@@ -22,6 +22,7 @@ import ModerationDashboard from './pages/admin/ModerationDashboard';
 
 // Shared Features
 import VerificationForm from './features/moderation/components/VerificationForm';
+import PaymentPage from './pages/common/PaymentPage';
 
 /**
  * Main Content Shell
@@ -40,11 +41,11 @@ function AppContent() {
   }
 
   return (
-    <div className="flex min-h-screen bg-stone-50">
+    <div className="flex min-h-screen bg-stone-50 selection:bg-emerald-500/30">
       {/* Sidebar appears only when logged in (Story 1.8) */}
       {user && <Sidebar role={user.role} />}
 
-      <div className="flex-1 flex flex-col">
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${user ? 'lg:pl-80' : ''}`}>
         {/* Navbar appears only when logged in (Story 1.10) */}
         {user && <Navbar />}
 
@@ -54,55 +55,58 @@ function AppContent() {
             <Route path="/register" element={<RegisterForm />} />
             <Route path="/login" element={<LoginForm />} />
 
+            {/* --- Standalone Pages --- */}
+            <Route path="/payment" element={<PaymentPage />} />
+
             {/* --- Farmer Dashboard (EPIC 2 & 4) --- */}
-            <Route 
-              path="/dashboard/farmer/*" 
+            <Route
+              path="/dashboard/farmer/*"
               element={
                 <ProtectedRoute role="FARMER">
                   <FarmerDashboard />
                 </ProtectedRoute>
-              } 
+              }
             />
-            
-            <Route 
-              path="/profile/verify" 
+
+            <Route
+              path="/profile/verify"
               element={
                 <ProtectedRoute role="FARMER">
                   <VerificationForm />
                 </ProtectedRoute>
-              } 
+              }
             />
 
             {/* --- Buyer Dashboard (EPIC 3 & 4) --- */}
-            <Route 
-              path="/dashboard/buyer/*" 
+            <Route
+              path="/dashboard/buyer/*"
               element={
                 <ProtectedRoute role="BUYER">
                   <BuyerDashboard />
                 </ProtectedRoute>
-              } 
+              }
             />
 
             {/* --- Admin Moderation (EPIC 7) --- */}
-            <Route 
-              path="/admin/moderation" 
+            <Route
+              path="/admin/moderation"
               element={
                 <ProtectedRoute role="ADMIN">
                   <ModerationDashboard />
                 </ProtectedRoute>
-              } 
+              }
             />
 
             {/* --- Automatic Redirects --- */}
-            <Route 
-              path="/" 
+            <Route
+              path="/"
               element={
-                user 
-                  ? <Navigate to={`/dashboard/${user.role.toLowerCase()}`} replace /> 
+                user
+                  ? <Navigate to={`/dashboard/${user.role.toLowerCase()}`} replace />
                   : <Navigate to="/register" replace />
-              } 
+              }
             />
-            
+
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

@@ -1,11 +1,16 @@
+import { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, ShoppingBag, BarChart2, MessageSquare, ShieldCheck, Sprout } from 'lucide-react';
+import { Home, ShoppingBag, BarChart2, ShieldCheck, Sprout } from 'lucide-react';
+import { AuthContext } from '../../context/AuthContext';
 
 export default function Sidebar({ role }) {
+  const { logout } = useContext(AuthContext);
+
   const links = role === 'FARMER' ? [
     { to: '/dashboard/farmer', icon: <Home size={20} />, label: 'Overview' },
     { to: '/dashboard/farmer/inventory', icon: <ShoppingBag size={20} />, label: 'My Crops' },
+    { to: '/dashboard/farmer/orders', icon: <ShoppingBag size={20} />, label: 'My Orders' },
     { to: '/dashboard/farmer/analytics', icon: <BarChart2 size={20} />, label: 'Market Prices' },
     { to: '/profile/verify', icon: <ShieldCheck size={20} />, label: 'Get Verified' },
   ] : [
@@ -14,55 +19,79 @@ export default function Sidebar({ role }) {
   ];
 
   return (
-    <aside className="w-64 h-screen bg-white/95 backdrop-blur-md border-r border-emerald-100 p-6 hidden lg:block shadow-lg">
-      {/* Logo */}
-      <motion.div
-        className="flex items-center gap-2 mb-8 pb-6 border-b border-emerald-50"
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <div className="bg-gradient-to-br from-emerald-600 to-emerald-500 p-2 rounded-xl text-white font-black shadow-lg">
-          <Sprout size={20} />
-        </div>
-        <span className="font-black text-emerald-900 tracking-tight text-sm">AgriTech</span>
-      </motion.div>
+    <aside className="hidden lg:flex flex-col w-72 h-[calc(100vh-2rem)] fixed left-4 top-4 bottom-4 z-40">
+      <div className="h-full glass-card flex flex-col p-6">
+        {/* Logo */}
+        <motion.div
+          className="flex items-center gap-3 mb-10 px-2"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 p-2.5 rounded-xl text-white shadow-lg shadow-emerald-500/20">
+            <Sprout size={22} className="fill-white/10" />
+          </div>
+          <div>
+            <span className="block font-bold text-emerald-950 text-lg tracking-tight leading-none">AgriTech</span>
+            <span className="text-[10px] font-semibold text-emerald-600 uppercase tracking-widest">Workspace</span>
+          </div>
+        </motion.div>
 
-      {/* Navigation Links */}
-      <div className="space-y-2">
-        {links.map((link, index) => (
-          <motion.div
-            key={link.to}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1, duration: 0.3 }}
-          >
-            <NavLink
-              to={link.to}
-              className={({ isActive }) =>
-                `flex items-center gap-3 p-4 rounded-2xl font-bold transition-all relative ${
-                  isActive
-                    ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-200'
-                    : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-700'
-                }`
-              }
+        {/* Navigation Links */}
+        <nav className="flex-1 space-y-2">
+          {links.map((link, index) => (
+            <motion.div
+              key={link.to}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 + index * 0.05, duration: 0.4 }}
             >
-              {({ isActive }) => (
-                <>
-                  {link.icon}
-                  <span>{link.label}</span>
-                  {isActive && (
-                    <motion.div
-                      className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full"
-                      layoutId="activeIndicator"
-                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                    />
-                  )}
-                </>
-              )}
-            </NavLink>
-          </motion.div>
-        ))}
+              <NavLink
+                to={link.to}
+                end={link.to === '/dashboard/farmer' || link.to === '/dashboard/buyer'}
+                className={({ isActive }) =>
+                  `flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-medium transition-all duration-300 relative group overflow-hidden ${isActive
+                    ? 'text-emerald-900 bg-emerald-50/80 shadow-sm shadow-emerald-100/50'
+                    : 'text-slate-500 hover:text-emerald-700 hover:bg-white/50'
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeTab"
+                        className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500"
+                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                      />
+                    )}
+                    <div className={`relative z-10 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
+                      {link.icon}
+                    </div>
+                    <span className="relative z-10">{link.label}</span>
+                  </>
+                )}
+              </NavLink>
+            </motion.div>
+          ))}
+        </nav>
+
+        {/* User Badge / Footer */}
+        <div className="mt-auto pt-6 border-t border-slate-100">
+          <button
+            onClick={logout}
+            className="w-full bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-4 border border-slate-100 flex items-center gap-3 hover:bg-rose-50 hover:border-rose-100 transition-all group"
+            title="Click to Switch Account (Logout)"
+          >
+            <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-sm border-2 border-white shadow-sm group-hover:bg-rose-100 group-hover:text-rose-600 transition-colors">
+              {role[0]}
+            </div>
+            <div className="text-left">
+              <p className="text-xs font-bold text-slate-800 group-hover:text-rose-900">Logged in as</p>
+              <p className="text-[10px] font-bold text-emerald-600 tracking-wider uppercase group-hover:text-rose-600">{role}</p>
+            </div>
+          </button>
+        </div>
       </div>
     </aside>
   );

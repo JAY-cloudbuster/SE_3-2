@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import MarketMap from '../../features/buyer/components/MarketMap';
 import CropCard from '../../features/buyer/components/CropCard';
 import { cropService } from '../../services/cropService';
 
 export default function BuyerDashboard() {
   const [crops, setCrops] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCrops = async () => {
@@ -48,7 +50,7 @@ export default function BuyerDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <CropCard crop={crop} onBuy={(c) => console.log('Purchase', c)} />
+            <CropCard crop={crop} onBuy={() => navigate('/payment')} />
           </motion.div>
         ))}
       </section>

@@ -52,44 +52,55 @@ export default function RegisterForm() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex bg-slate-100 p-1 rounded-2xl">
-              {['FARMER', 'BUYER'].map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, role: r })}
-                  className={`flex-1 py-2 rounded-xl text-xs font-black tracking-wide ${
-                    formData.role === r
-                      ? 'bg-emerald-600 text-white shadow-md'
-                      : 'text-slate-500'
-                  }`}
-                >
-                  {r}
-                </button>
-              ))}
+            <div>
+              <label className="label-text">I am a</label>
+              <div className="flex bg-slate-100 p-1.5 rounded-2xl">
+                {['FARMER', 'BUYER'].map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, role: r })}
+                    className={`flex-1 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all ${formData.role === r
+                        ? 'bg-white text-emerald-700 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-600'
+                      }`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <input
-              type="tel"
-              required
-              placeholder="Phone number"
-              className="w-full p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
-            />
-            <input
-              type="password"
-              required
-              placeholder="Password"
-              className="w-full p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-            />
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="label-text">Phone Number</label>
+                <input
+                  type="tel"
+                  required
+                  placeholder="e.g. 9876543210"
+                  className="input-field"
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
+                />
+              </div>
 
-            <button type="submit" className="btn-primary w-full mt-1">
-              Continue
+              <div>
+                <label className="label-text">Password</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Choose a strong password"
+                  className="input-field"
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            <button type="submit" className="btn-primary w-full mt-2 shadow-emerald-500/25">
+              Create Account
             </button>
           </form>
 

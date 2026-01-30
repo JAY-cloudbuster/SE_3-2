@@ -54,24 +54,49 @@ export default function LoginForm() {
           <p className="text-slate-400 mb-6 text-[11px] uppercase font-black tracking-[0.25em]">
             Buyer: Starts with “1” · Farmer: Any other number
           </p>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <input
-              type="tel"
-              required
-              placeholder="Phone number"
-              className="w-full bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
-              onChange={(e) => setPhone(e.target.value)}
-            />
-            <input
-              type="password"
-              required
-              placeholder="Password"
-              className="w-full bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <button type="submit" className="btn-primary w-full mt-1">
-              Log in
-            </button>
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <label className="label-text">Phone Number</label>
+              <input
+                type="tel"
+                required
+                placeholder="e.g. 9876543210"
+                className="input-field"
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="label-text">Password</label>
+              <input
+                type="password"
+                required
+                placeholder="••••••••"
+                className="input-field"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  login({ token: 'mock-token', user: { role: 'FARMER' } });
+                  navigate('/dashboard/farmer');
+                }}
+                className="btn-primary bg-gradient-to-br from-emerald-600 to-emerald-700 shadow-emerald-500/25"
+              >
+                Login as Farmer
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  login({ token: 'mock-token', user: { role: 'BUYER' } });
+                  navigate('/dashboard/buyer');
+                }}
+                className="btn-secondary text-emerald-800 border-emerald-200 hover:bg-emerald-50"
+              >
+                Login as Buyer
+              </button>
+            </div>
           </form>
 
           <p className="mt-6 text-xs text-center text-slate-500">
