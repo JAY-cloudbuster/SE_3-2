@@ -1,6 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';
+import { T } from '../../../context/TranslationContext';
+import LanguageSelector from '../../../components/common/LanguageSelector';
 import { authService } from '../../../services/authService';
 
 export default function LoginForm() {
@@ -21,6 +23,11 @@ export default function LoginForm() {
 
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center px-6 py-10">
+      {/* Language Selector - Fixed Position */}
+      <div className="fixed top-6 right-6 z-50">
+        <LanguageSelector />
+      </div>
+
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-32 -right-24 w-80 h-80 rounded-full bg-emerald-400/30 blur-3xl" />
         <div className="absolute -bottom-32 -left-24 w-80 h-80 rounded-full bg-emerald-700/25 blur-3xl" />
@@ -84,7 +91,7 @@ export default function LoginForm() {
                 }}
                 className="btn-primary bg-gradient-to-br from-emerald-600 to-emerald-700 shadow-emerald-500/25"
               >
-                Login as Farmer
+                <T>Login as Farmer</T>
               </button>
               <button
                 type="button"
@@ -94,7 +101,7 @@ export default function LoginForm() {
                 }}
                 className="btn-secondary text-emerald-800 border-emerald-200 hover:bg-emerald-50"
               >
-                Login as Buyer
+                <T>Login as Buyer</T>
               </button>
             </div>
           </form>

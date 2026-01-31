@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { TranslationProvider } from './context/TranslationContext';
 
 // Layout & Global Components
 import Navbar from './components/layout/Navbar';
@@ -23,6 +24,12 @@ import ModerationDashboard from './pages/admin/ModerationDashboard';
 // Shared Features
 import VerificationForm from './features/moderation/components/VerificationForm';
 import PaymentPage from './pages/common/PaymentPage';
+import TranslationDemo from './pages/common/TranslationDemo';
+import TradeDashboard from './pages/trade/TradeDashboard';
+import OrderConfirmationPage from './pages/common/OrderConfirmationPage';
+import TradingDemo from './pages/common/TradingDemo';
+import FarmerMarketplacePage from './pages/farmer/FarmerMarketplacePage';
+import NegotiationPage from './pages/trade/NegotiationPage';
 
 /**
  * Main Content Shell
@@ -57,6 +64,12 @@ function AppContent() {
 
             {/* --- Standalone Pages --- */}
             <Route path="/payment" element={<PaymentPage />} />
+            <Route path="/demo/translation" element={<TranslationDemo />} />
+            <Route path="/demo/trading" element={<TradingDemo />} />
+            <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
+            <Route path="/trade" element={<TradeDashboard />} />
+            <Route path="/negotiation/:negotiationId" element={<NegotiationPage />} />
+            <Route path="/marketplace" element={<FarmerMarketplacePage />} />
 
             {/* --- Farmer Dashboard (EPIC 2 & 4) --- */}
             <Route
@@ -123,13 +136,15 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <LanguageProvider>
-        <SocketProvider>
-          <BrowserRouter>
-            <AppContent />
-          </BrowserRouter>
-        </SocketProvider>
-      </LanguageProvider>
+      <TranslationProvider>
+        <LanguageProvider>
+          <SocketProvider>
+            <BrowserRouter>
+              <AppContent />
+            </BrowserRouter>
+          </SocketProvider>
+        </LanguageProvider>
+      </TranslationProvider>
     </AuthProvider>
   );
 }

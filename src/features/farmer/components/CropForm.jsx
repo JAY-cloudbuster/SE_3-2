@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, Mic, CheckCircle } from 'lucide-react';
+import { T } from '../../../context/TranslationContext';
 import { cropService } from '../../../services/cropService';
 import VoiceInput from '../../../components/common/VoiceInput';
 import CurrencyLabel from '../../../components/shared/CurrencyLabel';
@@ -43,8 +44,8 @@ export default function CropForm() {
         className="glass-card p-8 text-center space-y-4"
       >
         <CheckCircle className="mx-auto text-emerald-500" size={48} />
-        <h3 className="text-xl font-black text-emerald-900">Crop Listed Successfully!</h3>
-        <p className="text-sm text-slate-500">Your harvest is now visible to buyers.</p>
+        <h3 className="text-xl font-black text-emerald-900"><T>Crop Listed Successfully!</T></h3>
+        <p className="text-sm text-slate-500"><T>Your harvest is now visible to buyers.</T></p>
       </motion.div>
     );
   }
@@ -59,11 +60,11 @@ export default function CropForm() {
     >
       <div className="flex items-center gap-2 mb-2">
         <Upload className="text-emerald-600" size={20} />
-        <h3 className="text-xl font-black text-emerald-900">List New Harvest</h3>
+        <h3 className="text-xl font-black text-emerald-900"><T>List New Harvest</T></h3>
       </div>
 
       <div>
-        <label className="text-xs font-bold uppercase text-slate-500 mb-1 block">Crop Name</label>
+        <label className="text-xs font-bold uppercase text-slate-500 mb-1 block"><T>Crop Name</T></label>
         <input
           placeholder="e.g., Organic Wheat"
           value={data.name}
@@ -75,7 +76,7 @@ export default function CropForm() {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="text-xs font-bold uppercase text-slate-500 mb-1 block">Quantity (kg)</label>
+          <label className="text-xs font-bold uppercase text-slate-500 mb-1 block"><T>Quantity (kg)</T></label>
           <div className="flex gap-2">
             <input
               type="number"
@@ -90,7 +91,7 @@ export default function CropForm() {
         </div>
 
         <div>
-          <label className="text-xs font-bold uppercase text-slate-500 mb-1 block">Price (₹/kg)</label>
+          <label className="text-xs font-bold uppercase text-slate-500 mb-1 block"><T>Price (₹/kg)</T></label>
           <div className="flex gap-2">
             <input
               type="number"
@@ -106,18 +107,17 @@ export default function CropForm() {
       </div>
 
       <div>
-        <label className="text-xs font-bold uppercase text-slate-500 mb-1 block">Quality Grade</label>
+        <label className="text-xs font-bold uppercase text-slate-500 mb-1 block"><T>Quality Grade</T></label>
         <div className="flex gap-2">
           {['A', 'B', 'C'].map((grade) => (
             <button
               key={grade}
               type="button"
               onClick={() => setData({ ...data, quality: grade })}
-              className={`flex-1 py-2 rounded-xl font-black transition-all ${
-                data.quality === grade
+              className={`flex-1 py-2 rounded-xl font-black transition-all ${data.quality === grade
                   ? 'bg-emerald-600 text-white shadow-lg'
                   : 'bg-emerald-50 text-slate-600 hover:bg-emerald-100'
-              }`}
+                }`}
             >
               Grade {grade}
             </button>
@@ -130,7 +130,7 @@ export default function CropForm() {
         disabled={submitting}
         className="w-full btn-primary py-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {submitting ? 'Publishing...' : 'Publish Listing'}
+        <T>{submitting ? 'Publishing...' : 'Publish Listing'}</T>
       </button>
     </motion.form>
   );

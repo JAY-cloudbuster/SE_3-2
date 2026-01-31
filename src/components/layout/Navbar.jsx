@@ -1,7 +1,8 @@
 import { useContext } from 'react';
 import { motion } from 'framer-motion';
 import { AuthContext } from '../../context/AuthContext';
-import LanguagePicker from '../common/LanguagePicker';
+import LanguageSelector from '../common/LanguageSelector';
+import { T } from '../../context/TranslationContext';
 import { LogOut, User, Bell, Search, Menu } from 'lucide-react';
 
 export default function Navbar() {
@@ -33,7 +34,7 @@ export default function Navbar() {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-3 md:gap-5">
-          <LanguagePicker />
+          <LanguageSelector />
 
           <div className="h-6 w-px bg-slate-200 hidden md:block"></div>
 

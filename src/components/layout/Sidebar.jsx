@@ -1,8 +1,9 @@
 import { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, ShoppingBag, BarChart2, ShieldCheck, Sprout } from 'lucide-react';
+import { Home, ShoppingBag, BarChart2, ShieldCheck, Sprout, Store } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
+import { T } from '../../context/TranslationContext';
 
 export default function Sidebar({ role }) {
   const { logout } = useContext(AuthContext);
@@ -10,6 +11,7 @@ export default function Sidebar({ role }) {
   const links = role === 'FARMER' ? [
     { to: '/dashboard/farmer', icon: <Home size={20} />, label: 'Overview' },
     { to: '/dashboard/farmer/inventory', icon: <ShoppingBag size={20} />, label: 'My Crops' },
+    { to: '/marketplace', icon: <Store size={20} />, label: 'Marketplace' },
     { to: '/dashboard/farmer/orders', icon: <ShoppingBag size={20} />, label: 'My Orders' },
     { to: '/dashboard/farmer/analytics', icon: <BarChart2 size={20} />, label: 'Market Prices' },
     { to: '/profile/verify', icon: <ShieldCheck size={20} />, label: 'Get Verified' },
@@ -32,8 +34,8 @@ export default function Sidebar({ role }) {
             <Sprout size={22} className="fill-white/10" />
           </div>
           <div>
-            <span className="block font-bold text-emerald-950 text-lg tracking-tight leading-none">AgriTech</span>
-            <span className="text-[10px] font-semibold text-emerald-600 uppercase tracking-widest">Workspace</span>
+            <span className="block font-bold text-emerald-950 text-lg tracking-tight leading-none"><T>AgriTech</T></span>
+            <span className="text-[10px] font-semibold text-emerald-600 uppercase tracking-widest"><T>Workspace</T></span>
           </div>
         </motion.div>
 
@@ -68,7 +70,7 @@ export default function Sidebar({ role }) {
                     <div className={`relative z-10 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
                       {link.icon}
                     </div>
-                    <span className="relative z-10">{link.label}</span>
+                    <span className="relative z-10"><T>{link.label}</T></span>
                   </>
                 )}
               </NavLink>
@@ -87,8 +89,8 @@ export default function Sidebar({ role }) {
               {role[0]}
             </div>
             <div className="text-left">
-              <p className="text-xs font-bold text-slate-800 group-hover:text-rose-900">Logged in as</p>
-              <p className="text-[10px] font-bold text-emerald-600 tracking-wider uppercase group-hover:text-rose-600">{role}</p>
+              <p className="text-xs font-bold text-slate-800 group-hover:text-rose-900"><T>Logged in as</T></p>
+              <p className="text-[10px] font-bold text-emerald-600 tracking-wider uppercase group-hover:text-rose-600"><T>{role}</T></p>
             </div>
           </button>
         </div>

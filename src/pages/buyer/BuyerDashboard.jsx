@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { T } from '../../context/TranslationContext';
 import MarketMap from '../../features/buyer/components/MarketMap';
 import CropCard from '../../features/buyer/components/CropCard';
 import { cropService } from '../../services/cropService';
@@ -26,10 +27,10 @@ export default function BuyerDashboard() {
     >
       <section className="space-y-4">
         <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-          Discover Fresh Produce
+          <T>Discover Fresh Produce</T>
         </h2>
         <p className="text-slate-500 font-medium">
-          Explore trusted farmers around you with a live crop availability map.
+          <T>Explore trusted farmers around you with a live crop availability map.</T>
         </p>
         <MarketMap
           farms={crops.map((c) => ({

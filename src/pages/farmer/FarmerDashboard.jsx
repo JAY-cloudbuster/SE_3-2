@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { T } from '../../context/TranslationContext';
 import CropForm from '../../features/farmer/components/CropForm';
 import CropList from '../../features/farmer/components/CropList';
 import FarmerOrders from '../../features/farmer/components/FarmerOrders';
@@ -21,9 +22,9 @@ function DashboardOverview() {
         <PriceChart crop="Tomato" />
       </div>
       <div className="glass-card bg-gradient-to-b from-emerald-900 to-emerald-800 rounded-[2.5rem] p-10 text-white shadow-2xl border border-emerald-700/40 sticky top-24">
-        <h3 className="text-2xl font-bold mb-4">Price Alert</h3>
+        <h3 className="text-2xl font-bold mb-4"><T>Price Alert</T></h3>
         <p className="opacity-80 italic">
-          "Onion prices are expected to rise by 15% next week."
+          <T>Onion prices are expected to rise by 15% next week.</T>
         </p>
       </div>
     </motion.div>
@@ -38,10 +39,10 @@ export default function FarmerDashboard() {
       <header className="flex justify-between items-end gap-6">
         <div>
           <h1 className="text-5xl font-black text-emerald-950 tracking-tighter">
-            Farmer Dashboard
+            <T>Farmer Dashboard</T>
           </h1>
           <p className="text-emerald-600 font-bold mt-2">
-            Manage harvests and market trends
+            <T>Manage harvests and market trends</T>
           </p>
         </div>
         <div className="w-64 glass-card p-4 rounded-3xl border border-emerald-50 hidden md:block">

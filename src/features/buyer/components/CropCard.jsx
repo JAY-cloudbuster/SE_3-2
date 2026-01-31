@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Star, MapPin, ShieldCheck } from 'lucide-react';
 import { formatCurrency } from '../../../utils/formatters';
 import CurrencyLabel from '../../../components/shared/CurrencyLabel';
+import CropActionButtons from '../../../features/trade/components/CropActionButtons';
 
 export default function CropCard({ crop, onBuy }) {
   // Story 3.9: Virtual Crop Inspection with quality indicators [cite: 130]
@@ -9,6 +10,22 @@ export default function CropCard({ crop, onBuy }) {
     A: 'bg-emerald-500 text-white',
     B: 'bg-green-500 text-white',
     C: 'bg-yellow-500 text-white',
+  };
+
+  // Convert crop to match expected format
+  const cropData = {
+    id: crop._id,
+    name: crop.name,
+    price: crop.price,
+    quantity: crop.quantity || 100,
+    quality: crop.quality || 'A',
+    farmerId: crop.farmer || 'farmer_1',
+    farmerName: crop.farmerName || 'Local Farmer',
+    farmerLocation: crop.city || 'Ettimadai',
+    image: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400',
+    description: `Fresh ${crop.name} from ${crop.city || 'local farm'}`,
+    available: true,
+    negotiationEnabled: true,
   };
 
   return (
@@ -58,15 +75,16 @@ export default function CropCard({ crop, onBuy }) {
             By <span className="font-bold text-emerald-700">{crop.farmerName || 'Local Farmer'}</span>
           </p>
 
-          {/* Story 4.1: Fixed-Price Purchase [cite: 138] */}
-          <motion.button
-            onClick={() => onBuy(crop)}
-            className="w-full btn-primary py-2.5 text-sm"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            Buy Now
-          </motion.button>
+          {/* Buy Now & Negotiate Buttons */}
+          <CropActionButtons
+            crop={cropData}
+            currentUserId="buyer_1"
+            currentUserRole="buyer"
+            onOrderComplete={(order) => {
+              console.log('Order placed:', order);
+              onBuy?.(crop);
+            }}
+          />
         </div>
       </div>
     </motion.div>
