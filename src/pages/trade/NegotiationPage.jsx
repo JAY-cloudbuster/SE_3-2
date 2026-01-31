@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Home, ShoppingCart, Package, User } from 'lucide-react';
 import { T } from '../../context/TranslationContext';
+import { AuthContext } from '../../context/AuthContext';
 import NegotiationChat from '../../features/trade/components/NegotiationChat';
 
 /**
@@ -13,18 +14,18 @@ export default function NegotiationPage() {
     const { negotiationId } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
+    const { user } = useContext(AuthContext);
     const [negotiation, setNegotiation] = useState(null);
     const [crop, setCrop] = useState(null);
 
+    // Determine correct dashboard route based on user role
+    const dashboardRoute = user?.role === 'BUYER' ? '/dashboard/buyer' : '/marketplace';
+
     // Load negotiation data
     useEffect(() => {
-        console.log('NegotiationPage - negotiationId:', negotiationId);
-        console.log('NegotiationPage - location.state:', location.state);
-
         // If we have crop data in state, use it directly
         if (location.state?.crop) {
             const cropData = location.state.crop;
-            console.log('NegotiationPage - crop from state:', cropData);
 
             // Check if negotiation already exists
             const negotiations = JSON.parse(localStorage.getItem('mockNegotiations') || '[]');
@@ -33,7 +34,6 @@ export default function NegotiationPage() {
             );
 
             if (existingNeg) {
-                console.log('NegotiationPage - found existing negotiation:', existingNeg);
                 setNegotiation(existingNeg);
                 setCrop(cropData);
                 // Update URL if needed
@@ -42,7 +42,6 @@ export default function NegotiationPage() {
                 }
             } else {
                 // Create new negotiation
-                console.log('NegotiationPage - creating new negotiation');
                 const newNeg = {
                     id: `neg_${Date.now()}`,
                     cropId: cropData.id,
@@ -78,7 +77,6 @@ export default function NegotiationPage() {
             const neg = negotiations.find(n => n.id === negotiationId);
 
             if (neg) {
-                console.log('NegotiationPage - found negotiation by ID:', neg);
                 setNegotiation(neg);
 
                 // Load crop details
@@ -86,11 +84,7 @@ export default function NegotiationPage() {
                 const cropData = crops.find(c => c.id === neg.cropId);
                 if (cropData) {
                     setCrop(cropData);
-                } else {
-                    console.error('NegotiationPage - crop not found for negotiation');
                 }
-            } else {
-                console.error('NegotiationPage - negotiation not found:', negotiationId);
             }
         }
     }, [negotiationId, location.state, navigate]);
@@ -101,10 +95,10 @@ export default function NegotiationPage() {
                 <div className="text-center">
                     <p className="text-slate-500 mb-4"><T>Loading negotiation...</T></p>
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={() => navigate(dashboardRoute)}
                         className="text-emerald-600 font-bold hover:underline"
                     >
-                        <T>Go Back</T>
+                        <T>Back to Marketplace</T>
                     </button>
                 </div>
             </div>
@@ -112,41 +106,34 @@ export default function NegotiationPage() {
     }
 
     return (
-        <div className="-m-8 bg-gradient-to-b from-slate-50 to-white">
+        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
             {/* Top Navigation Bar */}
-            <div className="bg-white border-b border-slate-200 shadow-sm">
+            <div className="bg-white border-b border-slate-200 shadow-md sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-6 py-4">
                     <div className="flex items-center justify-between">
                         {/* Left: Back Button */}
                         <button
-                            onClick={() => navigate(-1)}
-                            className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold text-slate-700 transition-colors"
+                            onClick={() => navigate(dashboardRoute)}
+                            className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-colors shadow-lg"
                         >
                             <ArrowLeft size={20} />
-                            <span><T>Back</T></span>
+                            <span><T>Back to Dashboard</T></span>
                         </button>
 
                         {/* Center: Page Title */}
                         <div className="text-center">
-                            <h1 className="text-xl font-black text-slate-900"><T>Price Negotiation</T></h1>
+                            <h1 className="text-2xl font-black text-slate-900"><T>Price Negotiation</T></h1>
                             <p className="text-sm text-slate-500">{crop.name}</p>
                         </div>
 
                         {/* Right: Quick Actions */}
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => navigate('/dashboard/buyer')}
-                                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-                                title="Dashboard"
-                            >
-                                <Home size={20} className="text-slate-600" />
-                            </button>
+                        <div className="flex items-center gap-3">
                             <button
                                 onClick={() => navigate('/trade')}
-                                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                                className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-bold transition-colors"
                                 title="Trade Dashboard"
                             >
-                                <Package size={20} className="text-slate-600" />
+                                <T>All Negotiations</T>
                             </button>
                         </div>
                     </div>
@@ -219,10 +206,10 @@ export default function NegotiationPage() {
                                     <T>View All Negotiations</T>
                                 </button>
                                 <button
-                                    onClick={() => navigate('/dashboard/buyer')}
+                                    onClick={() => navigate(dashboardRoute)}
                                     className="w-full bg-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-300 transition-colors"
                                 >
-                                    <T>Back to Dashboard</T>
+                                    <T>Back to Marketplace</T>
                                 </button>
                             </div>
                         </div>

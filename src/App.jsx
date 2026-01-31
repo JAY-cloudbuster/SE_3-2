@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 // Global Context Providers
 import { AuthProvider, AuthContext } from './context/AuthContext';
@@ -38,6 +38,10 @@ import NegotiationPage from './pages/trade/NegotiationPage';
  */
 function AppContent() {
   const { user, loading } = useContext(AuthContext);
+  const location = useLocation();
+
+  // Hide sidebar and navbar on standalone pages (negotiation, trade dashboard)
+  const isStandalonePage = location.pathname.startsWith('/negotiation') || location.pathname.startsWith('/trade');
 
   if (loading) {
     return (
@@ -49,26 +53,28 @@ function AppContent() {
 
   return (
     <div className="flex min-h-screen bg-stone-50 selection:bg-emerald-500/30">
-      {/* Sidebar appears only when logged in (Story 1.8) */}
-      {user && <Sidebar role={user.role} />}
+      {/* Sidebar appears only when logged in and NOT on standalone pages */}
+      {user && !isStandalonePage && <Sidebar role={user.role} />}
 
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${user ? 'lg:pl-80' : ''}`}>
-        {/* Navbar appears only when logged in (Story 1.10) */}
-        {user && <Navbar />}
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${user && !isStandalonePage ? 'lg:pl-80' : ''}`}>
+        {/* Navbar appears only when logged in and NOT on standalone pages */}
+        {user && !isStandalonePage && <Navbar />}
 
-        <main className={`${user ? 'p-8' : ''} flex-1`}>
+        <main className={`${user && !isStandalonePage ? 'p-8' : ''} flex-1`}>
           <Routes>
             {/* --- Public Access --- */}
             <Route path="/register" element={<RegisterForm />} />
             <Route path="/login" element={<LoginForm />} />
 
-            {/* --- Standalone Pages --- */}
+            {/* --- Standalone Pages (No Sidebar) --- */}
+            <Route path="/negotiation/:negotiationId" element={<NegotiationPage />} />
+
+            {/* --- Pages with Sidebar --- */}
             <Route path="/payment" element={<PaymentPage />} />
             <Route path="/demo/translation" element={<TranslationDemo />} />
             <Route path="/demo/trading" element={<TradingDemo />} />
             <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
             <Route path="/trade" element={<TradeDashboard />} />
-            <Route path="/negotiation/:negotiationId" element={<NegotiationPage />} />
             <Route path="/marketplace" element={<FarmerMarketplacePage />} />
 
             {/* --- Farmer Dashboard (EPIC 2 & 4) --- */}
