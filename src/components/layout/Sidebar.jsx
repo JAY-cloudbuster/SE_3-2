@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Home, ShoppingBag, BarChart2, ShieldCheck, Sprout, Store } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
@@ -7,6 +7,12 @@ import { T } from '../../context/TranslationContext';
 
 export default function Sidebar({ role }) {
   const { logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate('/login');
+    logout();
+  };
 
   const links = role === 'FARMER' ? [
     { to: '/dashboard/farmer', icon: <Home size={20} />, label: 'Overview' },
@@ -81,7 +87,7 @@ export default function Sidebar({ role }) {
         {/* User Badge / Footer */}
         <div className="mt-auto pt-6 border-t border-slate-100">
           <button
-            onClick={logout}
+            onClick={handleLogout}
             className="w-full bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-4 border border-slate-100 flex items-center gap-3 hover:bg-rose-50 hover:border-rose-100 transition-all group"
             title="Click to Switch Account (Logout)"
           >

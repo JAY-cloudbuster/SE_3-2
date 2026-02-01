@@ -43,24 +43,7 @@ export default function Navbar() {
             <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
           </button>
 
-          <motion.div
-            className="flex items-center gap-3 pl-2 cursor-pointer group"
-            onClick={logout}
-            whileHover={{ scale: 1.02 }}
-            title="Click to Switch Account"
-          >
-            <div className="hidden md:flex flex-col items-end">
-              <span className="text-sm font-bold text-slate-800 leading-tight group-hover:text-rose-600 transition-colors">Agri User</span>
-              <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider group-hover:text-rose-500 transition-colors">{user?.role}</span>
-            </div>
 
-            <div className="bg-gradient-to-br from-emerald-100 to-teal-50 p-1 rounded-full border-2 border-white shadow-sm group-hover:from-rose-100 group-hover:to-pink-50 transition-colors">
-              <div className="bg-emerald-600 text-white p-2 rounded-full group-hover:bg-rose-500 transition-colors">
-                <User size={20} />
-              </div>
-            </div>
-            <LogOut size={20} className="ml-2 text-slate-400 group-hover:text-rose-500 transition-colors" />
-          </motion.div>
         </div>
       </div>
     </motion.nav>

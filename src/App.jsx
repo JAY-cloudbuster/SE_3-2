@@ -30,6 +30,7 @@ import OrderConfirmationPage from './pages/common/OrderConfirmationPage';
 import TradingDemo from './pages/common/TradingDemo';
 import FarmerMarketplacePage from './pages/farmer/FarmerMarketplacePage';
 import NegotiationPage from './pages/trade/NegotiationPage';
+import BuyNowPaymentPage from './pages/trade/BuyNowPaymentPage';
 
 /**
  * Main Content Shell
@@ -40,8 +41,8 @@ function AppContent() {
   const { user, loading } = useContext(AuthContext);
   const location = useLocation();
 
-  // Hide sidebar and navbar on standalone pages (negotiation, trade dashboard)
-  const isStandalonePage = location.pathname.startsWith('/negotiation') || location.pathname.startsWith('/trade');
+  // Hide sidebar and navbar on standalone pages (auth, negotiation, trade dashboard, buy now)
+  const isStandalonePage = location.pathname === '/login' || location.pathname === '/register' || location.pathname.startsWith('/negotiation') || location.pathname.startsWith('/trade') || location.pathname.startsWith('/buy');
 
   if (loading) {
     return (
@@ -68,6 +69,7 @@ function AppContent() {
 
             {/* --- Standalone Pages (No Sidebar) --- */}
             <Route path="/negotiation/:negotiationId" element={<NegotiationPage />} />
+            <Route path="/buy/:cropId" element={<BuyNowPaymentPage />} />
 
             {/* --- Pages with Sidebar --- */}
             <Route path="/payment" element={<PaymentPage />} />

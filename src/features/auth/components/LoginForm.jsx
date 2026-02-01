@@ -36,11 +36,11 @@ export default function LoginForm() {
       <div className="relative z-10 grid max-w-5xl w-full grid-cols-1 md:grid-cols-2 gap-10 items-center">
         <div className="space-y-4 order-2 md:order-1">
           <p className="inline-flex items-center text-[11px] font-black tracking-[0.25em] uppercase text-emerald-700 bg-emerald-50/80 rounded-full px-4 py-1 border border-emerald-100">
-            Secure access
+            <T>Secure access</T>
           </p>
           <h1 className="text-4xl md:text-5xl font-black tracking-tight text-emerald-950">
-            Sign in to your{' '}
-            <span className="text-emerald-600">AgriTech</span> workspace.
+            <T>Sign in to your</T>{' '}
+            <span className="text-emerald-600">AgriTech</span> <T>workspace.</T>
           </h1>
           <p className="text-xs md:text-sm text-slate-500 font-medium max-w-md">
             Use the same phone number you registered with. Buyers start with
@@ -51,12 +51,12 @@ export default function LoginForm() {
         <div className="glass-card p-8 md:p-10 w-full max-w-md mr-auto order-1 md:order-2 animate-slide-up">
           {justRegistered && (
             <div className="mb-4 rounded-2xl border border-emerald-100 bg-emerald-50/80 px-4 py-3 text-xs font-semibold text-emerald-800">
-              Registration successful. Log in to enter your dashboard.
+              <T>Registration successful. Log in to enter your dashboard.</T>
             </div>
           )}
 
           <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-2">
-            Welcome back
+            <T>Welcome back</T>
           </h2>
           <p className="text-slate-400 mb-6 text-[11px] uppercase font-black tracking-[0.25em]">
             Buyer: Starts with “1” · Farmer: Any other number
