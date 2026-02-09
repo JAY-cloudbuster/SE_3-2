@@ -10,12 +10,24 @@ const MOCK_CROPS = [
     { id: 4, name: 'Potatoes (Large)', quantity: 2000, price: 18, quality: 'C', date: '2023-10-08', location: 'Indore, MP' },
 ];
 
+import { cropService } from '../../../services/cropService';
+
 export default function CropList() {
     const [crops, setCrops] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Simulate fetching data
-        setTimeout(() => setCrops(MOCK_CROPS), 500);
+        const fetchCrops = async () => {
+            try {
+                const res = await cropService.getMyCrops();
+                setCrops(res.data);
+            } catch (error) {
+                console.error("Failed to fetch crops", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchCrops();
     }, []);
 
     return (
@@ -49,18 +61,24 @@ export default function CropList() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-emerald-50">
-                            {crops.length === 0 ? (
+                            {loading ? (
                                 <tr>
                                     <td colSpan="6" className="p-8 text-center text-slate-400 text-sm font-medium">
                                         Loading inventory...
                                     </td>
                                 </tr>
+                            ) : crops.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className="p-8 text-center text-slate-400 text-sm font-medium">
+                                        No crops listed yet. Start by listing a new harvest!
+                                    </td>
+                                </tr>
                             ) : (
                                 crops.map((crop) => (
-                                    <tr key={crop.id} className="hover:bg-emerald-50/30 transition-colors">
+                                    <tr key={crop._id} className="hover:bg-emerald-50/30 transition-colors">
                                         <td className="p-4">
                                             <div className="font-bold text-slate-800">{crop.name}</div>
-                                            <div className="text-[10px] text-slate-400 font-medium">Added on {crop.date}</div>
+                                            <div className="text-[10px] text-slate-400 font-medium">Added on {new Date(crop.createdAt).toLocaleDateString()}</div>
                                         </td>
                                         <td className="p-4">
                                             <div className="flex items-center gap-1.5 text-slate-600 font-medium text-sm">

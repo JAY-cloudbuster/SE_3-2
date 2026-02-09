@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import { LanguageProvider } from './context/LanguageContext';
-import { TranslationProvider } from './context/TranslationContext';
+import { TranslationProvider, useTranslation } from './context/TranslationContext';
 
 // Layout & Global Components
 import Navbar from './components/layout/Navbar';
@@ -39,7 +39,15 @@ import BuyNowPaymentPage from './pages/trade/BuyNowPaymentPage';
  */
 function AppContent() {
   const { user, loading } = useContext(AuthContext);
+  const { changeLanguage } = useTranslation();
   const location = useLocation();
+
+  // Sync Language on Login
+  React.useEffect(() => {
+    if (user && user.language) {
+      changeLanguage(user.language);
+    }
+  }, [user, changeLanguage]);
 
   // Hide sidebar and navbar on standalone pages (auth, negotiation, trade dashboard, buy now)
   const isStandalonePage = location.pathname === '/login' || location.pathname === '/register' || location.pathname.startsWith('/negotiation') || location.pathname.startsWith('/trade') || location.pathname.startsWith('/buy');

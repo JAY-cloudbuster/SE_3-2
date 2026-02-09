@@ -9,6 +9,12 @@ import TrustGauge from '../../components/shared/TrustGauge';
 import PriceChart from '../../features/market/components/PriceChart';
 
 function DashboardOverview() {
+  const [refreshKey, setRefreshKey] = React.useState(0);
+
+  const handleCropAdded = () => {
+    setRefreshKey(prev => prev + 1);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -18,7 +24,8 @@ function DashboardOverview() {
       className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start"
     >
       <div className="lg:col-span-2 space-y-6">
-        <CropForm />
+        <CropForm onCropAdded={handleCropAdded} />
+        <CropList key={refreshKey} /> {/* Key change forces re-fetch */}
         <PriceChart crop="Tomato" />
       </div>
       <div className="glass-card bg-gradient-to-b from-emerald-900 to-emerald-800 rounded-[2.5rem] p-10 text-white shadow-2xl border border-emerald-700/40 sticky top-24">

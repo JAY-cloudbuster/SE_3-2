@@ -14,15 +14,27 @@ export default function LoginForm() {
 
   const justRegistered = new URLSearchParams(location.search).get('registered') === '1';
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e, role = null) => {
     e.preventDefault();
-    const res = await authService.login({ phone, password });
-    login(res.data);
-    navigate(`/dashboard/${res.data.user.role.toLowerCase()}`);
+    try {
+      const res = await authService.login({ phone, password });
+
+      const userRole = res.data.user.role;
+
+      // Optional: Check if role matches what they clicked (if we want to enforce it strict)
+      // But for now, we trust the DB return. 
+
+      login(res.data);
+      navigate(`/dashboard/${userRole.toLowerCase()}`);
+    } catch (error) {
+      console.error(error);
+      alert(error.response?.data?.message || 'Login failed');
+    }
   };
 
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center px-6 py-10">
+      {/* ... keeping existing layout ... */}
       {/* Language Selector - Fixed Position */}
       <div className="fixed top-6 right-6 z-50">
         <LanguageSelector />
@@ -61,7 +73,7 @@ export default function LoginForm() {
           <p className="text-slate-400 mb-6 text-[11px] uppercase font-black tracking-[0.25em]">
             Buyer: Starts with “1” · Farmer: Any other number
           </p>
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form className="space-y-5">
             <div>
               <label className="label-text">Phone Number</label>
               <input
@@ -85,20 +97,14 @@ export default function LoginForm() {
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button
                 type="button"
-                onClick={() => {
-                  login({ token: 'mock-token', user: { role: 'FARMER' } });
-                  navigate('/dashboard/farmer');
-                }}
+                onClick={(e) => handleLogin(e, 'FARMER')}
                 className="btn-primary bg-gradient-to-br from-emerald-600 to-emerald-700 shadow-emerald-500/25"
               >
                 <T>Login as Farmer</T>
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  login({ token: 'mock-token', user: { role: 'BUYER' } });
-                  navigate('/dashboard/buyer');
-                }}
+                onClick={(e) => handleLogin(e, 'BUYER')}
                 className="btn-secondary text-emerald-800 border-emerald-200 hover:bg-emerald-50"
               >
                 <T>Login as Buyer</T>

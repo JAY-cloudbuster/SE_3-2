@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, Mic, CheckCircle } from 'lucide-react';
+import { Upload, CheckCircle } from 'lucide-react';
 import { T } from '../../../context/TranslationContext';
 import { cropService } from '../../../services/cropService';
 import VoiceInput from '../../../components/common/VoiceInput';
-import CurrencyLabel from '../../../components/shared/CurrencyLabel';
 
-export default function CropForm() {
-  const [data, setData] = useState({ name: '', quantity: '', price: '', quality: 'A' });
+export default function CropForm({ onCropAdded }) {
+  const [data, setData] = useState({ name: '', quantity: '', price: '', quality: 'A', location: '' });
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -17,9 +16,10 @@ export default function CropForm() {
     try {
       await cropService.create(data);
       setSuccess(true);
+      if (onCropAdded) onCropAdded(); // Notify parent to refresh list
       setTimeout(() => {
         setSuccess(false);
-        setData({ name: '', quantity: '', price: '', quality: 'A' });
+        setData({ name: '', quantity: '', price: '', quality: 'A', location: '' });
       }, 3000);
     } catch (error) {
       console.error('Failed to list crop:', error);
@@ -74,20 +74,39 @@ export default function CropForm() {
         />
       </div>
 
+      <div>
+        <label className="text-xs font-bold uppercase text-slate-500 mb-1 block"><T>Location</T></label>
+        <input
+          placeholder="e.g., Coimbatore, Tamil Nadu"
+          value={data.location}
+          className="w-full bg-emerald-50/50 p-3 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 border border-emerald-100"
+          onChange={(e) => setData({ ...data, location: e.target.value })}
+          required
+        />
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-xs font-bold uppercase text-slate-500 mb-1 block"><T>Quantity (kg)</T></label>
           <div className="flex gap-2">
             <input
               type="number"
-              placeholder="100"
+              placeholder="1-200"
               value={data.quantity}
+              min="1"
+              max="200"
               className="flex-1 bg-emerald-50/50 p-3 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 border border-emerald-100"
-              onChange={(e) => setData({ ...data, quantity: e.target.value })}
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                if (val > 200) return; // Prevent typing > 200
+                if (val < 0) return;   // Prevent typing < 0
+                setData({ ...data, quantity: e.target.value })
+              }}
               required
             />
             <VoiceInput onResult={handleVoiceQuantity} />
           </div>
+          <p className="text-[10px] text-slate-400 mt-1">Max: 200 kg</p>
         </div>
 
         <div>
@@ -95,14 +114,22 @@ export default function CropForm() {
           <div className="flex gap-2">
             <input
               type="number"
-              placeholder="40"
+              placeholder="1-500"
               value={data.price}
+              min="1"
+              max="500"
               className="flex-1 bg-emerald-50/50 p-3 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 border border-emerald-100"
-              onChange={(e) => setData({ ...data, price: e.target.value })}
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                if (val > 500) return; // Prevent typing > 500
+                if (val < 0) return;   // Prevent typing < 0
+                setData({ ...data, price: e.target.value })
+              }}
               required
             />
             <VoiceInput onResult={handleVoicePrice} />
           </div>
+          <p className="text-[10px] text-slate-400 mt-1">Max: ₹500/kg</p>
         </div>
       </div>
 
@@ -115,8 +142,8 @@ export default function CropForm() {
               type="button"
               onClick={() => setData({ ...data, quality: grade })}
               className={`flex-1 py-2 rounded-xl font-black transition-all ${data.quality === grade
-                  ? 'bg-emerald-600 text-white shadow-lg'
-                  : 'bg-emerald-50 text-slate-600 hover:bg-emerald-100'
+                ? 'bg-emerald-600 text-white shadow-lg'
+                : 'bg-emerald-50 text-slate-600 hover:bg-emerald-100'
                 }`}
             >
               Grade {grade}
