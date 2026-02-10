@@ -35,3 +35,18 @@ components such as subsidy awareness prompts, government scheme integration, cro
 sory channels, or micro-financing partner interactions. The system should highlight thoughtful
 engineering values—including inclusivity, fairness, security, and usability—and demonstrate
 originality beyond superficial marketplace templates commonly published online.
+
+
+# Objectives
+
+Enable farmers to sell crops directly to buyers without unnecessary intermediaries
+Provide decision-support tools such as price trends, demand forecasts, and quality-based pricing
+Support multiple Indian languages and low-tech interaction methods (voice, SMS, icons)
+Improve farmer income stability, trust, and negotiation power
+
+# Target Users
+
+Small and marginal farmers
+Institutional buyers (retailers, cooperatives, procurement groups)
+Agricultural advisors and support agencies
+Financial and logistics partners
