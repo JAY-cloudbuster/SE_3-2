@@ -18,10 +18,6 @@ The class diagram models the \*\*core domain entities\*\*, their attributes, and
 
 
 
-The diagram is written using \*\*Mermaid syntax\*\* and embedded directly in this README to ensure version control, easy updates, and alignment with DevOps best practices.
-
-
-
 ---
 
 
@@ -227,6 +223,7 @@ Buyer "1" --> "many" Bid : submits
 
 
 Order --> Review : generates
+
 
 
 
