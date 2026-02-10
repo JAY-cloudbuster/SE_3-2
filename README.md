@@ -105,3 +105,78 @@ Access the app:
 | **Real-time**      | Socket.IO                                     |
 
 ---
+## Project Structure
+
+```
+SE_3-2/
+├── backend/
+│   ├── config/
+│   │   └── db.js                # MongoDB connection
+│   ├── controllers/
+│   │   ├── authController.js    # Register & login logic
+│   │   └── cropController.js    # Crop CRUD operations
+│   ├── middlewares/
+│   │   └── authMiddleware.js    # JWT verification & admin check
+│   ├── models/
+│   │   ├── User.js              # User schema (phone, role, language)
+│   │   ├── Crop.js              # Crop schema (name, price, quality, location)
+│   │   ├── Negotiation.js       # Negotiation schema (messages, offers)
+│   │   └── Order.js             # Order schema (items, status, shipping)
+│   ├── routes/
+│   │   ├── authRoutes.js        # POST /register, /login
+│   │   └── cropRoutes.js        # POST /create, GET /my, GET /all
+│   ├── server.js                # Express app + Socket.IO setup
+│   ├── package.json
+│   └── .env
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── common/          # LanguageSelector, ProtectedRoute, VoiceInput, TranslatedText
+│   │   │   ├── layout/          # Navbar, Sidebar
+│   │   │   └── shared/          # CurrencyLabel, TrustGauge
+│   │   ├── context/
+│   │   │   ├── AuthContext.jsx          # Auth state & JWT management
+│   │   │   ├── LanguageContext.jsx      # Language preference
+│   │   │   ├── SocketContext.jsx        # Socket.IO connection
+│   │   │   └── TranslationContext.jsx   # Dynamic translation via Google API
+│   │   ├── features/
+│   │   │   ├── auth/            # LoginForm, RegisterForm
+│   │   │   ├── buyer/           # CropCard, MarketMap
+│   │   │   ├── farmer/          # CropForm, CropList, FarmerOrders, VerificationForm
+│   │   │   ├── market/          # PriceChart
+│   │   │   ├── moderation/      # VerificationForm
+│   │   │   └── trade/           # AuctionCard, AuctionForm, BidPanel, BuyNowButton,
+│   │   │                        # NegotiateButton, NegotiationChat, Negotiator,
+│   │   │                        # OrderSummaryModal, OrderTrackingCard, CropActionButtons
+│   │   ├── pages/
+│   │   │   ├── farmer/          # FarmerDashboard, FarmerMarketplacePage
+│   │   │   ├── buyer/           # BuyerDashboard
+│   │   │   ├── admin/           # ModerationDashboard
+│   │   │   ├── trade/           # TradeDashboard, NegotiationPage, BuyNowPaymentPage
+│   │   │   └── common/          # PaymentPage, OrderConfirmationPage, TranslationDemo, TradingDemo
+│   │   ├── services/
+│   │   │   ├── api.js               # Axios instance + JWT interceptor
+│   │   │   ├── authService.js       # Login/register API calls
+│   │   │   ├── cropService.js       # Crop CRUD API calls
+│   │   │   ├── priceService.js      # Price data API calls
+│   │   │   ├── tradeService.js      # Bid/offer/order API calls
+│   │   │   └── translationService.js # Google Translate integration
+│   │   ├── hooks/
+│   │   │   ├── useAuctionTimer.js   # Auction countdown logic
+│   │   │   └── useSpeech.js         # Web Speech API integration
+│   │   ├── utils/
+│   │   │   ├── formatters.js        # Currency formatting (INR)
+│   │   │   └── priceSort.js         # Price sorting utility
+│   │   ├── data/
+│   │   │   └── mockTradingData.js   # Mock data for trading features
+│   │   ├── App.jsx              # Root component + routing
+│   │   ├── main.jsx             # React entry point
+│   │   └── index.css            # Global styles + Tailwind imports
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   └── package.json
+└── README.md
+```
+
+---
