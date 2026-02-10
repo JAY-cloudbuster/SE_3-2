@@ -279,3 +279,22 @@ The frontend Axios base URL is configured in `src/services/api.js` pointing to `
 | `receive_offer`  | Server → Client | Receive a negotiation offer    |
 
 ---
+## Application URLs
+
+| Page                  | Route                      | Role          |
+| --------------------- | -------------------------- | ------------- |
+| Login                 | `/login`                   | Public        |
+| Register              | `/register`                | Public        |
+| Farmer Dashboard      | `/dashboard/farmer/*`      | Farmer        |
+| Farmer Marketplace    | `/marketplace`             | Farmer        |
+| Buyer Dashboard       | `/dashboard/buyer`         | Buyer         |
+| Trade Dashboard       | `/trade`                   | Authenticated |
+| Negotiation           | `/negotiation/:id`         | Authenticated |
+| Buy Now Payment       | `/buy/:cropId`             | Authenticated |
+| Order Confirmation    | `/order-confirmation`      | Authenticated |
+| Payment               | `/payment`                 | Authenticated |
+| Moderation            | `/moderation`              | Admin         |
+| Translation Demo      | `/demo/translation`        | Public        |
+| Trading Demo          | `/demo/trading`            | Public        |
+
+---
