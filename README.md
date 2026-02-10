@@ -85,3 +85,23 @@ Access the app:
 - **Role-Based Access**: Protected routes for Farmer, Buyer, and Admin roles
 
 ---
+
+## Tech Stack
+
+| Component          | Technology                                    |
+| ------------------ | --------------------------------------------- |
+| **Frontend**       | React 18 + Vite                               |
+| **Styling**        | Tailwind CSS                                  |
+| **Animations**     | Framer Motion                                 |
+| **State Mgmt**     | React Context API                             |
+| **Routing**        | React Router DOM v6                           |
+| **HTTP Client**    | Axios                                         |
+| **Charts**         | Chart.js + react-chartjs-2                    |
+| **Icons**          | Lucide React                                  |
+| **Translation**    | i18next + Google Translate API                |
+| **Backend**        | Node.js + Express.js                          |
+| **Database**       | MongoDB + Mongoose                            |
+| **Authentication** | JWT (jsonwebtoken) + bcryptjs                 |
+| **Real-time**      | Socket.IO                                     |
+
+---
