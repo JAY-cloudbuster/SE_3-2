@@ -19,11 +19,11 @@ export default function CropCard({ crop, onBuy }) {
     price: crop.price,
     quantity: crop.quantity || 100,
     quality: crop.quality || 'A',
-    farmerId: crop.farmer || 'farmer_1',
-    farmerName: crop.farmerName || 'Local Farmer',
-    farmerLocation: crop.city || 'Ettimadai',
+    farmerId: crop.farmer?._id || crop.farmer || 'farmer_1',
+    farmerName: crop.farmer?.name || 'Local Farmer',
+    farmerLocation: crop.farmer?.location || crop.location || 'Unknown',
     image: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400',
-    description: `Fresh ${crop.name} from ${crop.city || 'local farm'}`,
+    description: `Fresh ${crop.name} from ${crop.farmer?.location || crop.location || 'local farm'}`,
     available: true,
     negotiationEnabled: true,
   };
@@ -67,12 +67,12 @@ export default function CropCard({ crop, onBuy }) {
 
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <MapPin size={12} />
-          <span className="line-clamp-1">{crop.city || 'Ettimadai'}</span>
+          <span className="line-clamp-1">{crop.farmer?.location || crop.location || 'Unknown'}</span>
         </div>
 
         <div className="pt-2 border-t border-emerald-50">
           <p className="text-xs text-slate-600 mb-3">
-            By <span className="font-bold text-emerald-700">{crop.farmerName || 'Local Farmer'}</span>
+            By <span className="font-bold text-emerald-700">{crop.farmer?.name || 'Local Farmer'}</span>
           </p>
 
           {/* Buy Now & Negotiate Buttons */}

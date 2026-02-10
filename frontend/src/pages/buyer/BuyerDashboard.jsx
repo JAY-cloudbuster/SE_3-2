@@ -38,7 +38,7 @@ export default function BuyerDashboard() {
             x: Math.random() * 80,
             y: Math.random() * 80,
             crop: c.name,
-            village: c.city,
+            village: c.farmer?.location || c.location || 'Unknown',
           }))}
         />
       </section>
