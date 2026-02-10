@@ -236,3 +236,46 @@ npm run dev
 The app will be available at **http://localhost:5173**
 
 ---
+# Environment Variables
+
+### Backend (`backend/.env`)
+
+| Variable     | Description                       | Example                                              |
+| ------------ | --------------------------------- | ---------------------------------------------------- |
+| `MONGO_URI`  | MongoDB connection string         | `mongodb+srv://user:pass@cluster.mongodb.net/agritech` |
+| `JWT_SECRET` | Secret key for JWT token signing  | `your_jwt_secret_key_here`                           |
+| `PORT`       | Server port                       | `5000`                                               |
+
+### Frontend (`frontend/.env`)
+
+The frontend Axios base URL is configured in `src/services/api.js` pointing to `http://localhost:5000/api`.
+
+---
+
+## API Overview
+
+### Authentication
+
+| Method | Endpoint              | Description          | Auth |
+| ------ | --------------------- | -------------------- | ---- |
+| POST   | `/api/auth/register`  | Register new user    | No   |
+| POST   | `/api/auth/login`     | Login & get JWT      | No   |
+
+### Crops
+
+| Method | Endpoint              | Description                   | Auth     |
+| ------ | --------------------- | ----------------------------- | -------- |
+| POST   | `/api/crops/create`   | Create new crop listing       | Required |
+| GET    | `/api/crops/my`       | Get logged-in farmer's crops  | Required |
+| GET    | `/api/crops/all`      | Get all available crops       | Required |
+
+### Real-time Events (Socket.IO)
+
+| Event            | Direction       | Description                    |
+| ---------------- | --------------- | ------------------------------ |
+| `place_bid`      | Client → Server | Place a bid on an auction      |
+| `new_high_bid`   | Server → Client | Broadcast new highest bid      |
+| `send_offer`     | Client → Server | Send a negotiation offer       |
+| `receive_offer`  | Server → Client | Receive a negotiation offer    |
+
+---
