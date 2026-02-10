@@ -27,6 +27,8 @@ building mechanisms like structured ratings or verified seller profiles can enha
 and adoption. The platform may further incorporate sustainability and financial empowerment
 6
 
+In the traditional agricultural market, farmers often face exploitation due to a lack of direct market access and reliance on multiple intermediaries. This results in significantly lower profits for producers while end consumers pay inflated prices. Additionally, information asymmetry regarding market trends and crop demand further disadvantages farmers. AgriTech aims to bridge this gap by providing a digital marketplace that fosters direct trade and transparency.
+
 ## Objectives
 
 -   **Eliminate Intermediaries:** Facilitate direct transactions between farmers and buyers to maximize farmer profits.
