@@ -196,6 +196,12 @@ SE_3-2/
 -   **Blockchain Supply Chain:** Utilizing blockchain to track produce from farm to fork for immutable transparency.
 -   **Advanced Logistics:** Integration with third-party logistics providers for automated shipping calculations and tracking.
 
+  
+ *Overall Flow:*  
+Farmer interacts with *Frontend → Backend APIs → Database + AI Layer → Response*  
+This ensures *real-time insights, secure transactions, and multilingual accessibility*, all in a scalable architecture.
+
+
 ## Contributors
 
 -   [Jayesh - CB.SC.U4CSE23453]
