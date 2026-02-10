@@ -8,3 +8,5 @@ We worked together on designing the system, implementing user authentication, an
 
 
 ## Problem Statement
+
+In the traditional agricultural market, farmers usually depend on middlemen to sell their produce, which often reduces their profit margins. Many farmers do not get real-time information about market prices or demand, while consumers end up paying higher prices.
