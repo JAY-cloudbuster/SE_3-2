@@ -220,3 +220,19 @@ npm run dev
 ```
 
 The API will be available at **http://localhost:5000**
+
+### 3. Frontend Setup
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+The app will be available at **http://localhost:5173**
+
+---
