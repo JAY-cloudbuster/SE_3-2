@@ -56,3 +56,35 @@ Institutional buyers (retailers, cooperatives, procurement groups)
 Agricultural advisors and support agencies
 
 Financial and logistics partners
+
+
+# Proposed Core Features (Initial Scope)
+Farmer Side
+
+Crop listing with quantity, quality, and expected price
+
+Multilingual UI (text + icons)
+
+Voice-assisted navigation (future scope)
+
+Price comparison and historical price view
+
+Buyer Side
+
+Browse and search crops by location and quality
+
+Bidding / negotiation workflow
+
+Verified buyer profile
+
+Platform Features
+
+Secure login & identity verification
+
+Role-based access (Farmer / Buyer / Admin)
+
+Rating & trust mechanism
+
+Dispute reporting
+
+
