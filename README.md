@@ -42,6 +42,13 @@ cd frontend
 npm install
 npm run dev
 ```
+Access the app:
+
+| Application       | URL                          |
+| ------------------ | ---------------------------- |
+| Frontend App       | http://localhost:5173         |
+| Backend API        | http://localhost:5000         |
+
 ## Overview
 
 ### For Farmers
