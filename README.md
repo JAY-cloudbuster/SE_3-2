@@ -6,7 +6,26 @@ AgriTech is a comprehensive MERN stack platform designed to revolutionize the ag
 
 ## Problem Statement
 
-In the traditional agricultural market, farmers often face exploitation due to a lack of direct market access and reliance on multiple intermediaries. This results in significantly lower profits for producers while end consumers pay inflated prices. Additionally, information asymmetry regarding market trends and crop demand further disadvantages farmers. AgriTech aims to bridge this gap by providing a digital marketplace that fosters direct trade and transparency.
+M5 — Multilingual Digital Marketplace and Decision-Support Platform for
+Indian Farmers
+This project focuses on creating a multilingual digital marketplace and decision-support ecosys
+tem that enables Indian farmers to directly connect with institutional buyers, retailers, coop
+eratives, and community procurement groups without excessive dependence on intermediaries.
+The system must be carefully engineered to address real challenges faced by farmers, such as
+limited access to transparent pricing, lack of negotiation power, unpredictable demand cycles,
+and varying levels of digital literacy. Instead of functioning as a typical e-commerce listing
+portal, the platform should offer rich decision-enabling capabilities—price comparison dash
+boards, historical price visualizations, demand forecast models, quality-based price assessment,
+and structured negotiation workflows. The interface must support native Indian languages
+and multimodal interaction including voice-based navigation, icon-based user guidance, simple
+visual metaphors, and SMS/IVR support where needed, recognizing that many stakeholders
+operate in low-technology environments.
+Technical depth may include AI-driven price prediction models, crop-based recommendation
+systems, location-aware logistics planning, or analytics on market trends. Features such as
+secure identity verification, auction or bidding models, dispute resolution processes, and trust
+building mechanisms like structured ratings or verified seller profiles can enhance credibility
+and adoption. The platform may further incorporate sustainability and financial empowerment
+6
 
 ## Objectives
 
