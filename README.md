@@ -57,11 +57,34 @@ In the traditional agricultural market, farmers often face exploitation due to a
 - SMS/IVR APIs – multimodal access for low-tech or low-connectivity users  
 
 ## System Architecture
+The system follows a layered architecture for scalability, security, and AI-powered decision support:
+1. *User Layer (Frontend)*
+   - Provides a responsive UI for farmers, buyers, and administrators.  
+   - Supports multilingual text, voice-based navigation, icons, and SMS/IVR interfaces.  
+   - Displays dashboards, price charts, auction status, and notifications.
 
-The application follows a standard Client-Server architecture:
-1.  **Client (Frontend):** A React Single Page Application (SPA) that interacts with the backend via RESTful APIs for data operations and Socket.io for real-time messaging.
-2.  **Server (Backend):** An Express.js server that handles API requests, manages business logic, connects to the MongoDB database, and facilitates real-time communication.
-3.  **Database:** MongoDB stores user data, crop listings, negotiations, and order history.
+2. *Application Layer (Backend)*
+   - Handles API requests from the frontend and coordinates workflows.  
+   - Implements core business logic: crop evaluation, auction management, and price calculations.  
+   - Integrates with AI/ML services for predictive analytics and recommendations.  
+   - Manages authentication, authorization, and secure data access.
+   3. *Data Layer (Database)*
+   - Stores user profiles, crop details, transactions, historical market data, and audit logs.  
+   - Enables fast queries for dashboards and AI/ML models.  
+   - Ensures data consistency, security, and backup.
+   4. *AI/ML Layer*
+   - Runs models for crop quality assessment, price prediction, and demand forecasting.  
+   - Supports decision-making for farmers using historical data and market trends.  
+   - Integrates seamlessly with backend APIs to provide real-time recommendations.
+
+   5. *Integration & Communication Layer*
+   - Interfaces with third-party services: SMS/IVR gateways, payment gateways, and government schemes APIs.  
+   - Ensures reliable communication, notifications, and alerts to all stakeholders.
+
+   6. *Security & DevOps*
+   - Implements secure authentication, data encryption, and role-based access control.  
+   - Uses CI/CD pipelines for automated testing, deployment, and monitoring.
+
 
 ## Folder Structure
 
@@ -180,3 +203,12 @@ SE_3-2/
 -   [Kokul - CB.SC.U4CSE23462]
 -   [Yeshwanth - CB.SC.U4CSE23543]
 -   [Pranav - CB.SC.U4CSE23453]
+
+
+
+SoC @AVV Coimbatore
+23CSE311 Software Engineering- Winter 2025
+components such as subsidy awareness prompts, government scheme integration, crop advi
+sory channels, or micro-financing partner interactions. The system should highlight thoughtful
+engineering values—including inclusivity, fairness, security, and usability—and demonstrate
+originality beyond superficial marketplace templates commonly published online.
