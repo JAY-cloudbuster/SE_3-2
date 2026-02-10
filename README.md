@@ -42,3 +42,24 @@ cd frontend
 npm install
 npm run dev
 ```
+## Overview
+
+### For Farmers
+
+- **Crop Listing**: Add crops with name, quantity, price, quality grade, location, and image
+- **Inventory Management**: View and manage all listed crops in a sortable table
+- **Order Management**: Track incoming orders from buyers
+- **Price Insights**: View price trend charts for market-aware decisions
+- **Trust Score**: Build credibility through a visual trust gauge
+- **Verification**: Submit documents (Aadhaar, land records) to earn a verified badge
+- **Voice Input**: Use speech-to-text for hands-free quantity and price entry
+- **Marketplace Access**: Browse and purchase crops from other farmers
+
+### For Buyers
+
+- **Marketplace**: Browse all available crop listings with quality grades
+- **Interactive Map**: View farm locations on a visual crop availability map
+- **Buy Now**: Quick purchase flow with quantity selection, delivery address, and payment
+- **Price Negotiation**: WhatsApp-style chat to negotiate prices with farmers
+- **Auction Bidding**: Participate in live auctions with real-time countdown timers
+- **Order Tracking**: Track order status through a visual timeline
