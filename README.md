@@ -1,10 +1,19 @@
-Multilingual Digital Marketplace and Decision-Support Platform for Indian Farmers
+# AgriTech Marketplace Platform
 
-## Overview
+A full-stack agricultural marketplace connecting farmers and buyers with real-time trading, multilingual support, and smart price discovery.
 
-AgriTech is a comprehensive MERN stack platform designed to revolutionize the agricultural supply chain by connecting farmers directly with buyers. By eliminating intermediaries, the platform ensures fair pricing for farmers and transparent sourcing for buyers. It incorporates modern web technologies to provide a seamless, real-time, and localized experience for users across different regions and languages.
+---
 
-## Problem Statement
+## Table of Contents
 
-In the traditional agricultural market, farmers usually depend on middlemen to sell their produce, which often reduces their profit margins. Many farmers do not get real-time information about market prices or demand, while consumers end up paying higher prices.
+- [Quick Start](#quick-start)
+- [Overview](#overview)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Running the Application](#running-the-application)
+- [Environment Variables](#environment-variables)
+- [API Overview](#api-overview)
+- [Application URLs](#application-urls)
+- [Important Notes](#important-notes)
 
+---
