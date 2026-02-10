@@ -180,3 +180,43 @@ SE_3-2/
 ```
 
 ---
+## Running the Application
+
+### 1. MongoDB Setup
+
+**Option A — MongoDB Atlas (Cloud)**
+
+1. Create a free cluster at [mongodb.com/atlas](https://www.mongodb.com/atlas)
+2. Get your connection string: `mongodb+srv://<user>:<pass>@cluster.mongodb.net/agritech`
+
+**Option B — Local MongoDB**
+
+```bash
+# Windows: Download from https://www.mongodb.com/try/download/community
+# macOS:
+brew tap mongodb/brew
+brew install mongodb-community
+brew services start mongodb-community
+
+# Ubuntu:
+sudo apt install -y mongodb
+sudo systemctl start mongodb
+```
+
+### 2. Backend Setup
+
+```bash
+cd backend
+
+# Install dependencies
+npm install
+
+# Create environment file
+cp .env.example .env
+# Edit .env with your MongoDB URI and JWT secret (see Environment Variables below)
+
+# Start development server
+npm run dev
+```
+
+The API will be available at **http://localhost:5000**
