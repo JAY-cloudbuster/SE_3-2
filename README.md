@@ -70,3 +70,18 @@ Access the app:
 - **Price Negotiation**: WhatsApp-style chat to negotiate prices with farmers
 - **Auction Bidding**: Participate in live auctions with real-time countdown timers
 - **Order Tracking**: Track order status through a visual timeline
+
+### For Admins
+
+- **Moderation Dashboard**: Review farmer verification requests
+- **Document Preview**: Preview submitted identity documents
+- **Dispute Management**: Monitor and resolve trade disputes
+
+### Platform-Wide
+
+- **Multilingual Support**: Automatic translation to 13+ Indian languages via Google Translate API
+- **Real-time Updates**: Live auction bids, negotiation messages via Socket.IO
+- **Responsive Design**: Mobile-friendly with glassmorphism UI and smooth animations
+- **Role-Based Access**: Protected routes for Farmer, Buyer, and Admin roles
+
+---
