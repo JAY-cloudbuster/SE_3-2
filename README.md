@@ -17,3 +17,13 @@ A full-stack agricultural marketplace connecting farmers and buyers with real-ti
 - [Important Notes](#important-notes)
 
 ---
+## Quick Start
+
+### Prerequisites
+
+- **Node.js** 18+
+- **MongoDB** (local or [MongoDB Atlas](https://www.mongodb.com/atlas))
+- **npm** or **yarn**
+
+### Swift Run
+
