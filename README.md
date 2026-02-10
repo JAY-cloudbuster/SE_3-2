@@ -27,25 +27,34 @@ In the traditional agricultural market, farmers often face exploitation due to a
 -   **Secure Payments:** Integration placeholders for handling secure financial transactions.
 -   **Visual Analytics:** Charts and data visualization for market trends and personal sales history.
 
-## Technology Stack
+## Tech Stack
 
 ### Frontend
--   **Framework:** React (via Vite)
--   **Styling:** Tailwind CSS
--   **Animation:** Framer Motion
--   **Charts:** Chart.js, React-Chartjs-2
--   **Icons:** Lucide-React
--   **Internationalization:** i18next, React-i18next
--   **Real-time Communication:** Socket.io-client
--   **HTTP Client:** Axios
+- **Framework:** React (via Vite) – responsive, interactive, and multilingual UI  
+- **Styling:** Tailwind CSS – modern and utility-first design  
+- **Animation:** Framer Motion – smooth UI transitions  
+- **Charts & Visualization:** Chart.js, React-Chartjs-2 – price trends and market dashboards  
+- **Icons:** Lucide-React – clean, lightweight iconography  
+- **Internationalization:** i18next, React-i18next – supports multiple Indian languages  
+- **Real-time Communication:** Socket.io-client – live updates for auctions and notifications  
+- **HTTP Client:** Axios – API requests and data fetching  
 
 ### Backend
--   **Runtime:** Node.js
--   **Framework:** Express.js
--   **Database:** MongoDB (with Mongoose ODM)
--   **Authentication:** JWT (JSON Web Tokens), BCrypt.js
--   **Real-time Communication:** Socket.io
--   **Cors:** Cross-Origin Resource Sharing
+- **Runtime:** Node.js – scalable server environment  
+- **Framework:** Express.js – RESTful APIs and backend logic  
+- **Database:** MongoDB (with Mongoose ODM) – stores crop data, user profiles, transactions, and historical market data  
+- **Authentication & Security:** JWT (JSON Web Tokens), BCrypt.js – secure login and data protection  
+- **Real-time Communication:** Socket.io – handles live auction updates and notifications  
+- **Cors:** Cross-Origin Resource Sharing – enables frontend-backend communication  
+
+### AI/ML
+- Python (scikit-learn, TensorFlow, PyTorch) – for price prediction, demand forecasting, and crop recommendations  
+
+### DevOps
+- Git, GitHub, CI/CD pipelines – version control, collaboration, and automated deployment  
+
+### Others
+- SMS/IVR APIs – multimodal access for low-tech or low-connectivity users  
 
 ## System Architecture
 
