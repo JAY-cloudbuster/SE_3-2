@@ -298,3 +298,11 @@ The frontend Axios base URL is configured in `src/services/api.js` pointing to `
 | Trading Demo          | `/demo/trading`            | Public        |
 
 ---
+## Important Notes
+
+- **Authentication** is phone-number based. Passwords are hashed using `bcryptjs` before storage.
+- **Role-based routing**: Farmers are redirected to `/dashboard/farmer`, Buyers to `/dashboard/buyer`, and Admins to `/moderation` after login.
+- **Translation** uses the Google Translate API with client-side caching for performance. Supports 13+ Indian languages including Hindi, Tamil, Telugu, Kannada, and more.
+- **Trading features** (auctions, negotiations, orders) currently use `localStorage` for mock data persistence. Connect to backend API endpoints for production use.
+- **Voice Input** uses the Web Speech API for hands-free data entry — supported in Chrome and Edge browsers.
+- **Currency** is formatted in Indian Rupees (₹) with the Indian numbering system (lakhs/crores).
