@@ -26,4 +26,19 @@ A full-stack agricultural marketplace connecting farmers and buyers with real-ti
 - **npm** or **yarn**
 
 ### Swift Run
+```bash
+# 1. Clone the repository
+git clone <repo-url>
+cd SE_3-2
 
+# 2. Start the backend
+cd backend
+npm install
+cp .env.example .env   # Configure your environment variables
+npm run dev
+
+# 3. Start the frontend (new terminal)
+cd frontend
+npm install
+npm run dev
+```
