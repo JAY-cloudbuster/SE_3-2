@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';
-import { T } from '../../../context/TranslationContext';
+import { T, useTranslation } from '../../../context/TranslationContext';
 import LanguageSelector from '../../../components/common/LanguageSelector';
 import { authService } from '../../../services/authService';
 
@@ -9,6 +9,7 @@ export default function LoginForm() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useContext(AuthContext);
+  const { changeLanguage } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -25,6 +26,12 @@ export default function LoginForm() {
       // But for now, we trust the DB return. 
 
       login(res.data);
+
+      // Set language from user profile
+      if (res.data.user.language) {
+        changeLanguage(res.data.user.language);
+      }
+
       navigate(`/dashboard/${userRole.toLowerCase()}`);
     } catch (error) {
       console.error(error);

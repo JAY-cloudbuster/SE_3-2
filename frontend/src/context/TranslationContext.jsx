@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { translateText, preloadCommonTranslations } from '../services/translationService';
 
 const TranslationContext = createContext();
@@ -53,9 +53,9 @@ export const TranslationProvider = ({ children }) => {
      * Change the current language
      * @param {string} langCode - Language code to switch to
      */
-    const changeLanguage = (langCode) => {
+    const changeLanguage = useCallback((langCode) => {
         setCurrentLanguage(langCode);
-    };
+    }, []);
 
     const value = {
         currentLanguage,
