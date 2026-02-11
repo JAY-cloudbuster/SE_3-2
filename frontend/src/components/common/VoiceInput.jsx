@@ -1,3 +1,24 @@
+/**
+ * @fileoverview Voice Input Component for AgriSahayak Frontend
+ * 
+ * Provides a microphone button that uses the Web Speech API
+ * (SpeechRecognition) to convert spoken numbers into input values.
+ * Used alongside quantity and price fields in CropForm to enable
+ * hands-free data entry for farmers.
+ * 
+ * Flow: Click mic → speak number → text parsed → number extracted → callback
+ * 
+ * Visual states:
+ * - Idle: Green mic icon on emerald background
+ * - Listening: Red mic-off icon with pulse animation
+ * 
+ * @component VoiceInput
+ * @param {Object} props
+ * @param {Function} props.onResult - Callback invoked with the parsed number
+ * 
+ * @see Epic 6, Story 6.5 - Voice Input for Numbers
+ * @see CropForm.jsx - Parent component that uses VoiceInput
+ */
 import { useState } from 'react';
 import { Mic, MicOff } from 'lucide-react';
 
@@ -11,7 +32,7 @@ export default function VoiceInput({ onResult }) {
     const recognition = new SpeechRecognition();
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
-    
+
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       // Task 2: Logic to convert spoken word to number [cite: 276]
@@ -23,7 +44,7 @@ export default function VoiceInput({ onResult }) {
   };
 
   return (
-    <button 
+    <button
       type="button"
       onClick={startListening}
       className={`p-2 rounded-full transition-colors ${isListening ? 'bg-rose-100 text-rose-600 animate-pulse' : 'bg-emerald-100 text-emerald-600'}`}

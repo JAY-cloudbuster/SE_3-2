@@ -1,3 +1,15 @@
+/**
+ * @fileoverview Farmer Verification Form Component for AgriSahayak Frontend
+ * 
+ * Allows farmers to upload ID proof and farm photo to apply for a
+ * verified badge. After submission, shows a success state with
+ * "Documents Under Review" message. Files are stored via API call
+ * and flagged for admin review.
+ * 
+ * @component VerificationForm
+ * @see Epic 7, Story 7.1 - Farmer Verification
+ * @see ModerationDashboard - Admin reviews submitted verifications
+ */
 import { useState } from 'react';
 import { Upload, CheckCircle } from 'lucide-react';
 import { T } from '../../../context/TranslationContext';

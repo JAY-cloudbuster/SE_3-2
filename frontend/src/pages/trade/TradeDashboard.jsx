@@ -1,3 +1,28 @@
+/**
+ * @fileoverview Trade Dashboard Page for AgriSahayak Frontend
+ * 
+ * Standalone full-screen page that provides a unified view of all
+ * trading activities: auctions, negotiations, and orders.
+ * 
+ * Features:
+ * - Stats cards showing counts for active auctions, negotiations, and orders
+ * - Tabbed interface: Active Auctions, Negotiations, My Orders
+ * - Auction tab: Grid of AuctionCard components
+ * - Negotiation tab: Split view (list + NegotiationChat)
+ * - Orders tab: Grid of OrderTrackingCard components
+ * - Top navbar with Back to Dashboard and Marketplace buttons
+ * - Animated tab transitions using Framer Motion AnimatePresence
+ * 
+ * Uses mock trading data from localStorage (mockTradingData module).
+ * 
+ * @component TradeDashboard
+ * @route /trade (Standalone, no Sidebar/Navbar)
+ * 
+ * @see Epic 4, Story 4.1 - View Available Auctions
+ * @see Epic 4, Story 4.4 - Negotiate Price
+ * @see Epic 4, Story 4.7 - Order Tracking
+ * @see mockTradingData.js - Data source for trading activities
+ */
 import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -9,10 +34,6 @@ import AuctionCard from '../../features/trade/components/AuctionCard';
 import NegotiationChat from '../../features/trade/components/NegotiationChat';
 import OrderTrackingCard from '../../features/trade/components/OrderTrackingCard';
 
-/**
- * TradeDashboard Component
- * Unified view of all trading activities - Standalone page
- */
 export default function TradeDashboard() {
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);

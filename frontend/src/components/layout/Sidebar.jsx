@@ -1,3 +1,21 @@
+/**
+ * @fileoverview Sidebar Navigation Component for AgriSahayak Frontend
+ * 
+ * Fixed left sidebar that provides role-based navigation links.
+ * - FARMER role: Overview, My Crops, Marketplace, My Orders, Market Prices, Get Verified
+ * - BUYER role: Discover, My Orders
+ * 
+ * Includes the AgriTech logo, animated NavLinks with active tab indicator,
+ * and a logout button styled as a user badge.
+ * Hidden on standalone pages and mobile viewports (lg: breakpoint).
+ * 
+ * @component Sidebar
+ * @param {Object} props
+ * @param {string} props.role - User role: 'FARMER' or 'BUYER'
+ * 
+ * @see Epic 1, Story 1.8 - Role-Based Dashboard Navigation
+ * @see App.jsx - Controls visibility based on route and auth status
+ */
 import { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';

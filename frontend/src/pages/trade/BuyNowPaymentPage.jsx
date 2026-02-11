@@ -1,3 +1,28 @@
+/**
+ * @fileoverview Buy Now Payment Page for AgriSahayak Frontend
+ * 
+ * Standalone full-screen checkout page for crop purchases.
+ * Implements a 3-step checkout flow:
+ * 1. Select Quantity — Increment/decrement controls
+ * 2. Delivery Address — Street, city, state, pincode + special instructions
+ * 3. Payment Method — Card, UPI, or Cash on Delivery
+ * 
+ * After order confirmation, saves the order to localStorage (mockOrders)
+ * and redirects to /order-confirmation with the order data.
+ * 
+ * Layout:
+ * - Left sidebar: Crop details + live order summary (subtotal, delivery, total)
+ * - Right panel: Multi-step form (quantity → address → payment)
+ * - Top navbar: Back button, page title, step indicator (1/2/3)
+ * 
+ * @component BuyNowPaymentPage
+ * @route /buy/:cropId (Standalone, no Sidebar/Navbar)
+ * 
+ * @see Epic 4, Story 4.5 - Buy Now (Instant Purchase)
+ * @see Epic 4, Story 4.6 - Checkout with Payment
+ * @see Epic 4, Story 4.7 - Order Confirmation
+ * @see OrderConfirmationPage - Redirected to after successful order
+ */
 import React, { useState, useContext, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -5,11 +30,6 @@ import { ArrowLeft, Package, MapPin, CreditCard, CheckCircle, Smartphone, Bankno
 import { T } from '../../context/TranslationContext';
 import { AuthContext } from '../../context/AuthContext';
 
-/**
- * BuyNowPaymentPage
- * Standalone full-page payment experience for crop purchases
- * Similar layout pattern to NegotiationPage
- */
 export default function BuyNowPaymentPage() {
     const navigate = useNavigate();
     const location = useLocation();
@@ -125,8 +145,8 @@ export default function BuyNowPaymentPage() {
                                 <div
                                     key={s}
                                     className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${step >= s
-                                            ? 'bg-emerald-600 text-white'
-                                            : 'bg-slate-200 text-slate-400'
+                                        ? 'bg-emerald-600 text-white'
+                                        : 'bg-slate-200 text-slate-400'
                                         }`}
                                 >
                                     {s}
@@ -348,8 +368,8 @@ export default function BuyNowPaymentPage() {
                                                 key={method.id}
                                                 onClick={() => setPaymentMethod(method.id)}
                                                 className={`flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 transition-all font-bold ${paymentMethod === method.id
-                                                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                                                        : 'border-slate-100 hover:border-emerald-200 text-slate-400'
+                                                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                                                    : 'border-slate-100 hover:border-emerald-200 text-slate-400'
                                                     }`}
                                             >
                                                 {method.icon}

@@ -1,3 +1,20 @@
+/**
+ * @fileoverview Interactive Crop Map Component for AgriSahayak Buyer Dashboard
+ * 
+ * Visual map showing farm locations as animated MapPin markers.
+ * Clicking a pin selects it and shows a tooltip with crop name,
+ * village, and availability status. Uses Framer Motion for marker
+ * entrance animation and tooltip transitions.
+ * 
+ * Note: This is a simplified CSS-positioned map (not a real mapping library).
+ * Farm coordinates are x/y percentages within the container.
+ * 
+ * @component MarketMap
+ * @param {Object} props
+ * @param {Array<{id, crop, village, x, y}>} props.farms - Farm marker data
+ * 
+ * @see Epic 3, Story 3.4 - Interactive Crop Map
+ */
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Navigation } from 'lucide-react';
@@ -15,7 +32,7 @@ export default function MarketMap({ farms }) {
     >
       {/* Pattern overlay */}
       <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/pinstripe.png')]"></div>
-      
+
       {/* Header */}
       <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
         <Navigation className="text-emerald-600" size={18} />
@@ -38,14 +55,13 @@ export default function MarketMap({ farms }) {
             onClick={() => setSelectedFarm(selectedFarm?.id === farm.id ? null : farm)}
           >
             <MapPin
-              className={`transition-all ${
-                selectedFarm?.id === farm.id
+              className={`transition-all ${selectedFarm?.id === farm.id
                   ? 'text-emerald-700 fill-emerald-300 scale-125'
                   : 'text-emerald-600 fill-emerald-200'
-              }`}
+                }`}
               size={36}
             />
-            
+
             {/* Tooltip */}
             <motion.div
               className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-40 p-3 bg-white rounded-xl shadow-2xl border border-emerald-100 z-30"

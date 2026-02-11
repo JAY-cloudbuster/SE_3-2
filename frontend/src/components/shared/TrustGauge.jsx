@@ -1,3 +1,16 @@
+/**
+ * @fileoverview Trust Score Gauge Component for AgriSahayak Frontend
+ * 
+ * Visual credibility indicator showing a farmer's trust score as a
+ * percentage bar with animated fill. Levels: Excellent (90+), Good (70+),
+ * Fair (50+), Building (<50). Uses emerald gradient with Framer Motion.
+ * 
+ * @component TrustGauge
+ * @param {Object} props
+ * @param {number} props.score - Trust score (0-100)
+ * 
+ * @see Epic 7, Story 7.10 - Trust Score Display
+ */
 import { motion } from 'framer-motion';
 import { ShieldCheck, TrendingUp } from 'lucide-react';
 
@@ -24,7 +37,7 @@ export default function TrustGauge({ score }) {
           <TrendingUp className="text-emerald-500" size={14} />
         </div>
       </div>
-      
+
       <div className="relative w-full bg-slate-100 h-4 rounded-full overflow-hidden">
         <motion.div
           className={`bg-gradient-to-r from-emerald-500 to-emerald-600 h-full rounded-full shadow-lg shadow-emerald-200/50`}

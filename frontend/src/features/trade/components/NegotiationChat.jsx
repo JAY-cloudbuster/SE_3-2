@@ -1,17 +1,28 @@
+/**
+ * @fileoverview Negotiation Chat Component for AgriSahayak Trade System
+ * 
+ * WhatsApp-style chat interface for price negotiations between buyers
+ * and farmers. Supports text messages, price proposals (with price/qty),
+ * accept/reject/counter-offer actions, and a typing indicator.
+ * 
+ * Messages and negotiation state are persisted in localStorage
+ * (mockNegotiations). Proposal messages show price details and
+ * action buttons (Accept, Counter, Reject) for the recipient.
+ * 
+ * @component NegotiationChat
+ * @param {Object} props
+ * @param {string} props.negotiationId - ID of the negotiation
+ * @param {string} props.currentUserId - Current user identifier
+ * @param {string} props.currentUserRole - 'buyer' or 'farmer'
+ * 
+ * @see Epic 4, Story 4.4 - Negotiate Price
+ * @see NegotiationPage - Page that renders this chat component
+ */
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Smile, Check, CheckCheck, Clock, TrendingUp, TrendingDown } from 'lucide-react';
 import { T } from '../../../context/TranslationContext';
 
-/**
- * NegotiationChat Component
- * WhatsApp-style chat interface for price negotiations
- * 
- * Props:
- * - negotiationId: ID of the negotiation
- * - currentUserId: ID of the current user
- * - currentUserRole: 'buyer' or 'farmer'
- */
 export default function NegotiationChat({ negotiationId, currentUserId, currentUserRole }) {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
@@ -156,8 +167,8 @@ export default function NegotiationChat({ negotiationId, currentUserId, currentU
                     {/* Message Bubble */}
                     <div
                         className={`rounded-2xl px-4 py-3 ${isMine
-                                ? 'bg-emerald-500 text-white rounded-br-sm'
-                                : 'bg-white border border-slate-200 text-slate-800 rounded-bl-sm'
+                            ? 'bg-emerald-500 text-white rounded-br-sm'
+                            : 'bg-white border border-slate-200 text-slate-800 rounded-bl-sm'
                             } ${isProposal ? 'border-2 border-emerald-400' : ''} ${isAccept ? 'bg-green-100 border-green-400' : ''
                             } ${isReject ? 'bg-red-100 border-red-400' : ''}`}
                     >

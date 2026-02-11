@@ -1,12 +1,22 @@
+/**
+ * @fileoverview Auction Creation Form Component for AgriSahayak Trade System
+ * 
+ * Form to create a new auction for a crop. Fields: starting price,
+ * reserve price, quantity, and duration (1h–48h). Saves the auction
+ * to localStorage (mockAuctions) and calls onSuccess callback.
+ * 
+ * @component AuctionForm
+ * @param {Object} props
+ * @param {Object} props.crop - Crop data (id, name, price, quantity, farmerId, farmerName)
+ * @param {Function} [props.onSuccess] - Callback with created auction object
+ * 
+ * @see Epic 4, Story 4.1 - Create Auction
+ */
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Gavel, Calendar, DollarSign, Package } from 'lucide-react';
 import { T } from '../../../context/TranslationContext';
 
-/**
- * AuctionForm Component
- * Create new auction for a crop
- */
 export default function AuctionForm({ crop, onSuccess }) {
     const [formData, setFormData] = useState({
         startingPrice: crop?.price || '',

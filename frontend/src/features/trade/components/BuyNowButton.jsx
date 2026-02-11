@@ -1,17 +1,25 @@
+/**
+ * @fileoverview Buy Now Button Component for AgriSahayak Trade System
+ * 
+ * Quick purchase button that navigates to the standalone payment page
+ * (/buy/:cropId) with crop data. Rendered inside CropActionButtons
+ * and CropCard components throughout the marketplace.
+ * 
+ * @component BuyNowButton
+ * @param {Object} props
+ * @param {Object} props.crop - Crop data (id, name, price, etc.)
+ * @param {Function} [props.onOrderComplete] - Legacy callback (unused, kept for compatibility)
+ * 
+ * @see Epic 4, Story 4.5 - Buy Now (Instant Purchase)
+ * @see BuyNowPaymentPage - Destination page for checkout
+ * @see CropActionButtons - Parent component that renders this button
+ */
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { T } from '../../../context/TranslationContext';
 
-/**
- * BuyNowButton Component
- * Quick purchase button for crops - navigates to standalone payment page
- * 
- * Props:
- * - crop: Crop object with details
- * - onOrderComplete: Callback when order is placed (optional, for backwards compatibility)
- */
 export default function BuyNowButton({ crop, onOrderComplete }) {
     const navigate = useNavigate();
 

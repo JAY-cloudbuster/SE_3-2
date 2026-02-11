@@ -1,3 +1,16 @@
+/**
+ * @fileoverview Top Navigation Bar Component for AgriSahayak Frontend
+ * 
+ * Renders a sticky glass-morphism navigation bar at the top of dashboard pages.
+ * Contains a search input, language selector, notification bell, and user actions.
+ * Hidden on standalone pages (auth, negotiation, trade dashboard, buy now).
+ * 
+ * Uses Framer Motion for entrance animation (slide down + fade in).
+ * 
+ * @component Navbar
+ * @see App.jsx - Controls visibility based on route and auth status
+ * @see LanguageSelector - Embedded language switching dropdown
+ */
 import { useContext } from 'react';
 import { motion } from 'framer-motion';
 import { AuthContext } from '../../context/AuthContext';

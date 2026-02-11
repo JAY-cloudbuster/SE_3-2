@@ -1,3 +1,30 @@
+/**
+ * @fileoverview Registration Form Component for AgriSahayak Frontend
+ * 
+ * This component renders the user registration page with a multi-field form.
+ * Users can register as either FARMER or BUYER with:
+ * - Role selection (FARMER/BUYER toggle)
+ * - Preferred language selection (13 Indian languages)
+ * - Full name, phone number (10-digit), and password
+ * - Password strength meter (0-4 scale with visual bar)
+ * - Password confirmation with match validation
+ * 
+ * On successful registration, the user is redirected to the login page
+ * with a success notification (?registered=1 query parameter).
+ * 
+ * The form includes a LanguageSelector in the top-right corner,
+ * allowing users to switch the UI language even before registration.
+ * All visible text is wrapped in <T> components for automatic translation.
+ * 
+ * @component RegisterForm
+ * @route /register (Public)
+ * 
+ * @see Epic 1, Story 1.1 - Register as Farmer or Buyer
+ * @see Epic 1, Story 1.3 - Select Preferred Language
+ * @see Epic 1, Story 1.7 - Password Encryption (handled by backend)
+ * @see authService.register() - API call for registration
+ */
+
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { T } from '../../../context/TranslationContext';

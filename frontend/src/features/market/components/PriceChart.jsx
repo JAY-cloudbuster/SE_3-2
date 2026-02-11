@@ -1,3 +1,20 @@
+/**
+ * @fileoverview Price Chart Component for AgriSahayak Frontend
+ * 
+ * Renders a Chart.js line chart showing market price trends for a crop.
+ * Attempts to fetch historical data from priceService; falls back to
+ * hardcoded 5-day mock data if the API is unavailable or returns empty.
+ * 
+ * Uses Chart.js via react-chartjs-2 with emerald color scheme,
+ * smooth curves (tension 0.35), and ₹ prefix on y-axis ticks.
+ * 
+ * @component PriceChart
+ * @param {Object} props
+ * @param {string} [props.crop='Tomato'] - Crop name to fetch trends for
+ * 
+ * @see Epic 5, Story 5.1 - Market Price Trends
+ * @see priceService.getHistoricalTrends - API call (stub)
+ */
 import { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import {

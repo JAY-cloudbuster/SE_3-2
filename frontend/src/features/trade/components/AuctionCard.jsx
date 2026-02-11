@@ -1,12 +1,24 @@
+/**
+ * @fileoverview Auction Card Component for AgriSahayak Trade System
+ * 
+ * Displays a live auction with countdown timer, current bid, bidder info,
+ * starting price, quantity stats, and bid count. Timer updates every second.
+ * Shows "Place Bid" button while active; shows winner info after auction ends.
+ * 
+ * @component AuctionCard
+ * @param {Object} props
+ * @param {Object} props.auction - Auction data (cropName, farmerName, endTime, currentBid, etc.)
+ * @param {Function} [props.onBidClick] - Callback when "Place Bid" is clicked
+ * 
+ * @see Epic 4, Story 4.1 - View Available Auctions
+ * @see Epic 4, Story 4.2 - Place Real-Time Bids
+ * @see TradeDashboard - Renders AuctionCard in the auctions tab
+ */
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Clock, TrendingUp, Users, Gavel } from 'lucide-react';
 import { T } from '../../../context/TranslationContext';
 
-/**
- * AuctionCard Component
- * Display auction with countdown timer and bidding info
- */
 export default function AuctionCard({ auction, onBidClick }) {
     const [timeLeft, setTimeLeft] = useState('');
 

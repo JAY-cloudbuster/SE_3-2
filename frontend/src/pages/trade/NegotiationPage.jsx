@@ -1,3 +1,27 @@
+/**
+ * @fileoverview Negotiation Page for AgriSahayak Frontend
+ * 
+ * Standalone full-screen page for price negotiations between buyers and farmers.
+ * Features a split layout: crop details sidebar (left) + chat interface (right).
+ * 
+ * Data flow:
+ * 1. Receives crop data via React Router location.state
+ * 2. Checks localStorage for existing negotiation with this crop
+ * 3. If found, loads existing negotiation; if not, creates a new one
+ * 4. Stores negotiation data in localStorage (mockNegotiations key)
+ * 
+ * Layout:
+ * - Left sidebar: Crop image, details (price, quantity, farmer, location), status badge
+ * - Right panel: NegotiationChat component (real-time messaging interface)
+ * - Top navbar: Back to Dashboard, page title, All Negotiations link
+ * 
+ * @component NegotiationPage
+ * @route /negotiation/:negotiationId (Standalone, no Sidebar/Navbar)
+ * 
+ * @see Epic 4, Story 4.4 - Negotiate Price
+ * @see NegotiationChat - Chat component used for messaging
+ * @see FarmerMarketplace - Source of crop data passed via navigation state
+ */
 import React, { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
@@ -6,10 +30,6 @@ import { T } from '../../context/TranslationContext';
 import { AuthContext } from '../../context/AuthContext';
 import NegotiationChat from '../../features/trade/components/NegotiationChat';
 
-/**
- * NegotiationPage
- * Dedicated page for price negotiations with navigation
- */
 export default function NegotiationPage() {
     const { negotiationId } = useParams();
     const navigate = useNavigate();

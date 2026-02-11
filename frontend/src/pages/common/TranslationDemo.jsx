@@ -1,12 +1,22 @@
+/**
+ * @fileoverview Translation Demo Page for AgriSahayak Frontend
+ * 
+ * Interactive demo showcasing the dynamic translation system.
+ * Shows examples of translated text, form labels, action buttons,
+ * status messages, and feature list. Includes code usage examples
+ * and displays the current language dynamically.
+ * 
+ * Accessible at /demo/translation.
+ * 
+ * @component TranslationDemo
+ * @see Epic 6, Story 6.2 - Dynamic Translation
+ * @see TranslationContext - Powers the <T> component
+ */
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { T, useTranslation } from '../../context/TranslationContext';
 import { Globe, Sparkles, CheckCircle } from 'lucide-react';
 
-/**
- * Demo page showing how to use the translation system
- * This can be accessed at /demo/translation for testing
- */
 export default function TranslationDemo() {
     const { currentLanguage, t } = useTranslation();
     const [dynamicText, setDynamicText] = useState('');

@@ -1,3 +1,16 @@
+/**
+ * @fileoverview Buyer Dashboard Page for AgriSahayak Frontend
+ * 
+ * Main landing page for buyers. Fetches available crops from the API
+ * and displays:
+ * - MarketMap with randomized farm pin locations
+ * - Responsive grid of CropCard components for browsing/purchasing
+ * 
+ * @component BuyerDashboard
+ * @see Epic 3, Story 3.1 - Browse Available Crops
+ * @see MarketMap - Interactive crop location map
+ * @see CropCard - Individual crop listing card
+ */
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';

@@ -1,3 +1,28 @@
+/**
+ * @fileoverview Login Form Component for AgriSahayak Frontend
+ * 
+ * This component renders the user login page with phone number and password fields.
+ * Upon successful authentication, it:
+ * 1. Stores the JWT token and user data via AuthContext.login()
+ * 2. Sets the user's preferred language via TranslationContext.changeLanguage()
+ * 3. Redirects to the role-specific dashboard (/dashboard/farmer or /dashboard/buyer)
+ * 
+ * Features:
+ * - Two login buttons: "Login as Farmer" and "Login as Buyer"
+ *   (both call the same endpoint; the role is determined by the database)
+ * - Shows a success banner when redirected from registration (?registered=1)
+ * - LanguageSelector in the top-right corner for pre-login language switching
+ * - All visible text wrapped in <T> for automatic translation
+ * 
+ * @component LoginForm
+ * @route /login (Public)
+ * 
+ * @see Epic 1, Story 1.2 - Login with Phone & Password
+ * @see Epic 1, Story 1.8 - Role-Based Redirect
+ * @see Epic 6, Story 6.1 - Persist Interface Language (set on login)
+ * @see authService.login() - API call for authentication
+ */
+
 import React, { useState, useContext } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';

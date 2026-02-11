@@ -1,3 +1,29 @@
+/**
+ * @fileoverview Crop Listing Form Component for AgriSahayak Frontend
+ * 
+ * This component allows farmers to create new crop listings on the marketplace.
+ * It collects crop details (name, location, quantity, price, quality grade)
+ * and submits them to the backend via cropService.create().
+ * 
+ * Key features:
+ * - Voice input support for quantity and price fields (VoiceInput component)
+ * - Input validation: quantity (1-200 kg), price (₹1-500/kg)
+ * - Quality grade selection (A/B/C) via toggle buttons
+ * - Success animation with CheckCircle icon on successful submission
+ * - Auto-reset of form after 3 seconds on success
+ * - Framer Motion animations for smooth entrance and success transitions
+ * 
+ * @component CropForm
+ * @param {Object} props
+ * @param {Function} props.onCropAdded - Callback fired after successful listing,
+ *                                        used by parent to refresh the crop list
+ * 
+ * @see Epic 2, Story 2.4 - Add Crop Listing
+ * @see Epic 6, Story 6.5 - Voice Input for Numbers
+ * @see cropService.create() - API call for creating the listing
+ * @see VoiceInput - Component for speech-to-number input
+ */
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, CheckCircle } from 'lucide-react';

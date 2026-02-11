@@ -1,3 +1,16 @@
+/**
+ * @fileoverview Moderation Dashboard Page for AgriSahayak Admin Panel
+ * 
+ * Admin command center for system oversight and user trust management.
+ * Tabbed interface with three sections:
+ * - Verifications: Review farmer ID proofs and approve/reject badges
+ * - Disputes: View active trade dispute threads (placeholder)
+ * - Reports: (placeholder tab)
+ * 
+ * @component ModerationDashboard
+ * @see Epic 7, Story 7.5 - Admin Moderation Dashboard
+ * @see VerificationForm - Farmer-facing form that submits documents for review
+ */
 import { useState } from 'react';
 import { ShieldCheck, AlertTriangle, Scale } from 'lucide-react';
 
@@ -17,12 +30,11 @@ export default function ModerationDashboard() {
       {/* Admin Tabbed Interface  */}
       <div className="flex gap-4 p-1 bg-slate-100 rounded-2xl w-fit">
         {['verifications', 'disputes', 'reports'].map(tab => (
-          <button 
-            key={tab} 
+          <button
+            key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-6 py-2 rounded-xl text-sm font-bold capitalize transition-all ${
-              activeTab === tab ? 'bg-white shadow-md text-slate-900' : 'text-slate-500'
-            }`}
+            className={`px-6 py-2 rounded-xl text-sm font-bold capitalize transition-all ${activeTab === tab ? 'bg-white shadow-md text-slate-900' : 'text-slate-500'
+              }`}
           >
             {tab}
           </button>
@@ -55,7 +67,7 @@ export default function ModerationDashboard() {
             </table>
           </div>
         )}
-        
+
         {activeTab === 'disputes' && (
           <div className="flex flex-col items-center justify-center h-64 glass-card text-slate-400">
             <Scale size={48} className="mb-4 opacity-20" />

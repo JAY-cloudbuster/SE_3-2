@@ -1,8 +1,34 @@
+/**
+ * @fileoverview Crop List Component for AgriSahayak Farmer Dashboard
+ * 
+ * This component displays the farmer's "My Harvest Inventory" table,
+ * showing all crop listings created by the currently logged-in farmer.
+ * Data is fetched from the backend via cropService.getMyCrops().
+ * 
+ * Table columns: Crop Name, Location (with MapPin icon), Quantity (kg),
+ * Price/kg (₹), Quality Grade (A/B/C badge), and Actions (Edit/Delete).
+ * 
+ * Current status:
+ * - ✅ Data fetching and display works correctly
+ * - ✅ Location column with MapPin icon
+ * - ✅ Quality grade color-coded badges (A=green, B=yellow, C=grey)
+ * - ✅ Price trend indicator (↑ for prices > ₹20/kg)
+ * - ⚠️ Edit button (Edit3 icon) - UI only, handler NOT implemented
+ * - ⚠️ Delete button (Trash2 icon) - UI only, handler NOT implemented
+ * 
+ * @component CropList
+ * 
+ * @see Epic 2, Story 2.6 - View Crop Listings
+ * @see Epic 2, Story 2.7 - Edit Crop Details (planned)
+ * @see Epic 2, Story 2.8 - Delete Crop Listing (planned)
+ * @see cropService.getMyCrops() - API call for fetching farmer's crops
+ */
+
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Package, TrendingUp, Edit3, Trash2, MapPin } from 'lucide-react';
 
-// Mock data (replace with actual API call later)
+// Mock data (used as fallback for development, actual API data used in production)
 const MOCK_CROPS = [
     { id: 1, name: 'Organic Wheat', quantity: 500, price: 24, quality: 'A', date: '2023-10-15', location: 'Punawale, Pune' },
     { id: 2, name: 'Red Onions', quantity: 1200, price: 35, quality: 'B', date: '2023-10-12', location: 'Nashik, MH' },

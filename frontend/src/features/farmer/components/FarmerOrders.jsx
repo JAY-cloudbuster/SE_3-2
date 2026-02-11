@@ -1,3 +1,14 @@
+/**
+ * @fileoverview Farmer Orders Component for AgriSahayak Frontend
+ * 
+ * Displays a list of recent orders received by the farmer.
+ * Uses mock data (MOCK_ORDERS) with simulated loading delay.
+ * Each order card shows buyer name, order ID, items, amount,
+ * date, and status badge (Pending/Completed/Processing).
+ * 
+ * @component FarmerOrders
+ * @see Epic 4, Story 4.7 - Order Tracking for Farmers
+ */
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingBag, Calendar, Clock, ChevronRight } from 'lucide-react';

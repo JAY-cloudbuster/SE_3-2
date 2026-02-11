@@ -1,18 +1,26 @@
+/**
+ * @fileoverview Negotiate Button Component for AgriSahayak Trade System
+ * 
+ * Button that navigates to the standalone negotiation page. Checks
+ * localStorage for an existing negotiation on the crop; if found,
+ * navigates to it, otherwise opens /negotiation/new with crop state.
+ * 
+ * @component NegotiateButton
+ * @param {Object} props
+ * @param {Object} props.crop - Crop data (id, name, price, etc.)
+ * @param {string} [props.currentUserId='buyer_1'] - Current user identifier
+ * @param {string} [props.currentUserRole='buyer'] - 'buyer' or 'farmer'
+ * 
+ * @see Epic 4, Story 4.4 - Negotiate Price
+ * @see NegotiationPage - Destination page for negotiations
+ * @see CropActionButtons - Parent component that renders this button
+ */
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { T } from '../../../context/TranslationContext';
 
-/**
- * NegotiateButton Component
- * Navigates to dedicated negotiation page
- * 
- * Props:
- * - crop: Crop object with details
- * - currentUserId: ID of current user
- * - currentUserRole: 'buyer' or 'farmer'
- */
 export default function NegotiateButton({ crop, currentUserId = 'buyer_1', currentUserRole = 'buyer' }) {
     const navigate = useNavigate();
 

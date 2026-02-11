@@ -1,3 +1,17 @@
+/**
+ * @fileoverview Trading Features Demo Page for AgriSahayak Frontend
+ * 
+ * Interactive showcase of all trading features: Buy Now flow,
+ * Negotiation Chat, Auction System, and Order Tracking.
+ * Uses a tabbed selector to switch between demos. All data
+ * is stored in localStorage for demonstration purposes.
+ * 
+ * Accessible at /demo/trading.
+ * 
+ * @component TradingDemo
+ * @see Epic 4 - All Trading Features
+ * @see TradeDashboard - Production trade page
+ */
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Gavel, MessageSquare, ShoppingCart, Package, Sparkles } from 'lucide-react';
@@ -9,10 +23,6 @@ import AuctionForm from '../../features/trade/components/AuctionForm';
 import AuctionCard from '../../features/trade/components/AuctionCard';
 import OrderTrackingCard from '../../features/trade/components/OrderTrackingCard';
 
-/**
- * TradingDemo Page
- * Showcase all trading features
- */
 export default function TradingDemo() {
     const [activeDemo, setActiveDemo] = useState('buynow');
     const sampleCrop = mockCrops[0];
@@ -79,8 +89,8 @@ export default function TradingDemo() {
                                 key={demo.id}
                                 onClick={() => setActiveDemo(demo.id)}
                                 className={`p-6 rounded-2xl border-2 transition-all ${activeDemo === demo.id
-                                        ? `border-${demo.color}-500 bg-${demo.color}-50 shadow-lg`
-                                        : 'border-slate-200 bg-white hover:border-slate-300'
+                                    ? `border-${demo.color}-500 bg-${demo.color}-50 shadow-lg`
+                                    : 'border-slate-200 bg-white hover:border-slate-300'
                                     }`}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
