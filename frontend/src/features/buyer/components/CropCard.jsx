@@ -1,3 +1,19 @@
+/**
+ * @fileoverview Crop Card Component for AgriSahayak Buyer Dashboard
+ * 
+ * Renders a marketplace crop card showing crop image, quality badge,
+ * farmer name/location, price (via CurrencyLabel), star rating, and
+ * action buttons (Buy Now, Negotiate) via CropActionButtons.
+ * Normalizes crop data from the API into the format expected by trade components.
+ * 
+ * @component CropCard
+ * @param {Object} props
+ * @param {Object} props.crop - Crop/listing data from API
+ * @param {Function} [props.onBuy] - Callback when crop is purchased
+ * 
+ * @see Epic 3, Story 3.9 - Virtual Crop Inspection
+ * @see CropActionButtons - Buy Now and Negotiate action buttons
+ */
 import { motion } from 'framer-motion';
 import { Star, MapPin, ShieldCheck } from 'lucide-react';
 import { formatCurrency } from '../../../utils/formatters';

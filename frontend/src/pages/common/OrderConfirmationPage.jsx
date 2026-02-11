@@ -1,13 +1,24 @@
+/**
+ * @fileoverview Order Confirmation Page for AgriSahayak Frontend
+ * 
+ * Success page shown after placing an order. Displays a spring-animated
+ * checkmark, order details (crop, quantity, amount, farmer, delivery
+ * address, date), and current status. Provides navigation to the
+ * buyer dashboard and order tracking.
+ * 
+ * Reads order data from location.state; shows fallback if missing.
+ * 
+ * @component OrderConfirmationPage
+ * @see Epic 4, Story 4.6 - Order Confirmation
+ * @see BuyNowPaymentPage - Redirects here after checkout
+ * @see OrderSummaryModal - Alternative checkout also redirects here
+ */
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, Package, MapPin, Calendar, ArrowRight } from 'lucide-react';
 import { T } from '../../context/TranslationContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-/**
- * OrderConfirmationPage
- * Success page after placing an order
- */
 export default function OrderConfirmationPage() {
     const location = useLocation();
     const navigate = useNavigate();

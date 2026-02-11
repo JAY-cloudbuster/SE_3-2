@@ -1,3 +1,16 @@
+/**
+ * @fileoverview Payment Page (Legacy) for AgriSahayak Frontend
+ * 
+ * Generic secure checkout page with 3 payment methods: Card, UPI, and
+ * Cash on Delivery. Uses mock order data (Onions + Potatoes). Shows
+ * a processing spinner (2s) then a success confirmation with order ID.
+ * 
+ * Note: Superseded by BuyNowPaymentPage for new buy-now flows.
+ * This page is still accessible and used for older navigation paths.
+ * 
+ * @component PaymentPage
+ * @see Epic 5, Story 5.4 - Secure Payments
+ */
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CreditCard, ShieldCheck, Truck, Check, Smartphone, Banknote } from 'lucide-react';
@@ -80,8 +93,8 @@ export default function PaymentPage() {
                                     key={method.id}
                                     onClick={() => setPaymentMethod(method.id)}
                                     className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all font-bold ${paymentMethod === method.id
-                                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                                            : 'border-slate-100 hover:border-emerald-200 text-slate-400'
+                                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                                        : 'border-slate-100 hover:border-emerald-200 text-slate-400'
                                         }`}
                                 >
                                     {method.icon}

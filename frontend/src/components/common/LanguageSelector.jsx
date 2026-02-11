@@ -1,3 +1,19 @@
+/**
+ * @fileoverview Language Selector Dropdown Component for AgriSahayak Frontend
+ * 
+ * Animated dropdown that allows users to switch the UI language.
+ * Displays the current language's native name and a list of 13 supported
+ * Indian languages. Selection triggers TranslationContext.changeLanguage()
+ * which preloads common translations and re-renders all <T> components.
+ * 
+ * Used in both the Navbar (dashboard pages) and auth pages (fixed top-right).
+ * Shows an animated pulse indicator while translations are loading.
+ * 
+ * @component LanguageSelector
+ * @see Epic 1, Story 1.3 - Select Preferred Language
+ * @see Epic 6, Story 6.1 - Persist Interface Language
+ * @see TranslationContext - Provides language state and change function
+ */
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Languages, Check, ChevronDown } from 'lucide-react';

@@ -1,3 +1,20 @@
+/**
+ * @fileoverview Farmer Dashboard Page for AgriSahayak Frontend
+ * 
+ * Main landing page for farmers with sub-routes:
+ * - Overview (index): CropForm, CropList, PriceChart + Price Alert sidebar
+ * - /inventory: CropList standalone
+ * - /orders: FarmerOrders
+ * 
+ * Includes TrustGauge (92) in the header and uses AnimatePresence
+ * for route transitions.
+ * 
+ * @component FarmerDashboard
+ * @see Epic 2, Story 2.1 - Farmer Dashboard
+ * @see CropForm - Add new crops
+ * @see CropList - View/manage listed crops
+ * @see PriceChart - Market price trends
+ */
 import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';

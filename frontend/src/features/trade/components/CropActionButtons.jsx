@@ -1,18 +1,27 @@
+/**
+ * @fileoverview Crop Action Buttons Component for AgriSahayak Trade System
+ * 
+ * Composite component that renders Buy Now and Negotiate buttons for a crop.
+ * The Negotiate button is conditionally shown based on crop.negotiationEnabled.
+ * Used within CropCard and FarmerMarketplace to provide trade actions.
+ * 
+ * @component CropActionButtons
+ * @param {Object} props
+ * @param {Object} props.crop - Crop data object
+ * @param {string} [props.currentUserId='buyer_1'] - Current user ID
+ * @param {string} [props.currentUserRole='buyer'] - 'buyer' or 'farmer'
+ * @param {Function} [props.onOrderComplete] - Callback when order is placed
+ * 
+ * @see Epic 4, Story 4.5 - Buy Now
+ * @see Epic 4, Story 4.4 - Negotiate Price
+ * @see BuyNowButton - Renders the Buy Now action
+ * @see NegotiateButton - Renders the Negotiate action
+ */
 import React from 'react';
 import { T } from '../../../context/TranslationContext';
 import BuyNowButton from './BuyNowButton';
 import NegotiateButton from './NegotiateButton';
 
-/**
- * CropActionButtons Component
- * Displays Buy Now and Negotiate buttons for a crop
- * 
- * Props:
- * - crop: Crop object
- * - currentUserId: Current user ID
- * - currentUserRole: 'buyer' or 'farmer'
- * - onOrderComplete: Callback when order is placed
- */
 export default function CropActionButtons({
     crop,
     currentUserId = 'buyer_1',

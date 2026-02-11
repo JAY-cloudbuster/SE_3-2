@@ -1,3 +1,19 @@
+/**
+ * @fileoverview Farmer Marketplace Page for AgriSahayak Frontend
+ * 
+ * Dedicated marketplace page for farmers to browse and purchase crops
+ * from other farmers. Mirrors the BuyerDashboard experience but uses
+ * mock data instead of API calls. Filters out the current farmer's
+ * own listings and transforms data for CropCard compatibility.
+ * 
+ * Includes MarketMap with randomized pin locations and a responsive
+ * CropCard grid.
+ * 
+ * @component FarmerMarketplacePage
+ * @see Epic 3, Story 3.1 - Browse Available Crops (Farmer View)
+ * @see BuyerDashboard - Equivalent page for buyer role
+ * @see MarketMap - Interactive crop location map
+ */
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -6,11 +22,6 @@ import MarketMap from '../../features/buyer/components/MarketMap';
 import CropCard from '../../features/buyer/components/CropCard';
 import { mockCrops } from '../../data/mockTradingData';
 
-/**
- * FarmerMarketplacePage
- * Dedicated marketplace page for farmers to browse and buy crops from other farmers
- * Mirrors the Buyer Dashboard experience
- */
 export default function FarmerMarketplacePage() {
     const [crops, setCrops] = useState([]);
     const navigate = useNavigate();

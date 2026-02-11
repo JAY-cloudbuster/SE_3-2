@@ -1,3 +1,22 @@
+/**
+ * @fileoverview Farmer Marketplace Component for AgriSahayak Frontend
+ * 
+ * Allows farmers to browse and buy crops from other farmers.
+ * Filters out the current farmer's own listings. Displays:
+ * - SVG grid map with animated crop markers and hover tooltips
+ * - Responsive grid of crop cards with image, price, quality, location
+ * - CropActionButtons for Buy Now and Negotiate actions
+ * 
+ * Uses mock crop data from mockTradingData module.
+ * 
+ * @component FarmerMarketplace
+ * @param {Object} props
+ * @param {string} [props.currentFarmerId='farmer_1'] - ID of current farmer to exclude
+ * 
+ * @see Epic 3, Story 3.1 - Browse Available Crops
+ * @see CropActionButtons - Trade action buttons (Buy/Negotiate)
+ * @see FarmerMarketplacePage - Page wrapper that renders this component
+ */
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingBag, MapPin } from 'lucide-react';
@@ -5,10 +24,6 @@ import { T } from '../../../context/TranslationContext';
 import { mockCrops } from '../../../data/mockTradingData';
 import CropActionButtons from '../../../features/trade/components/CropActionButtons';
 
-/**
- * FarmerMarketplace Component
- * Allows farmers to browse and buy crops from other farmers
- */
 export default function FarmerMarketplace({ currentFarmerId = 'farmer_1' }) {
     // Filter out current farmer's own crops
     const availableCrops = mockCrops.filter(crop => crop.farmerId !== currentFarmerId);

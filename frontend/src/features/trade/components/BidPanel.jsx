@@ -1,3 +1,22 @@
+/**
+ * @fileoverview Bid Panel Component for AgriSahayak Trade System
+ * 
+ * Real-time bidding interface for live auctions. Connects via SocketContext
+ * to receive 'new_high_bid' events and emit 'place_bid' events.
+ * Shows current highest bid (animated on change), countdown timer
+ * (via useAuctionTimer hook), and a bid input form with validation.
+ * Displays brief success feedback after placing a bid.
+ * 
+ * @component BidPanel
+ * @param {Object} props
+ * @param {string} props.auctionId - Auction identifier
+ * @param {number} [props.initialBid=500] - Starting bid amount
+ * @param {Date} [props.expiryDate] - Auction end time
+ * 
+ * @see Epic 4, Story 4.3 - Real-Time Bid Updates
+ * @see SocketContext - WebSocket connection for live events
+ * @see useAuctionTimer - Hook for countdown display
+ */
 import { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SocketContext } from '../../../context/SocketContext';
@@ -25,7 +44,7 @@ export default function BidPanel({ auctionId, initialBid = 500, expiryDate }) {
   const placeBid = (e) => {
     e.preventDefault();
     if (!socket || !myBid || Number(myBid) <= highestBid) return;
-    
+
     socket.emit('place_bid', { auctionId, amount: Number(myBid) }); // Story 4.3 [cite: 149]
     setBidPlaced(true);
     setMyBid('');

@@ -1,3 +1,25 @@
+/**
+ * @fileoverview Protected Route Guard Component for AgriSahayak Frontend
+ * 
+ * Higher-order component that wraps route elements to enforce:
+ * 1. Authentication — Redirects unauthenticated users to /login
+ * 2. Authorization — Redirects users to their own dashboard if they
+ *    attempt to access a route for a different role
+ * 
+ * Guard logic:
+ * - Loading state → Show loading indicator
+ * - No user → Redirect to /login
+ * - Wrong role → Redirect to /dashboard/{user's role}
+ * - Correct role → Render children
+ * 
+ * @component ProtectedRoute
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Protected page component
+ * @param {string} props.role - Required role: 'FARMER', 'BUYER', or 'ADMIN'
+ * 
+ * @see Epic 1, Story 1.8 - Role-Based Access Control
+ * @see App.jsx - Uses this component to guard dashboard routes
+ */
 import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';

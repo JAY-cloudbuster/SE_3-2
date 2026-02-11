@@ -1,13 +1,29 @@
+/**
+ * @fileoverview Order Summary Modal Component for AgriSahayak Trade System
+ * 
+ * Full-screen modal with a 3-step checkout flow:
+ * 1. Order Details - Crop info, quantity selector, price breakdown
+ * 2. Delivery Address - Street, city, state, pincode, and notes
+ * 3. Confirmation - Final review before placing order
+ * 
+ * Saves orders to localStorage (mockOrders) and redirects to
+ * /order-confirmation with order data. Used as an alternative to
+ * the standalone BuyNowPaymentPage.
+ * 
+ * @component OrderSummaryModal
+ * @param {Object} props
+ * @param {Object} props.crop - Crop data (id, name, price, quantity, etc.)
+ * @param {Function} props.onClose - Callback to close the modal
+ * @param {Function} props.onConfirm - Callback with the created order
+ * 
+ * @see Epic 4, Story 4.5 - Buy Now Checkout
+ */
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Package, MapPin, CreditCard, CheckCircle } from 'lucide-react';
 import { T } from '../../../context/TranslationContext';
 import { useNavigate } from 'react-router-dom';
 
-/**
- * OrderSummaryModal Component
- * Shows order details and collects delivery information
- */
 export default function OrderSummaryModal({ crop, onClose, onConfirm }) {
     const [quantity, setQuantity] = useState(10);
     const [deliveryAddress, setDeliveryAddress] = useState({
@@ -86,8 +102,8 @@ export default function OrderSummaryModal({ crop, onClose, onConfirm }) {
                             <div key={s} className="flex items-center gap-2">
                                 <div
                                     className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${step >= s
-                                            ? 'bg-emerald-600 text-white'
-                                            : 'bg-slate-200 text-slate-400'
+                                        ? 'bg-emerald-600 text-white'
+                                        : 'bg-slate-200 text-slate-400'
                                         }`}
                                 >
                                     {s}

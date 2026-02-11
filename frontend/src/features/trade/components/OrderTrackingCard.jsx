@@ -1,12 +1,24 @@
+/**
+ * @fileoverview Order Tracking Card Component for AgriSahayak Trade System
+ * 
+ * Displays order status with a vertical timeline showing progression
+ * through Pending → Confirmed → Shipped → Delivered (or Cancelled).
+ * Each timeline event shows icon, label, note, and timestamp.
+ * Includes order details (quantity, price, total) and a cancel button
+ * for pending orders.
+ * 
+ * @component OrderTrackingCard
+ * @param {Object} props
+ * @param {Object} props.order - Order data (id, cropName, status, timeline, quantity, etc.)
+ * 
+ * @see Epic 4, Story 4.7 - Order Tracking
+ * @see TradeDashboard - Renders OrderTrackingCard in the orders tab
+ */
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Package, Truck, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { T } from '../../../context/TranslationContext';
 
-/**
- * OrderTrackingCard Component
- * Shows order status timeline
- */
 export default function OrderTrackingCard({ order }) {
     const statusConfig = {
         pending: { icon: Clock, color: 'yellow', label: 'Pending' },
