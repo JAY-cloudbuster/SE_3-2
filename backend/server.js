@@ -9,7 +9,9 @@ const { Server } = require('socket.io');
 dotenv.config();
 
 // Connect to Database
-connectDB();
+if (process.env.NODE_ENV !== 'test') {
+    connectDB();
+}
 
 const app = express();
 const httpServer = createServer(app);
@@ -24,8 +26,15 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/crops', require('./routes/cropRoutes'));
 
 // Error Handler Middleware
+// Error Handler Middleware
 app.use((err, req, res, next) => {
-    const statusCode = res.statusCode ? res.statusCode : 500;
+    let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+
+    // Mongoose validation error
+    if (err.name === 'ValidationError') {
+        statusCode = 400;
+    }
+
     res.status(statusCode);
     res.json({
         message: err.message,
@@ -59,6 +68,10 @@ io.on("connection", (socket) => {
 
 const PORT = process.env.PORT || 5000;
 
-httpServer.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+if (require.main === module) {
+    httpServer.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+module.exports = app;
