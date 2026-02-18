@@ -1,5 +1,5 @@
 /**
- * @fileoverview Protected Route Guard Component for AgriSahayak Frontend
+ * @fileoverview Protected Route Guard Component for AgriTech Frontend
  * 
  * Higher-order component that wraps route elements to enforce:
  * 1. Authentication — Redirects unauthenticated users to /login
