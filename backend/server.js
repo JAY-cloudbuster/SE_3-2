@@ -32,6 +32,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const path = require('path');
 const connectDB = require('./config/db');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
@@ -43,19 +44,14 @@ const { Server } = require('socket.io');
 // ============================================================
 dotenv.config();
 
-<<<<<<< HEAD
-// Connect to Database
-if (process.env.NODE_ENV !== 'test') {
-    connectDB();
-}
-=======
 // ============================================================
 // 2. DATABASE CONNECTION
 // Connect to MongoDB using the MONGO_URI from environment variables
-// The server will exit if the connection fails (see config/db.js)
+// Skipped in test environment (tests manage their own connection)
 // ============================================================
-connectDB();
->>>>>>> a288885e92a6a22d181445ecaec932582a9282d7
+if (process.env.NODE_ENV !== 'test') {
+    connectDB();
+}
 
 // ============================================================
 // 3. EXPRESS APP & HTTP SERVER INITIALIZATION
@@ -90,6 +86,12 @@ app.use(express.json());
  */
 app.use(express.urlencoded({ extended: false }));
 
+/**
+ * Static File Serving - Serves uploaded files (crop images, etc.)
+ * Files in the /uploads directory are accessible via /uploads/<filename>
+ */
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // ============================================================
 // 5. API ROUTE MOUNTING
 // Each route module handles a specific resource/feature area
@@ -113,9 +115,38 @@ app.use('/api/auth', require('./routes/authRoutes'));
  */
 app.use('/api/crops', require('./routes/cropRoutes'));
 
-<<<<<<< HEAD
-// Error Handler Middleware
-// Error Handler Middleware
+/**
+ * Trade Routes (/api/trade/*)
+ * - POST /api/trade/bid              - Place bid on auction
+ * - POST /api/trade/negotiation/*    - Negotiation endpoints
+ * - POST /api/trade/orders           - Create order
+ * - GET  /api/trade/orders           - Get user's orders
+ * - PUT  /api/trade/orders/:id       - Update order status
+ * @see routes/tradeRoutes.js
+ */
+app.use('/api/trade', require('./routes/tradeRoutes'));
+
+/**
+ * Price Routes (/api/prices/*)
+ * - GET /api/prices/current   - Current market prices
+ * - GET /api/prices/trends    - Historical price trends
+ * - GET /api/prices/recommend - Pricing recommendations
+ * @see routes/priceRoutes.js
+ */
+app.use('/api/prices', require('./routes/priceRoutes'));
+
+/**
+ * Admin Routes (/api/admin/*)
+ * - GET /api/admin/users          - List all users
+ * - PUT /api/admin/users/:id/*    - Verify/ban users
+ * - GET /api/admin/stats          - Platform statistics
+ * @see routes/adminRoutes.js
+ */
+app.use('/api/admin', require('./routes/adminRoutes'));
+
+// ============================================================
+// 6. GLOBAL ERROR HANDLER MIDDLEWARE
+// ============================================================
 app.use((err, req, res, next) => {
     let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
 
@@ -123,31 +154,6 @@ app.use((err, req, res, next) => {
     if (err.name === 'ValidationError') {
         statusCode = 400;
     }
-
-=======
-// ============================================================
-// 6. GLOBAL ERROR HANDLER MIDDLEWARE
-// Catches all errors thrown by route handlers and middleware
-// Must be defined AFTER all routes (Express error handlers
-// are identified by having 4 parameters: err, req, res, next)
-// ============================================================
-
-/**
- * Global Error Handler
- * 
- * Formats error responses consistently across all endpoints.
- * In development mode, includes the full stack trace for debugging.
- * In production mode, the stack trace is hidden for security.
- * 
- * @param {Error} err - The error object thrown by a handler
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Express next middleware function
- */
-app.use((err, req, res, next) => {
-    // Use the status code already set by the handler, or default to 500
-    const statusCode = res.statusCode ? res.statusCode : 500;
->>>>>>> a288885e92a6a22d181445ecaec932582a9282d7
     res.status(statusCode);
     res.json({
         message: err.message,
@@ -195,34 +201,37 @@ const io = new Server(httpServer, {
 io.on("connection", (socket) => {
     console.log(`User Connected: ${socket.id}`);
 
-    /**
-     * Join Room Event
-     * Allows a client to join a specific Socket.io room.
-     * Rooms are used to group users for targeted message broadcasting
-     * (e.g., all bidders in an auction, or two parties in a negotiation).
-     * @param {String} data - Room ID to join (e.g., negotiation ID or auction ID)
-     */
+    /** Join Room — client joins auction room, negotiation thread, etc. */
     socket.on("join_room", (data) => {
         socket.join(data);
     });
 
-    /**
-     * Send Message Event
-     * Broadcasts a message to all other users in the specified room.
-     * Uses socket.to() to send to room members EXCEPT the sender.
-     * @param {Object} data - Message payload containing room ID and message content
-     * @param {String} data.room - Target room ID
-     * @param {String} data.message - Message content
-     */
+    /** Send Message — broadcasts chat message to room members */
     socket.on("send_message", (data) => {
         socket.to(data.room).emit("receive_message", data);
     });
 
-    /**
-     * Disconnect Event
-     * Triggered automatically when a client disconnects.
-     * Used for cleanup and logging purposes.
-     */
+    /** Place Bid — broadcasts new bid to all auction room members */
+    socket.on("place_bid", (data) => {
+        socket.to(data.room).emit("new_bid", data);
+    });
+
+    /** Negotiation Offer — broadcasts new price offer to negotiation room */
+    socket.on("negotiation_offer", (data) => {
+        socket.to(data.room).emit("new_offer", data);
+    });
+
+    /** Negotiation Accept — notifies room that deal was accepted */
+    socket.on("negotiation_accept", (data) => {
+        socket.to(data.room).emit("offer_accepted", data);
+    });
+
+    /** Order Update — broadcasts status change to relevant parties */
+    socket.on("order_update", (data) => {
+        socket.to(data.room).emit("order_status_changed", data);
+    });
+
+    /** Disconnect — cleanup and logging */
     socket.on("disconnect", () => {
         console.log("User Disconnected", socket.id);
     });

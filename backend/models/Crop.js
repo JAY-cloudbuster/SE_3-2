@@ -123,6 +123,18 @@ const cropSchema = new mongoose.Schema({
     },
 
     /**
+     * Crop category for filtering and search.
+     * @type {String}
+     * @enum {('grain'|'vegetable'|'fruit'|'spice'|'pulse'|'oilseed'|'other')}
+     * @default 'other'
+     */
+    category: {
+        type: String,
+        enum: ['grain', 'vegetable', 'fruit', 'spice', 'pulse', 'oilseed', 'other'],
+        default: 'other'
+    },
+
+    /**
      * Filename/path of the crop's display image.
      * Currently stores a string path (no actual file upload implemented).
      * Defaults to a placeholder image for listings without photos.
@@ -163,6 +175,22 @@ const cropSchema = new mongoose.Schema({
     isSold: {
         type: Boolean,
         default: false
+    },
+
+    /**
+     * Detailed availability status.
+     * - Available: Listed and available for purchase
+     * - OutOfStock: Temporarily unavailable
+     * - Sold: Completely sold out
+     * - Draft: Not yet published
+     * @type {String}
+     * @enum {('Available'|'OutOfStock'|'Sold'|'Draft')}
+     * @default 'Available'
+     */
+    status: {
+        type: String,
+        enum: ['Available', 'OutOfStock', 'Sold', 'Draft'],
+        default: 'Available'
     }
 }, { timestamps: true }); // Automatically adds createdAt and updatedAt fields
 

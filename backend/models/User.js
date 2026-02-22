@@ -171,6 +171,30 @@ const userSchema = new mongoose.Schema({
     trustScore: {
         type: Number,
         default: 100
+    },
+
+    /**
+     * Whether the user has been verified by an admin.
+     * Verified users get a badge and higher trust score.
+     * @type {Boolean}
+     * @default false
+     * @see Epic 7, Story 7.1 - Request Verification
+     */
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
+
+    /**
+     * Whether the user has been banned by an admin.
+     * Banned users cannot login or perform any actions.
+     * @type {Boolean}
+     * @default false
+     * @see Epic 7, Story 7.7 - Moderation Dashboard
+     */
+    isBanned: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true }); // Automatically adds createdAt and updatedAt fields
 
