@@ -87,5 +87,26 @@ export const cropService = {
   getAll: async () => {
     const response = await api.get('/crops');
     return response;
+  },
+
+  /**
+   * Update an existing crop listing
+   * @param {string} id - Crop ID
+   * @param {Object} data - Updated crop data
+   * @returns {Promise<import('axios').AxiosResponse>}
+   */
+  update: async (id, data) => {
+    const response = await api.put(`/crops/${id}`, data);
+    return response;
+  },
+
+  /**
+   * Delete a crop listing
+   * @param {string} id - Crop ID
+   * @returns {Promise<import('axios').AxiosResponse>}
+   */
+  delete: async (id) => {
+    const response = await api.delete(`/crops/${id}`);
+    return response;
   }
 };

@@ -24,37 +24,24 @@
 
 const express = require('express');
 const router = express.Router();
-const { createCrop, getMyCrops, getAllCrops } = require('../controllers/cropController');
+const { createCrop, getMyCrops, getAllCrops, updateCrop, deleteCrop } = require('../controllers/cropController');
 const { protect } = require('../middlewares/authMiddleware');
 
-// ============================================================
-// All routes below require JWT authentication (protect middleware)
-// The protect middleware verifies the JWT and attaches req.user
-// ============================================================
+// All routes require JWT authentication
 
-/**
- * @route POST /api/crops
- * @description Create a new crop listing. Farmer's ID is automatically
- *              attached from the JWT token. Validates required fields.
- * @access Private - Requires valid JWT token (intended for Farmers)
- */
+/** POST /api/crops - Create a new crop listing */
 router.post('/', protect, createCrop);
 
-/**
- * @route GET /api/crops/my
- * @description Retrieve all crop listings created by the authenticated farmer.
- *              Results sorted by newest first. Used by FarmerDashboard.
- * @access Private - Requires valid JWT token (Farmer only)
- */
+/** GET /api/crops/my - Get farmer's own listings */
 router.get('/my', protect, getMyCrops);
 
-/**
- * @route GET /api/crops
- * @description Retrieve all available (unsold) crops for the marketplace.
- *              Populates farmer info (name, location, trustScore).
- *              Results sorted by newest first.
- * @access Private - Requires valid JWT token (any authenticated user)
- */
+/** GET /api/crops - Get all marketplace crops (with search/filter) */
 router.get('/', protect, getAllCrops);
+
+/** PUT /api/crops/:id - Update a crop listing (owner only) */
+router.put('/:id', protect, updateCrop);
+
+/** DELETE /api/crops/:id - Delete a crop listing (owner only) */
+router.delete('/:id', protect, deleteCrop);
 
 module.exports = router;

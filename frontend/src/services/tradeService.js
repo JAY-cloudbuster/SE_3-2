@@ -35,81 +35,27 @@ import api from './api';
  * @namespace tradeService
  */
 export const tradeService = {
-  /**
-   * Place a Bid on an Auction
-   * 
-   * Submits a bid for a crop auction. The bid amount must exceed
-   * the current highest bid.
-   * 
-   * ⚠️ Backend endpoint NOT IMPLEMENTED — will return 404
-   * 
-   * @async
-   * @function placeBid
-   * @param {Object} bidData - Bid details
-   * @param {string} bidData.auctionId - ID of the auction to bid on
-   * @param {number} bidData.amount - Bid amount in ₹
-   * @returns {Promise<import('axios').AxiosResponse>} Response with bid confirmation
-   * 
-   * @see Epic 4, Story 4.3 - Place Bids via Auction
-   * @see BidPanel.jsx - Frontend component for placing bids
-   */
+  /** Place a bid on an auction */
   placeBid: async (bidData) => api.post('/trade/bid', bidData),
 
-  /**
-   * Send a Price Offer in Negotiation
-   * 
-   * Sends a new price offer to the other party in a negotiation.
-   * Creates a message with type 'offer' in the Negotiation document.
-   * 
-   * ⚠️ Backend endpoint NOT IMPLEMENTED — will return 404
-   * 
-   * @async
-   * @function sendOffer
-   * @param {Object} offerData - Offer details
-   * @param {string} offerData.negotiationId - ID of the negotiation
-   * @param {number} offerData.amount - Offered price in ₹
-   * @param {string} [offerData.message] - Optional message with the offer
-   * @returns {Promise<import('axios').AxiosResponse>} Response with updated negotiation
-   * 
-   * @see Epic 4, Story 4.4 - Negotiate Price
-   * @see NegotiationChat.jsx - Frontend negotiation interface
-   */
-  sendOffer: async (offerData) => api.post('/trade/offer', offerData),
+  /** Start a new negotiation for a crop */
+  startNegotiation: async (data) => api.post('/trade/negotiation/start', data),
 
-  /**
-   * Get User's Orders
-   * 
-   * Retrieves all orders for the authenticated user (as buyer or farmer).
-   * Used by the Trade Dashboard and Order Tracking components.
-   * 
-   * ⚠️ Backend endpoint NOT IMPLEMENTED — will return 404
-   * 
-   * @async
-   * @function getOrders
-   * @returns {Promise<import('axios').AxiosResponse>} Response with array of order documents
-   * 
-   * @see Epic 4, Story 4.7 - Order Confirmation
-   * @see OrderTrackingCard.jsx - Displays order status
-   */
+  /** Send a price offer in an existing negotiation */
+  sendOffer: async (offerData) => api.post('/trade/negotiation/offer', offerData),
+
+  /** Accept a negotiation (farmer only) */
+  acceptNegotiation: async (negotiationId) => api.put(`/trade/negotiation/${negotiationId}/accept`),
+
+  /** Reject a negotiation (farmer only) */
+  rejectNegotiation: async (negotiationId) => api.put(`/trade/negotiation/${negotiationId}/reject`),
+
+  /** Create an order (buy now or from negotiation) */
+  createOrder: async (orderData) => api.post('/trade/orders', orderData),
+
+  /** Get current user's orders */
   getOrders: async () => api.get('/trade/orders'),
 
-  /**
-   * Update Order Status
-   * 
-   * Updates the fulfillment status of an order (e.g., Pending → Shipped).
-   * Only the farmer who owns the order can update its status.
-   * 
-   * ⚠️ Backend endpoint NOT IMPLEMENTED — will return 404
-   * 
-   * @async
-   * @function updateOrderStatus
-   * @param {string} id - Order ID to update
-   * @param {Object} data - Status update data
-   * @param {string} data.status - New status: 'Processing', 'Shipped', 'Delivered', 'Cancelled'
-   * @returns {Promise<import('axios').AxiosResponse>} Response with updated order
-   * 
-   * @see Epic 4, Story 4.8 - Order Status Updates
-   * @see FarmerOrders.jsx - Farmer's order management view
-   */
+  /** Update order status (farmer only) */
   updateOrderStatus: async (id, data) => api.put(`/trade/orders/${id}`, data),
 };

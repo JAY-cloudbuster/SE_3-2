@@ -108,46 +108,121 @@ const getMyCrops = asyncHandler(async (req, res) => {
 });
 
 /**
- * Get All Available Crops (Marketplace)
+ * Get All Available Crops (Marketplace) with Search & Filter
  * 
- * Retrieves all crop listings that are currently available (not sold)
- * for display on the buyer's marketplace page. Each crop is populated
- * with the farmer's name, location, and trust score for display.
+ * Supports query params: search, minPrice, maxPrice, quality, 
+ * location, category, sortBy, order.
  * 
- * Filters: Only crops with `isSold: false` are returned.
- * Sort: Newest listings appear first.
- * 
- * @route GET /api/crops
- * @access Private - Requires JWT authentication
- * 
- * @returns {Array<Object>} 200 - Array of available crop documents with populated farmer info
- * 
- * @example
- * // Response (farmer field is populated with selected fields)
- * [
- *   {
- *     "_id": "...", "name": "Organic Wheat", "price": 24,
- *     "farmer": { "name": "Ram Kumar", "location": "Pune, MH", "trustScore": 95 }
- *   }
- * ]
- * 
+ * @route GET /api/crops?search=wheat&minPrice=10&quality=A
+ * @access Private
  * @see Epic 3 - Buyer Discovery & Exploration
- * @see FarmerMarketplace.jsx - Frontend component that displays marketplace
- * @see CropCard.jsx - Individual crop card component
  */
 const getAllCrops = asyncHandler(async (req, res) => {
-    // Fetch all unsold crops and populate farmer details for display
-    // .populate() replaces the farmer ObjectId with actual user data
-    // Only selecting name, location, and trustScore from the User document
-    const crops = await Crop.find({ isSold: false })
-        .populate('farmer', 'name location trustScore') // Join farmer data
-        .sort({ createdAt: -1 }); // Newest first
+    const { search, minPrice, maxPrice, quality, location, category, sortBy, order } = req.query;
+
+    // Base filter: only available crops
+    const filter = { isSold: false, status: { $ne: 'Sold' } };
+
+    // Name search (case-insensitive regex)
+    if (search) {
+        filter.name = { $regex: search, $options: 'i' };
+    }
+
+    // Price range filter
+    if (minPrice || maxPrice) {
+        filter.price = {};
+        if (minPrice) filter.price.$gte = parseFloat(minPrice);
+        if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
+    }
+
+    // Quality grade filter
+    if (quality) {
+        filter.quality = quality;
+    }
+
+    // Location filter (case-insensitive regex)
+    if (location) {
+        filter.location = { $regex: location, $options: 'i' };
+    }
+
+    // Category filter
+    if (category) {
+        filter.category = category;
+    }
+
+    // Sorting
+    let sortOption = { createdAt: -1 }; // Default: newest first
+    if (sortBy) {
+        const sortOrder = order === 'asc' ? 1 : -1;
+        sortOption = { [sortBy]: sortOrder };
+    }
+
+    const crops = await Crop.find(filter)
+        .populate('farmer', 'name location trustScore isVerified')
+        .sort(sortOption);
+
     res.status(200).json(crops);
+});
+
+/**
+ * Update a Crop Listing
+ * 
+ * @route PUT /api/crops/:id
+ * @access Private (Owner farmer only)
+ */
+const updateCrop = asyncHandler(async (req, res) => {
+    const crop = await Crop.findById(req.params.id);
+
+    if (!crop) {
+        res.status(404);
+        throw new Error('Crop not found');
+    }
+
+    // Verify the authenticated user owns this crop
+    if (crop.farmer.toString() !== req.user.id) {
+        res.status(403);
+        throw new Error('Not authorized to update this crop');
+    }
+
+    const updatedCrop = await Crop.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        { new: true, runValidators: true }
+    );
+
+    res.status(200).json(updatedCrop);
+});
+
+/**
+ * Delete a Crop Listing
+ * 
+ * @route DELETE /api/crops/:id
+ * @access Private (Owner farmer only)
+ */
+const deleteCrop = asyncHandler(async (req, res) => {
+    const crop = await Crop.findById(req.params.id);
+
+    if (!crop) {
+        res.status(404);
+        throw new Error('Crop not found');
+    }
+
+    // Verify the authenticated user owns this crop
+    if (crop.farmer.toString() !== req.user.id) {
+        res.status(403);
+        throw new Error('Not authorized to delete this crop');
+    }
+
+    await Crop.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({ message: 'Crop deleted successfully', id: req.params.id });
 });
 
 // Export controller functions for use in cropRoutes.js
 module.exports = {
     createCrop,
     getMyCrops,
-    getAllCrops
+    getAllCrops,
+    updateCrop,
+    deleteCrop
 };
