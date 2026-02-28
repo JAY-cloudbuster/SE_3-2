@@ -128,6 +128,12 @@ app.use('/api/trade', require('./routes/tradeRoutes'));
 
 /**
  * Price Routes (/api/prices/*)
+ * - GET /api/prices/current   - Current market prices
+ * - GET /api/prices/trends    - Historical price trends
+ * - GET /api/prices/recommend - Pricing recommendations
+ * @see routes/priceRoutes.js
+ */
+app.use('/api/prices', require('./routes/priceRoutes'));
 
 /**
  * Admin Routes (/api/admin/*)
@@ -138,11 +144,6 @@ app.use('/api/trade', require('./routes/tradeRoutes'));
  */
 app.use('/api/admin', require('./routes/adminRoutes'));
 
-// ============================================================
-// 6. GLOBAL ERROR HANDLER MIDDLEWARE
-// ============================================================
-app.use((err, req, res, next) => {
-=======
 // ============================================================
 // 6. GLOBAL ERROR HANDLER MIDDLEWARE
 // Catches all errors thrown by route handlers and middleware
