@@ -128,12 +128,6 @@ app.use('/api/trade', require('./routes/tradeRoutes'));
 
 /**
  * Price Routes (/api/prices/*)
- * - GET /api/prices/current   - Current market prices
- * - GET /api/prices/trends    - Historical price trends
- * - GET /api/prices/recommend - Pricing recommendations
- * @see routes/priceRoutes.js
- */
-app.use('/api/prices', require('./routes/priceRoutes'));
 
 /**
  * Admin Routes (/api/admin/*)
@@ -148,6 +142,29 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 // 6. GLOBAL ERROR HANDLER MIDDLEWARE
 // ============================================================
 app.use((err, req, res, next) => {
+=======
+// ============================================================
+// 6. GLOBAL ERROR HANDLER MIDDLEWARE
+// Catches all errors thrown by route handlers and middleware
+// Must be defined AFTER all routes (Express error handlers
+// are identified by having 4 parameters: err, req, res, next)
+// ============================================================
+
+/**
+ * Global Error Handler
+ * 
+ * Formats error responses consistently across all endpoints.
+ * In development mode, includes the full stack trace for debugging.
+ * In production mode, the stack trace is hidden for security.
+ * 
+ * @param {Error} err - The error object thrown by a handler
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+app.use((err, req, res, next) => {
+    // Use the status code already set by the handler, or default to 500
+    // If status is 200 (success), it defaults to 500 for errors
     let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
 
     // Mongoose validation error

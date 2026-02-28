@@ -184,9 +184,22 @@ const updateCrop = asyncHandler(async (req, res) => {
         throw new Error('Not authorized to update this crop');
     }
 
+    const blockedFields = ['_id', 'farmer', 'createdAt', 'updatedAt', '__v'];
+    const payload = Object.keys(req.body || {}).reduce((acc, key) => {
+        if (!blockedFields.includes(key)) {
+            acc[key] = req.body[key];
+        }
+        return acc;
+    }, {});
+
+    if (Object.prototype.hasOwnProperty.call(req.body || {}, 'createdAt')) {
+        res.status(400);
+        throw new Error('Posting date cannot be updated');
+    }
+
     const updatedCrop = await Crop.findByIdAndUpdate(
         req.params.id,
-        req.body,
+        payload,
         { new: true, runValidators: true }
     );
 
