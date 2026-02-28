@@ -92,10 +92,7 @@ export const TranslationProvider = ({ children }) => {
      * Falls back to 'en' (English) if no saved preference exists.
      * @type {string}
      */
-    const [currentLanguage, setCurrentLanguage] = useState(() => {
-        // Restore language preference from localStorage (persisted across sessions)
-        return localStorage.getItem('appLanguage') || 'en';
-    });
+    const [currentLanguage, setCurrentLanguage] = useState('en');
 
     /**
      * Translation loading indicator.

@@ -23,13 +23,33 @@ import CropForm from '../../features/farmer/components/CropForm';
 import CropList from '../../features/farmer/components/CropList';
 import FarmerOrders from '../../features/farmer/components/FarmerOrders';
 import TrustGauge from '../../components/shared/TrustGauge';
-import PriceChart from '../../features/market/components/PriceChart';
+import SmartPostModal from '../../components/SmartPostModal';
+import { cropService } from '../../services/cropService';
 
 function DashboardOverview() {
   const [refreshKey, setRefreshKey] = React.useState(0);
+  const [pendingCropData, setPendingCropData] = React.useState(null);
+  const aiInsightsRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!pendingCropData || !aiInsightsRef.current) return;
+    requestAnimationFrame(() => {
+      aiInsightsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [pendingCropData]);
 
   const handleCropAdded = () => {
     setRefreshKey(prev => prev + 1);
+  };
+
+  const handleAiIntercept = (formData) => {
+    setPendingCropData(formData);
+  };
+
+  const handleDecisionPost = async (formData, status) => {
+    await cropService.create({ ...formData, status: status || 'Available' });
+    handleCropAdded();
+    setPendingCropData(null);
   };
 
   return (
@@ -41,9 +61,18 @@ function DashboardOverview() {
       className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start"
     >
       <div className="lg:col-span-2 space-y-6">
-        <CropForm onCropAdded={handleCropAdded} />
+        <CropForm onAiIntercept={handleAiIntercept} />
         <CropList key={refreshKey} /> {/* Key change forces re-fetch */}
-        <PriceChart crop="Tomato" />
+        {pendingCropData && (
+          <div ref={aiInsightsRef}>
+            <SmartPostModal
+              formData={pendingCropData}
+              onClose={() => setPendingCropData(null)}
+              onPost={handleDecisionPost}
+              inline
+            />
+          </div>
+        )}
       </div>
       <div className="glass-card bg-gradient-to-b from-emerald-900 to-emerald-800 rounded-[2.5rem] p-10 text-white shadow-2xl border border-emerald-700/40 sticky top-24">
         <h3 className="text-2xl font-bold mb-4"><T>Price Alert</T></h3>

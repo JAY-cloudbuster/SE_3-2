@@ -213,21 +213,11 @@ function AppContent() {
             />
 
             {/* ==================== DEFAULT REDIRECTS ==================== */}
-            {/* Root path "/" redirects based on authentication status:
-                - Logged in: redirect to role-specific dashboard (/dashboard/farmer or /dashboard/buyer)
-                - Not logged in: redirect to registration page
-                This implements Epic 1, Story 1.8 - Role-Based Redirect */}
-            <Route
-              path="/"
-              element={
-                user
-                  ? <Navigate to={`/dashboard/${user.role.toLowerCase()}`} replace />
-                  : <Navigate to="/register" replace />
-              }
-            />
+            {/* Always land on login when opening the app root link */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
 
-            {/* Catch-all fallback: redirect any unknown routes to root */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Catch-all fallback: redirect any unknown routes to login */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </main>
       </div>

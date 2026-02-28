@@ -144,6 +144,15 @@ app.use('/api/prices', require('./routes/priceRoutes'));
  */
 app.use('/api/admin', require('./routes/adminRoutes'));
 
+/**
+ * Decision / AI Routes (/api/decision/*)
+ * - GET /api/decision?crop=xxx&state=yyy  - AI recommendation + chart data
+ * - GET /api/decision/commodities          - Available crop/state lists
+ * @see routes/decisionRoutes.js
+ * @see Module 5 - Price Transparency & Decision Support
+ */
+app.use('/api/decision', require('./routes/decisionRoutes'));
+
 // ============================================================
 // 6. GLOBAL ERROR HANDLER MIDDLEWARE
 // Catches all errors thrown by route handlers and middleware
@@ -217,8 +226,6 @@ const io = new Server(httpServer, {
  * 3. disconnect - Client disconnects (cleanup)
  */
 io.on("connection", (socket) => {
-    console.log(`User Connected: ${socket.id}`);
-
     /** Join Room — client joins auction room, negotiation thread, etc. */
     socket.on("join_room", (data) => {
         socket.join(data);
@@ -250,9 +257,7 @@ io.on("connection", (socket) => {
     });
 
     /** Disconnect — cleanup and logging */
-    socket.on("disconnect", () => {
-        console.log("User Disconnected", socket.id);
-    });
+    socket.on("disconnect", () => {});
 });
 
 // ============================================================

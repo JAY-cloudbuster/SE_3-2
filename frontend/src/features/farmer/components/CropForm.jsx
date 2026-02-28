@@ -28,29 +28,17 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, CheckCircle } from 'lucide-react';
 import { T } from '../../../context/TranslationContext';
-import { cropService } from '../../../services/cropService';
 import VoiceInput from '../../../components/common/VoiceInput';
 
-export default function CropForm({ onCropAdded }) {
-  const [data, setData] = useState({ name: '', quantity: '', price: '', quality: 'A', location: '' });
-  const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
+export default function CropForm({ onAiIntercept }) {
+  const [data, setData] = useState({ name: '', quantity: '', price: '', quality: 'A', location: '', state: '' });
+  const [success] = useState(false);
 
-  const handleSubmit = async (e) => {
+  /** Intercept submit → show AI modal instead of saving directly */
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setSubmitting(true);
-    try {
-      await cropService.create(data);
-      setSuccess(true);
-      if (onCropAdded) onCropAdded(); // Notify parent to refresh list
-      setTimeout(() => {
-        setSuccess(false);
-        setData({ name: '', quantity: '', price: '', quality: 'A', location: '' });
-      }, 3000);
-    } catch (error) {
-      console.error('Failed to list crop:', error);
-    } finally {
-      setSubmitting(false);
+    if (onAiIntercept) {
+      onAiIntercept(data);
     }
   };
 
@@ -107,6 +95,17 @@ export default function CropForm({ onCropAdded }) {
           value={data.location}
           className="w-full bg-emerald-50/50 p-3 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 border border-emerald-100"
           onChange={(e) => setData({ ...data, location: e.target.value })}
+          required
+        />
+      </div>
+
+      <div>
+        <label className="text-xs font-bold uppercase text-slate-500 mb-1 block"><T>State</T></label>
+        <input
+          placeholder="e.g., Tamil Nadu"
+          value={data.state}
+          className="w-full bg-emerald-50/50 p-3 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 border border-emerald-100"
+          onChange={(e) => setData({ ...data, state: e.target.value })}
           required
         />
       </div>
@@ -180,10 +179,9 @@ export default function CropForm({ onCropAdded }) {
 
       <button
         type="submit"
-        disabled={submitting}
-        className="w-full btn-primary py-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full btn-primary py-3 text-sm"
       >
-        <T>{submitting ? 'Publishing...' : 'Publish Listing'}</T>
+        <T>Publish Listing</T>
       </button>
     </motion.form>
   );
