@@ -265,7 +265,10 @@ io.on("connection", (socket) => {
 // Listen on the configured port (from .env) or default to 5000
 // Uses httpServer (not app) to support both Express AND Socket.io
 // ============================================================
-
+module.exports = app;
+app.get("/", (req, res) => {
+  res.send("SE_3-2 Backend API Running");
+});
 /** Server port - defaults to 5000 if not specified in environment */
 const PORT = process.env.PORT || 5000;
 
@@ -275,4 +278,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = app;
+

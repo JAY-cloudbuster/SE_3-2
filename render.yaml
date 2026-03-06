@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: agrisahayak-backend
+    runtime: node
+    buildCommand: cd backend && npm install && mkdir -p uploads
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        generateValue: true  # Render will assign a port
+      - key: MONGO_URI
+        sync: false  # Set this manually in Render dashboard
+      - key: JWT_SECRET
+        sync: false  # Set this manually in Render dashboard
+      - key: CORS_ORIGIN
+        sync: false  # Set this manually in Render dashboard
