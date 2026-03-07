@@ -31,12 +31,12 @@ import axios from 'axios';
  * Pre-configured with the backend API base URL.
  * All relative paths in API calls are resolved against this base URL.
  * 
- * Example: api.get('/crops') → GET http://localhost:5000/api/crops
+ * Example: api.get('/crops') → GET https://se32-backend.onrender.com/api/crops
  * 
  * @type {import('axios').AxiosInstance}
  */
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api', // Backend Express server URL + /api prefix
+  baseURL: `${import.meta.env.VITE_API_URL}/api`, // Backend Express server URL + /api prefix from env
 });
 
 /**

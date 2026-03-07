@@ -80,7 +80,7 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       // User is authenticated - establish WebSocket connection
-      const newSocket = io('http://localhost:5000'); // Backend Socket.io server URL
+      const newSocket = io(import.meta.env.VITE_SOCKET_URL); // Backend Socket.io server URL from env
       setSocket(newSocket);
 
       // Cleanup: close the socket when user logs out or component unmounts
