@@ -32,6 +32,8 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 const connectDB = require('./config/db');
 const { createServer } = require('http');
@@ -67,11 +69,58 @@ const httpServer = createServer(app);
 // ============================================================
 
 /**
- * CORS Middleware - Enables Cross-Origin Resource Sharing
- * Allows the frontend (running on localhost:5173) to make
- * API requests to this backend (running on localhost:5000)
+ * Helmet Middleware - Sets secure HTTP response headers
+ * Protects against well-known web vulnerabilities (XSS, clickjacking, etc.)
  */
-app.use(cors());
+app.use(helmet());
+
+/**
+ * CORS Middleware - Restricts cross-origin requests to allowed origins only.
+ * In production the allowed origin is read from the CORS_ORIGIN env var.
+ * In development it falls back to localhost Vite dev-server.
+ */
+const allowedOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',')
+    : ['http://localhost:5173'];
+
+app.use(cors({
+    origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, Postman, curl in dev)
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error(`CORS policy: origin ${origin} is not allowed`));
+        }
+    },
+    credentials: true,
+}));
+
+/**
+ * Rate Limiter - Auth endpoints (login/register)
+ * Limits repeated authentication attempts to mitigate brute-force attacks.
+ * 20 requests per IP per 15-minute window.
+ */
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: 'Too many requests from this IP, please try again after 15 minutes.' },
+});
+app.use('/api/auth', authLimiter);
+
+/**
+ * General API Rate Limiter - all other routes
+ * 200 requests per IP per 15 minutes.
+ */
+const generalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: 'Too many requests, please slow down.' },
+});
+app.use('/api', generalLimiter);
 
 /**
  * JSON Body Parser - Parses incoming request bodies as JSON
@@ -210,7 +259,7 @@ app.use((err, req, res, next) => {
  */
 const io = new Server(httpServer, {
     cors: {
-        origin: "http://localhost:5173", // Frontend Vite dev server URL
+        origin: allowedOrigins, // Uses same allowed origins as REST CORS config
         methods: ["GET", "POST"]
     }
 });
