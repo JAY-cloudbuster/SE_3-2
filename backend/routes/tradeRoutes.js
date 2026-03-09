@@ -12,6 +12,10 @@ const express = require('express');
 const router = express.Router();
 const {
     placeBid,
+    getIncomingBids,
+    getAcceptedBidsForBuyer,
+    getBidHistoryForBuyer,
+    updateBidStatus,
     startNegotiation,
     sendOffer,
     acceptNegotiation,
@@ -24,6 +28,10 @@ const { protect } = require('../middlewares/authMiddleware');
 
 // Bidding
 router.post('/bid', protect, placeBid);
+router.get('/bids/incoming', protect, getIncomingBids);
+router.get('/bids/accepted', protect, getAcceptedBidsForBuyer);
+router.get('/bids/history', protect, getBidHistoryForBuyer);
+router.put('/bids/:id/status', protect, updateBidStatus);
 
 // Negotiations
 router.post('/negotiation/start', protect, startNegotiation);

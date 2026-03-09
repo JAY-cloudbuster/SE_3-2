@@ -11,9 +11,13 @@
  */
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingBag, Calendar, Clock, ChevronRight, PackageOpen } from 'lucide-react';
+import { ShoppingBag, Calendar, ChevronRight, PackageOpen, Gavel, CheckCircle2, XCircle } from 'lucide-react';
 import { T } from '../../../context/TranslationContext';
 import { tradeService } from '../../../services/tradeService';
+import toast from 'react-hot-toast';
+import { useContext } from 'react';
+import { AuthContext } from '../../../context/AuthContext';
+import { SocketContext } from '../../../context/SocketContext';
 
 const statusStyles = {
     Pending: 'bg-amber-100 text-amber-700 border-amber-200',
@@ -24,24 +28,81 @@ const statusStyles = {
 };
 
 export default function FarmerOrders() {
+    const { user } = useContext(AuthContext);
+    const socket = useContext(SocketContext);
     const [orders, setOrders] = useState([]);
+    const [bids, setBids] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchOrders = async () => {
+        const fetchData = async () => {
             try {
-                const res = await tradeService.getOrders();
-                setOrders(res.data || []);
+                const [ordersRes, bidsRes] = await Promise.all([
+                    tradeService.getOrders(),
+                    tradeService.getIncomingBids(),
+                ]);
+                const farmerOrders = (ordersRes.data || []).filter(
+                    (order) => String(order.farmer?._id || order.farmer) === String(user?._id)
+                );
+                setOrders(farmerOrders);
+                setBids(bidsRes.data || []);
             } catch (err) {
-                console.error('Failed to fetch orders:', err);
+                console.error('Failed to fetch farmer trade data:', err);
                 setError(err.response?.data?.message || 'Failed to load orders');
             } finally {
                 setLoading(false);
             }
         };
-        fetchOrders();
-    }, []);
+        fetchData();
+    }, [user?._id]);
+
+    useEffect(() => {
+        if (!socket || !user?._id) return;
+
+        const onPaymentCompleted = (payload) => {
+            if (String(payload?.farmerId) !== String(user._id)) return;
+
+            if (payload?.type === 'accepted_bid_payment_completed') {
+                toast.success(`Payment completed for accepted bid on ${payload.cropName || 'crop'}`);
+            }
+
+            if (payload?.orderId) {
+                tradeService
+                    .getOrders()
+                    .then((ordersRes) => {
+                        const farmerOrders = (ordersRes.data || []).filter(
+                            (order) => String(order.farmer?._id || order.farmer) === String(user._id)
+                        );
+                        setOrders(farmerOrders);
+                    })
+                    .catch(() => {});
+            }
+
+            if (payload?.sourceBidId) {
+                setBids((prev) =>
+                    prev.map((b) =>
+                        String(b._id) === String(payload.sourceBidId)
+                            ? { ...b, status: 'Completed', expiresAt: payload.completedAt }
+                            : b
+                    )
+                );
+            }
+        };
+
+        socket.on('payment_completed', onPaymentCompleted);
+        return () => socket.off('payment_completed', onPaymentCompleted);
+    }, [socket, user?._id]);
+
+    const handleBidDecision = async (bidId, status) => {
+        try {
+            const res = await tradeService.updateBidStatus(bidId, status);
+            setBids((prev) => prev.map((b) => (b._id === bidId ? res.data : b)));
+            toast.success(`Bid ${status.toLowerCase()}`);
+        } catch (err) {
+            toast.error(err.response?.data?.message || `Failed to ${status.toLowerCase()} bid`);
+        }
+    };
 
     return (
         <motion.div
@@ -88,11 +149,66 @@ export default function FarmerOrders() {
             )}
 
             {/* Empty state */}
-            {!loading && !error && orders.length === 0 && (
+            {!loading && !error && orders.length === 0 && bids.length === 0 && (
                 <div className="glass-card p-10 text-center">
                     <PackageOpen className="mx-auto text-slate-300 mb-4" size={48} />
                     <h3 className="font-bold text-slate-700 mb-1"><T>No orders yet</T></h3>
                     <p className="text-sm text-slate-500"><T>Orders will appear here when buyers purchase your crops</T></p>
+                </div>
+            )}
+
+            {/* Incoming Bids */}
+            {!loading && !error && (
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                        <Gavel className="text-blue-600" size={20} />
+                        <h3 className="text-xl font-black text-slate-900"><T>Incoming Bids</T></h3>
+                    </div>
+
+                    {bids.length === 0 ? (
+                        <div className="glass-card p-6 text-center text-sm text-slate-500">
+                            <T>No bids received yet</T>
+                        </div>
+                    ) : (
+                        <div className="grid gap-3">
+                            {bids.map((bid) => (
+                                <div key={bid._id} className="glass-card p-4 flex items-center justify-between border border-blue-100">
+                                    <div>
+                                        <p className="font-bold text-slate-800">{bid.listingId?.name || 'Crop'}</p>
+                                        <p className="text-xs text-slate-500">
+                                            <T>Buyer</T>: {bid.buyerId?.name || bid.buyerId?.phone || 'Buyer'}
+                                        </p>
+                                        <p className="text-sm font-bold text-emerald-700 mt-1">
+                                            ₹{bid.amount?.toLocaleString('en-IN')} /quintal
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        {bid.status === 'Pending' ? (
+                                            <>
+                                                <button
+                                                    onClick={() => handleBidDecision(bid._id, 'Accepted')}
+                                                    className="px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 flex items-center gap-1"
+                                                >
+                                                    <CheckCircle2 size={14} /> <T>Accept</T>
+                                                </button>
+                                                <button
+                                                    onClick={() => handleBidDecision(bid._id, 'Rejected')}
+                                                    className="px-3 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 flex items-center gap-1"
+                                                >
+                                                    <XCircle size={14} /> <T>Reject</T>
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${statusStyles[bid.status] || statusStyles.Pending}`}>
+                                                <T>{bid.status}</T>
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -101,7 +217,7 @@ export default function FarmerOrders() {
                 <div className="grid gap-4">
                     {orders.map((order) => {
                         const buyerName = order.buyer?.name || order.buyer?.phone || 'Buyer';
-                        const itemsSummary = order.items?.map(item => `${item.quantity}kg ${item.name}`).join(', ') || 'N/A';
+                        const itemsSummary = order.items?.map(item => `${item.quantity} quintal ${item.name}`).join(', ') || 'N/A';
                         const status = order.orderStatus || 'Pending';
                         const amount = order.totalAmount ? `₹${order.totalAmount.toLocaleString('en-IN')}` : 'N/A';
                         const date = order.createdAt

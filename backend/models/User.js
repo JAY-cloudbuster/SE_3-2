@@ -195,6 +195,15 @@ const userSchema = new mongoose.Schema({
     isBanned: {
         type: Boolean,
         default: false
+    },
+
+    /**
+     * Saved delivery addresses used during checkout.
+     * Stored user-wise to auto-reuse previous addresses.
+     */
+    savedAddresses: {
+        type: [String],
+        default: []
     }
 }, { timestamps: true }); // Automatically adds createdAt and updatedAt fields
 

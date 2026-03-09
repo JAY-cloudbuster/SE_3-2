@@ -18,8 +18,11 @@ import { motion } from 'framer-motion';
 import { Star, MapPin, ShieldCheck } from 'lucide-react';
 import { formatQuintalRate } from '../../../utils/formatters';
 import CropActionButtons from '../../../features/trade/components/CropActionButtons';
+import { useContext } from 'react';
+import { AuthContext } from '../../../context/AuthContext';
 
 export default function CropCard({ crop, onBuy }) {
+  const { user } = useContext(AuthContext);
   // Story 3.9: Virtual Crop Inspection with quality indicators [cite: 130]
   const qualityColors = {
     A: 'bg-emerald-500 text-white',
@@ -93,8 +96,8 @@ export default function CropCard({ crop, onBuy }) {
           {/* Buy Now & Negotiate Buttons */}
           <CropActionButtons
             crop={cropData}
-            currentUserId="buyer_1"
-            currentUserRole="buyer"
+            currentUserId={user?._id}
+            currentUserRole={(user?.role || 'BUYER').toLowerCase()}
             onOrderComplete={(order) => {
               console.log('Order placed:', order);
               onBuy?.(crop);

@@ -81,6 +81,11 @@ export const SocketProvider = ({ children }) => {
     if (user) {
       // User is authenticated - establish WebSocket connection
       const newSocket = io(import.meta.env.VITE_SOCKET_URL); // Backend Socket.io server URL from env
+
+      newSocket.on('connect', () => {
+        newSocket.emit('join_user_room', user._id);
+      });
+
       setSocket(newSocket);
 
       // Cleanup: close the socket when user logs out or component unmounts

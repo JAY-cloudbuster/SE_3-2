@@ -25,19 +25,8 @@ export default function NegotiateButton({ crop, currentUserId = 'buyer_1', curre
     const navigate = useNavigate();
 
     const handleOpenNegotiation = () => {
-        // Check if negotiation already exists for this crop
-        const negotiations = JSON.parse(localStorage.getItem('mockNegotiations') || '[]');
-        const existingNeg = negotiations.find(
-            n => n.cropId === crop.id && n.buyerId === currentUserId
-        );
-
-        if (existingNeg) {
-            // Navigate to existing negotiation
-            navigate(`/negotiation/${existingNeg.id}`, { state: { crop } });
-        } else {
-            // Navigate to new negotiation (will be created on page)
-            navigate(`/negotiation/new`, { state: { crop } });
-        }
+        const listingId = crop._id || crop.id;
+        navigate(`/negotiation/${listingId}`, { state: { crop } });
     };
 
     return (

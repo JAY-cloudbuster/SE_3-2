@@ -17,6 +17,9 @@ const asyncHandler = require('express-async-handler');
 const Crop = require('../models/Crop');
 const Order = require('../models/Order');
 const Negotiation = require('../models/Negotiation');
+const Bid = require('../models/Bid');
+const User = require('../models/User');
+const { encryptPaymentDetails } = require('../utils/paymentCrypto');
 
 /**
  * Place a Bid on an Auction-type Crop
@@ -49,16 +52,135 @@ const placeBid = asyncHandler(async (req, res) => {
         throw new Error(`Bid must be higher than current price of ₹${crop.price}`);
     }
 
+    const bid = await Bid.create({
+        listingId: crop._id,
+        buyerId: req.user.id,
+        farmerId: crop.farmer,
+        amount,
+        status: 'Pending'
+    });
+
     // Update crop price to highest bid
     crop.price = amount;
     await crop.save();
 
     res.status(200).json({
         message: 'Bid placed successfully',
+        bid,
         cropId: crop._id,
         newPrice: amount,
         bidder: req.user.id
     });
+});
+
+/**
+ * Get Incoming Bids for Farmer
+ *
+ * @route GET /api/trade/bids/incoming
+ * @access Private (Farmer)
+ */
+const getIncomingBids = asyncHandler(async (req, res) => {
+    const bids = await Bid.find({ farmerId: req.user.id })
+        .populate('buyerId', 'name phone')
+        .populate('listingId', 'name quantity price quality')
+        .sort({ createdAt: -1 });
+
+    res.status(200).json(bids);
+});
+
+/**
+ * Get Accepted Bids for Buyer
+ *
+ * @route GET /api/trade/bids/accepted
+ * @access Private (Buyer)
+ */
+const getAcceptedBidsForBuyer = asyncHandler(async (req, res) => {
+    await Bid.updateMany(
+        {
+            buyerId: req.user.id,
+            status: 'Accepted',
+            expiresAt: { $lt: new Date() }
+        },
+        {
+            $set: { status: 'Expired' }
+        }
+    );
+
+    const bids = await Bid.find({
+        buyerId: req.user.id,
+        status: 'Accepted',
+        expiresAt: { $gte: new Date() }
+    })
+        .populate('farmerId', 'name phone')
+        .populate('listingId', 'name quantity price quality image location')
+        .sort({ updatedAt: -1 });
+
+    res.status(200).json(bids);
+});
+
+/**
+ * Get Buyer Bid History (posted/accepted/failed/expired/completed)
+ *
+ * @route GET /api/trade/bids/history
+ * @access Private (Buyer)
+ */
+const getBidHistoryForBuyer = asyncHandler(async (req, res) => {
+    await Bid.updateMany(
+        {
+            buyerId: req.user.id,
+            status: 'Accepted',
+            expiresAt: { $lt: new Date() }
+        },
+        {
+            $set: { status: 'Expired' }
+        }
+    );
+
+    const bids = await Bid.find({ buyerId: req.user.id })
+        .populate('farmerId', 'name phone')
+        .populate('listingId', 'name quantity price quality image location')
+        .sort({ createdAt: -1 });
+
+    res.status(200).json(bids);
+});
+
+/**
+ * Update Bid Status
+ *
+ * @route PUT /api/trade/bids/:id/status
+ * @access Private (Farmer)
+ */
+const updateBidStatus = asyncHandler(async (req, res) => {
+    const { status } = req.body;
+
+    if (!status || !['Accepted', 'Rejected'].includes(status)) {
+        res.status(400);
+        throw new Error('Status must be Accepted or Rejected');
+    }
+
+    const bid = await Bid.findById(req.params.id);
+    if (!bid) {
+        res.status(404);
+        throw new Error('Bid not found');
+    }
+
+    if (bid.farmerId.toString() !== req.user.id) {
+        res.status(403);
+        throw new Error('Not authorized to update this bid');
+    }
+
+    bid.status = status;
+    if (status === 'Accepted') {
+        bid.acceptedAt = new Date();
+        bid.expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
+    }
+    await bid.save();
+
+    const populated = await Bid.findById(bid._id)
+        .populate('buyerId', 'name phone')
+        .populate('listingId', 'name quantity price quality');
+
+    res.status(200).json(populated);
 });
 
 /**
@@ -245,11 +367,16 @@ const rejectNegotiation = asyncHandler(async (req, res) => {
  * @access Private (Buyer)
  */
 const createOrder = asyncHandler(async (req, res) => {
-    const { cropId, quantity, paymentMethod, shippingAddress, negotiationId } = req.body;
+    const { cropId, quantity, paymentMethod, shippingAddress, negotiationId, bidId, paymentDetails } = req.body;
 
     if (!cropId || !paymentMethod || !shippingAddress) {
         res.status(400);
         throw new Error('Crop ID, payment method, and shipping address are required');
+    }
+
+    if (paymentMethod !== 'cod' && (!paymentDetails || Object.keys(paymentDetails).length === 0)) {
+        res.status(400);
+        throw new Error('Payment details are required for online payment');
     }
 
     const crop = await Crop.findById(cropId).populate('farmer');
@@ -264,7 +391,50 @@ const createOrder = asyncHandler(async (req, res) => {
     }
 
     let pricePerKg = crop.price;
-    let orderQuantity = quantity || crop.quantity;
+    const orderQuantity = Number(quantity || 0);
+
+    if (!orderQuantity || orderQuantity <= 0) {
+        res.status(400);
+        throw new Error('Valid quantity is required');
+    }
+
+    if (orderQuantity > crop.quantity) {
+        res.status(400);
+        throw new Error(`Only ${crop.quantity} quintal(s) available for this crop`);
+    }
+
+    let linkedBid = null;
+
+    // If order is from an accepted bid, enforce buyer ownership and 2-hour expiry.
+    if (bidId) {
+        linkedBid = await Bid.findById(bidId);
+        if (!linkedBid) {
+            res.status(404);
+            throw new Error('Bid not found');
+        }
+
+        if (linkedBid.buyerId.toString() !== req.user.id) {
+            res.status(403);
+            throw new Error('You are not authorized to checkout this bid');
+        }
+
+        if (linkedBid.listingId.toString() !== crop._id.toString()) {
+            res.status(400);
+            throw new Error('Bid does not belong to this crop listing');
+        }
+
+        if (linkedBid.status !== 'Accepted') {
+            res.status(400);
+            throw new Error('Only accepted bids can proceed to payment');
+        }
+
+        if (!linkedBid.expiresAt || new Date(linkedBid.expiresAt) < new Date()) {
+            res.status(400);
+            throw new Error('Bid payment window expired. Please place a new bid.');
+        }
+
+        pricePerKg = linkedBid.amount;
+    }
 
     // If order is from an accepted negotiation, use negotiated price
     if (negotiationId) {
@@ -276,6 +446,7 @@ const createOrder = asyncHandler(async (req, res) => {
 
     const itemTotal = orderQuantity * pricePerKg;
     const shippingCost = 0; // Free shipping
+    const encryptedPayment = encryptPaymentDetails(paymentDetails || {});
 
     const order = await Order.create({
         buyer: req.user.id,
@@ -290,17 +461,69 @@ const createOrder = asyncHandler(async (req, res) => {
         totalAmount: itemTotal + shippingCost,
         shippingCost,
         paymentMethod,
-        shippingAddress
+        paymentStatus: paymentMethod === 'cod' ? 'pending' : 'paid',
+        shippingAddress,
+        paymentDetailsEncrypted: encryptedPayment.encrypted,
+        paymentDetailsIv: encryptedPayment.iv,
+        paymentDetailsTag: encryptedPayment.tag,
+        sourceBid: linkedBid ? linkedBid._id : undefined
     });
 
-    // Mark crop as sold
-    crop.isSold = true;
-    crop.status = 'Sold';
+    // Decrement available crop quantity on successful purchase.
+    crop.quantity = Math.max(0, crop.quantity - orderQuantity);
+    if (crop.quantity === 0) {
+        crop.isSold = true;
+        crop.status = 'Sold';
+    }
     await crop.save();
+
+    // Save delivery address user-wise for reuse.
+    await User.findByIdAndUpdate(
+        req.user.id,
+        { $addToSet: { savedAddresses: shippingAddress } },
+        { new: true }
+    );
+
+    if (linkedBid) {
+        linkedBid.status = 'Completed';
+        linkedBid.expiresAt = new Date();
+        await linkedBid.save();
+    }
 
     const populated = await Order.findById(order._id)
         .populate('buyer', 'name phone')
         .populate('farmer', 'name phone');
+
+    if (order.paymentStatus === 'paid') {
+        const io = req.app.get('io');
+        if (io) {
+            const paymentEvent = {
+                orderId: populated._id,
+                sourceBidId: linkedBid?._id || null,
+                listingId: crop._id,
+                cropName: crop.name,
+                buyer: {
+                    id: populated.buyer?._id,
+                    name: populated.buyer?.name || 'Buyer',
+                    phone: populated.buyer?.phone || ''
+                },
+                farmerId: populated.farmer?._id,
+                amount: populated.totalAmount,
+                quantity: orderQuantity,
+                paymentStatus: 'completed',
+                completedAt: new Date().toISOString(),
+                type: linkedBid ? 'accepted_bid_payment_completed' : 'buy_now_payment_completed'
+            };
+
+            // Farmer dashboard listeners can subscribe to user:<farmerId>.
+            io.to(`user:${String(populated.farmer?._id)}`).emit('payment_completed', paymentEvent);
+
+            if (linkedBid) {
+                // Keep trade room participants informed about accepted bid settlement.
+                io.to(String(linkedBid.listingId)).emit('accepted_bid_payment_completed', paymentEvent);
+            }
+        }
+    }
 
     res.status(201).json(populated);
 });
@@ -369,6 +592,10 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
 
 module.exports = {
     placeBid,
+    getIncomingBids,
+    getAcceptedBidsForBuyer,
+    getBidHistoryForBuyer,
+    updateBidStatus,
     startNegotiation,
     sendOffer,
     acceptNegotiation,

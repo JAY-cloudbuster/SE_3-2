@@ -177,6 +177,8 @@ app.use('/api/admin', require('./routes/adminRoutes'));
  */
 app.use('/api/decision', require('./routes/decisionRoutes'));
 
+app.use('/api/bidmessage', require('./routes/bidMessageRoutes'));
+
 // ============================================================
 // 6. GLOBAL ERROR HANDLER MIDDLEWARE
 // Catches all errors thrown by route handlers and middleware
@@ -234,55 +236,16 @@ app.use((err, req, res, next) => {
  */
 const io = new Server(httpServer, {
     cors: {
-        origin: "http://localhost:5173", // Frontend Vite dev server URL
+        origin: "http://localhost:5173",
         methods: ["GET", "POST"]
     }
 });
 
-/**
- * Socket.io Connection Event Handler
- * 
- * Listens for new WebSocket connections and sets up event handlers
- * for each connected client (user). Currently supports:
- * 
- * 1. join_room - Client joins a specific room (e.g., auction room, negotiation thread)
- * 2. send_message - Client sends a message to a room (broadcast to other room members)
- * 3. disconnect - Client disconnects (cleanup)
- */
-io.on("connection", (socket) => {
-    /** Join Room — client joins auction room, negotiation thread, etc. */
-    socket.on("join_room", (data) => {
-        socket.join(data);
-    });
+// Expose io to controllers through req.app.get('io').
+app.set('io', io);
 
-    /** Send Message — broadcasts chat message to room members */
-    socket.on("send_message", (data) => {
-        socket.to(data.room).emit("receive_message", data);
-    });
-
-    /** Place Bid — broadcasts new bid to all auction room members */
-    socket.on("place_bid", (data) => {
-        socket.to(data.room).emit("new_bid", data);
-    });
-
-    /** Negotiation Offer — broadcasts new price offer to negotiation room */
-    socket.on("negotiation_offer", (data) => {
-        socket.to(data.room).emit("new_offer", data);
-    });
-
-    /** Negotiation Accept — notifies room that deal was accepted */
-    socket.on("negotiation_accept", (data) => {
-        socket.to(data.room).emit("offer_accepted", data);
-    });
-
-    /** Order Update — broadcasts status change to relevant parties */
-    socket.on("order_update", (data) => {
-        socket.to(data.room).emit("order_status_changed", data);
-    });
-
-    /** Disconnect — cleanup and logging */
-    socket.on("disconnect", () => {});
-});
+const socketHandler = require('./socketHandler');
+socketHandler(io);
 
 // ============================================================
 // 8. START THE HTTP SERVER

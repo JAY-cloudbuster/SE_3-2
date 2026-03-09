@@ -56,6 +56,18 @@ export const tradeService = {
   /** Get current user's orders */
   getOrders: async () => api.get('/trade/orders'),
 
+  /** Get incoming bids for farmer */
+  getIncomingBids: async () => api.get('/trade/bids/incoming'),
+
+  /** Get accepted bids for buyer (contains payment expiry) */
+  getAcceptedBids: async () => api.get('/trade/bids/accepted'),
+
+  /** Get complete bid history for buyer */
+  getBidHistory: async () => api.get('/trade/bids/history'),
+
+  /** Accept/reject a bid (farmer only) */
+  updateBidStatus: async (id, status) => api.put(`/trade/bids/${id}/status`, { status }),
+
   /** Update order status (farmer only) */
   updateOrderStatus: async (id, data) => api.put(`/trade/orders/${id}`, data),
 };

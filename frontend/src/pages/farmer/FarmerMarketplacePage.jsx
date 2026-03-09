@@ -14,38 +14,31 @@
  * @see BuyerDashboard - Equivalent page for buyer role
  * @see MarketMap - Interactive crop location map
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { T } from '../../context/TranslationContext';
+import { AuthContext } from '../../context/AuthContext';
 import MarketMap from '../../features/buyer/components/MarketMap';
 import CropCard from '../../features/buyer/components/CropCard';
-import { mockCrops } from '../../data/mockTradingData';
+import { cropService } from '../../services/cropService';
 
 export default function FarmerMarketplacePage() {
     const [crops, setCrops] = useState([]);
     const navigate = useNavigate();
-    const currentFarmerId = 'farmer_1'; // In real app, get from auth context
+    const { user } = useContext(AuthContext);
 
     useEffect(() => {
-        // Load crops from mock data, filter out current farmer's crops
-        const availableCrops = mockCrops.filter(crop => crop.farmerId !== currentFarmerId);
+        const fetchCrops = async () => {
+            const res = await cropService.getAll();
+            const availableCrops = res.data.filter(
+                (crop) => String(crop.farmer?._id || crop.farmer) !== String(user?._id)
+            );
+            setCrops(availableCrops);
+        };
 
-        // Convert to format expected by CropCard
-        const formattedCrops = availableCrops.map(crop => ({
-            _id: crop.id,
-            name: crop.name,
-            price: crop.price,
-            quantity: crop.quantity,
-            quality: crop.quality,
-            farmer: crop.farmerId,
-            farmerName: crop.farmerName,
-            city: crop.farmerLocation,
-            verified: true,
-        }));
-
-        setCrops(formattedCrops);
-    }, [currentFarmerId]);
+        fetchCrops();
+    }, [user?._id]);
 
     return (
         <motion.div

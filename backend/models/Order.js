@@ -168,6 +168,30 @@ const orderSchema = new mongoose.Schema({
     shippingAddress: {
         type: String,
         required: true
+    },
+
+    /**
+     * Encrypted payment payload storage (AES-GCM).
+     */
+    paymentDetailsEncrypted: {
+        type: String,
+        default: ''
+    },
+    paymentDetailsIv: {
+        type: String,
+        default: ''
+    },
+    paymentDetailsTag: {
+        type: String,
+        default: ''
+    },
+
+    /**
+     * Optional accepted bid used for this order checkout.
+     */
+    sourceBid: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Bid'
     }
 }, { timestamps: true }); // Automatically adds createdAt and updatedAt fields
 
