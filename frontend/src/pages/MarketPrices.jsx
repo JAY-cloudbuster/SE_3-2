@@ -103,14 +103,14 @@ function ChartSkeleton() {
 
 function SummaryCard({ icon: Icon, label, value, subValue, colorClass = 'text-emerald-600', bgClass = 'bg-emerald-50', borderClass = 'border-emerald-100' }) {
   return (
-    <div className={`rounded-2xl border ${borderClass} bg-white p-5 shadow-sm flex gap-4 items-start`}>
-      <div className={`${bgClass} rounded-xl p-2.5 mt-0.5`}>
+    <div className={`rounded-2xl border ${borderClass} bg-white p-5 shadow-sm flex gap-4 items-start overflow-hidden min-w-0`}>
+      <div className={`${bgClass} rounded-xl p-2.5 mt-0.5 shrink-0`}>
         <Icon size={18} className={colorClass} />
       </div>
-      <div>
-        <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{label}</p>
-        <p className={`text-2xl font-black mt-0.5 ${colorClass}`}>{value}</p>
-        {subValue && <p className="text-xs text-slate-400 mt-0.5 font-medium">{subValue}</p>}
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 truncate">{label}</p>
+        <p className={`text-xl font-black mt-0.5 ${colorClass} break-words leading-tight`}>{value}</p>
+        {subValue && <p className="text-xs text-slate-400 mt-0.5 font-medium break-words line-clamp-2">{subValue}</p>}
       </div>
     </div>
   );

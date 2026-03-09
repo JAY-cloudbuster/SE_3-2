@@ -29,6 +29,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Package, MapPin, CreditCard, CheckCircle, Smartphone, Banknote, Truck, ShieldCheck } from 'lucide-react';
 import { T } from '../../context/TranslationContext';
 import { AuthContext } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 
 export default function BuyNowPaymentPage() {
     const navigate = useNavigate();
@@ -48,6 +49,62 @@ export default function BuyNowPaymentPage() {
     const [step, setStep] = useState(1); // 1: Summary, 2: Address, 3: Payment
     const [paymentMethod, setPaymentMethod] = useState('card');
     const [processing, setProcessing] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvc: '', name: '' });
+    const [upiId, setUpiId] = useState('');
+
+    // Validation for Step 2: Delivery Address
+    const validateAddress = () => {
+        const newErrors = {};
+        if (!deliveryAddress.street.trim()) newErrors.street = 'Street address is required';
+        if (!deliveryAddress.city.trim()) newErrors.city = 'City is required';
+        if (!deliveryAddress.state.trim()) newErrors.state = 'State is required';
+        if (!deliveryAddress.pincode.trim()) {
+            newErrors.pincode = 'Pincode is required';
+        } else if (!/^\d{6}$/.test(deliveryAddress.pincode.trim())) {
+            newErrors.pincode = 'Enter a valid 6-digit pincode';
+        }
+        setErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) {
+            toast.error('Please fill all required address fields');
+        }
+        return Object.keys(newErrors).length === 0;
+    };
+
+    // Validation for Step 3: Payment
+    const validatePayment = () => {
+        const newErrors = {};
+        if (paymentMethod === 'card') {
+            const num = cardDetails.number.replace(/\s/g, '');
+            if (!num) newErrors.cardNumber = 'Card number is required';
+            else if (!/^\d{16}$/.test(num)) newErrors.cardNumber = 'Enter a valid 16-digit card number';
+            if (!cardDetails.expiry.trim()) newErrors.cardExpiry = 'Expiry date is required';
+            else if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(cardDetails.expiry.trim())) newErrors.cardExpiry = 'Use MM/YY format';
+            if (!cardDetails.cvc.trim()) newErrors.cardCvc = 'CVC is required';
+            else if (!/^\d{3}$/.test(cardDetails.cvc.trim())) newErrors.cardCvc = 'Enter a valid 3-digit CVC';
+            if (!cardDetails.name.trim()) newErrors.cardName = 'Cardholder name is required';
+        } else if (paymentMethod === 'upi') {
+            if (!upiId.trim()) newErrors.upiId = 'UPI ID is required';
+            else if (!upiId.includes('@')) newErrors.upiId = 'Enter a valid UPI ID (e.g., name@upi)';
+        }
+        // COD has no validation
+        setErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) {
+            toast.error('Please fill all required payment fields');
+        }
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleNext = () => {
+        if (step === 2 && !validateAddress()) return;
+        setErrors({});
+        setStep(step + 1);
+    };
+
+    const handleConfirmAndPay = () => {
+        if (!validatePayment()) return;
+        handleConfirmOrder();
+    };
 
     // Determine correct dashboard route based on user role
     const dashboardRoute = user?.role === 'BUYER' ? '/dashboard/buyer' : '/marketplace';
@@ -287,10 +344,11 @@ export default function BuyNowPaymentPage() {
                                             <input
                                                 type="text"
                                                 value={deliveryAddress.street}
-                                                onChange={(e) => setDeliveryAddress({ ...deliveryAddress, street: e.target.value })}
-                                                className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none text-lg"
+                                                onChange={(e) => { setDeliveryAddress({ ...deliveryAddress, street: e.target.value }); setErrors(prev => ({ ...prev, street: undefined })); }}
+                                                className={`w-full px-4 py-4 border-2 rounded-xl focus:outline-none text-lg ${errors.street ? 'border-rose-400 focus:border-rose-500' : 'border-slate-200 focus:border-emerald-500'}`}
                                                 placeholder="123 Market Road"
                                             />
+                                            {errors.street && <p className="text-xs text-rose-500 font-medium mt-1">{errors.street}</p>}
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
@@ -301,10 +359,11 @@ export default function BuyNowPaymentPage() {
                                                 <input
                                                     type="text"
                                                     value={deliveryAddress.city}
-                                                    onChange={(e) => setDeliveryAddress({ ...deliveryAddress, city: e.target.value })}
-                                                    className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none text-lg"
+                                                    onChange={(e) => { setDeliveryAddress({ ...deliveryAddress, city: e.target.value }); setErrors(prev => ({ ...prev, city: undefined })); }}
+                                                    className={`w-full px-4 py-4 border-2 rounded-xl focus:outline-none text-lg ${errors.city ? 'border-rose-400 focus:border-rose-500' : 'border-slate-200 focus:border-emerald-500'}`}
                                                     placeholder="Mumbai"
                                                 />
+                                                {errors.city && <p className="text-xs text-rose-500 font-medium mt-1">{errors.city}</p>}
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-bold text-slate-700 mb-2">
@@ -313,10 +372,11 @@ export default function BuyNowPaymentPage() {
                                                 <input
                                                     type="text"
                                                     value={deliveryAddress.state}
-                                                    onChange={(e) => setDeliveryAddress({ ...deliveryAddress, state: e.target.value })}
-                                                    className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none text-lg"
+                                                    onChange={(e) => { setDeliveryAddress({ ...deliveryAddress, state: e.target.value }); setErrors(prev => ({ ...prev, state: undefined })); }}
+                                                    className={`w-full px-4 py-4 border-2 rounded-xl focus:outline-none text-lg ${errors.state ? 'border-rose-400 focus:border-rose-500' : 'border-slate-200 focus:border-emerald-500'}`}
                                                     placeholder="Maharashtra"
                                                 />
+                                                {errors.state && <p className="text-xs text-rose-500 font-medium mt-1">{errors.state}</p>}
                                             </div>
                                         </div>
 
@@ -327,10 +387,12 @@ export default function BuyNowPaymentPage() {
                                             <input
                                                 type="text"
                                                 value={deliveryAddress.pincode}
-                                                onChange={(e) => setDeliveryAddress({ ...deliveryAddress, pincode: e.target.value })}
-                                                className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none text-lg"
+                                                onChange={(e) => { setDeliveryAddress({ ...deliveryAddress, pincode: e.target.value }); setErrors(prev => ({ ...prev, pincode: undefined })); }}
+                                                className={`w-full px-4 py-4 border-2 rounded-xl focus:outline-none text-lg ${errors.pincode ? 'border-rose-400 focus:border-rose-500' : 'border-slate-200 focus:border-emerald-500'}`}
                                                 placeholder="400001"
+                                                maxLength={6}
                                             />
+                                            {errors.pincode && <p className="text-xs text-rose-500 font-medium mt-1">{errors.pincode}</p>}
                                         </div>
 
                                         <div>
@@ -387,8 +449,12 @@ export default function BuyNowPaymentPage() {
                                                     <input
                                                         type="text"
                                                         placeholder="0000 0000 0000 0000"
-                                                        className="w-full px-4 py-4 pl-12 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none text-lg"
+                                                        value={cardDetails.number}
+                                                        onChange={(e) => { setCardDetails(prev => ({ ...prev, number: e.target.value })); setErrors(prev => ({ ...prev, cardNumber: undefined })); }}
+                                                        className={`w-full px-4 py-4 pl-12 border-2 rounded-xl focus:outline-none text-lg ${errors.cardNumber ? 'border-rose-400 focus:border-rose-500' : 'border-slate-200 focus:border-emerald-500'}`}
+                                                        maxLength={19}
                                                     />
+                                                    {errors.cardNumber && <p className="text-xs text-rose-500 font-medium mt-1">{errors.cardNumber}</p>}
                                                     <CreditCard size={20} className="absolute left-4 top-4 text-slate-400" />
                                                 </div>
                                             </div>
@@ -398,16 +464,24 @@ export default function BuyNowPaymentPage() {
                                                     <input
                                                         type="text"
                                                         placeholder="MM/YY"
-                                                        className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none text-lg"
+                                                        value={cardDetails.expiry}
+                                                        onChange={(e) => { setCardDetails(prev => ({ ...prev, expiry: e.target.value })); setErrors(prev => ({ ...prev, cardExpiry: undefined })); }}
+                                                        className={`w-full px-4 py-4 border-2 rounded-xl focus:outline-none text-lg ${errors.cardExpiry ? 'border-rose-400 focus:border-rose-500' : 'border-slate-200 focus:border-emerald-500'}`}
+                                                        maxLength={5}
                                                     />
+                                                    {errors.cardExpiry && <p className="text-xs text-rose-500 font-medium mt-1">{errors.cardExpiry}</p>}
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-bold text-slate-700 mb-2">CVC</label>
                                                     <input
                                                         type="text"
                                                         placeholder="123"
-                                                        className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none text-lg"
+                                                        value={cardDetails.cvc}
+                                                        onChange={(e) => { setCardDetails(prev => ({ ...prev, cvc: e.target.value })); setErrors(prev => ({ ...prev, cardCvc: undefined })); }}
+                                                        className={`w-full px-4 py-4 border-2 rounded-xl focus:outline-none text-lg ${errors.cardCvc ? 'border-rose-400 focus:border-rose-500' : 'border-slate-200 focus:border-emerald-500'}`}
+                                                        maxLength={3}
                                                     />
+                                                    {errors.cardCvc && <p className="text-xs text-rose-500 font-medium mt-1">{errors.cardCvc}</p>}
                                                 </div>
                                             </div>
                                             <div>
@@ -415,8 +489,11 @@ export default function BuyNowPaymentPage() {
                                                 <input
                                                     type="text"
                                                     placeholder="John Doe"
-                                                    className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none text-lg"
+                                                    value={cardDetails.name}
+                                                    onChange={(e) => { setCardDetails(prev => ({ ...prev, name: e.target.value })); setErrors(prev => ({ ...prev, cardName: undefined })); }}
+                                                    className={`w-full px-4 py-4 border-2 rounded-xl focus:outline-none text-lg ${errors.cardName ? 'border-rose-400 focus:border-rose-500' : 'border-slate-200 focus:border-emerald-500'}`}
                                                 />
+                                                {errors.cardName && <p className="text-xs text-rose-500 font-medium mt-1">{errors.cardName}</p>}
                                             </div>
                                         </motion.div>
                                     )}
@@ -427,8 +504,11 @@ export default function BuyNowPaymentPage() {
                                             <input
                                                 type="text"
                                                 placeholder="username@upi"
-                                                className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none text-lg"
+                                                value={upiId}
+                                                onChange={(e) => { setUpiId(e.target.value); setErrors(prev => ({ ...prev, upiId: undefined })); }}
+                                                className={`w-full px-4 py-4 border-2 rounded-xl focus:outline-none text-lg ${errors.upiId ? 'border-rose-400 focus:border-rose-500' : 'border-slate-200 focus:border-emerald-500'}`}
                                             />
+                                            {errors.upiId && <p className="text-xs text-rose-500 font-medium mt-1">{errors.upiId}</p>}
                                             <p className="text-sm text-slate-500 mt-3">
                                                 <T>Verify on your UPI app after clicking pay.</T>
                                             </p>
@@ -483,14 +563,14 @@ export default function BuyNowPaymentPage() {
                                 )}
                                 {step < 3 ? (
                                     <button
-                                        onClick={() => setStep(step + 1)}
+                                        onClick={handleNext}
                                         className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-bold py-4 rounded-xl hover:shadow-lg transition-all text-lg"
                                     >
                                         <T>Continue</T>
                                     </button>
                                 ) : (
                                     <button
-                                        onClick={handleConfirmOrder}
+                                        onClick={handleConfirmAndPay}
                                         disabled={processing}
                                         className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-bold py-4 rounded-xl hover:shadow-lg transition-all text-lg disabled:opacity-70 disabled:cursor-not-allowed"
                                     >

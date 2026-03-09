@@ -50,8 +50,16 @@ export default function LoginForm() {
 
       const userRole = res.data.user.role;
 
-      // Optional: Check if role matches what they clicked (if we want to enforce it strict)
-      // But for now, we trust the DB return. 
+      // Enforce strict role matching: if user clicks "Login as Buyer"
+      // but their account is registered as FARMER (or vice versa), block login.
+      if (role && userRole !== role) {
+        // Clear the stored auth data since we're rejecting this login
+        localStorage.removeItem('user');
+        toast.error(
+          `Your account is registered as a ${userRole.charAt(0) + userRole.slice(1).toLowerCase()}. Please click "Login as ${userRole.charAt(0) + userRole.slice(1).toLowerCase()}" instead.`
+        );
+        return;
+      }
 
       login(res.data);
 

@@ -85,6 +85,7 @@ import FarmerMarketplacePage from './pages/farmer/FarmerMarketplacePage'; // Epi
 import NegotiationPage from './pages/trade/NegotiationPage';             // Epic 4: Price negotiation
 import BuyNowPaymentPage from './pages/trade/BuyNowPaymentPage';         // Epic 4: Buy now checkout
 import MarketPrices from './pages/MarketPrices';                          // Market Prices financial dashboard
+import TrackOrderPage from './pages/common/TrackOrderPage';               // Order tracking page
 import { Toaster } from 'react-hot-toast';
 
 /**
@@ -170,6 +171,7 @@ function AppContent() {
             <Route path="/trade" element={<TradeDashboard />} />
             <Route path="/marketplace" element={<FarmerMarketplacePage />} />
             <Route path="/market-prices" element={<MarketPrices />} />
+            <Route path="/orders" element={<TrackOrderPage />} />
 
             {/* ==================== FARMER ROUTES (Epic 2 & 4) ==================== */}
             {/* Protected: Only accessible to users with FARMER role */}
