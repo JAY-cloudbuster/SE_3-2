@@ -13,12 +13,11 @@
 const express = require('express');
 const router = express.Router();
 const { getDecision, getCommodities } = require('../controllers/decisionController');
-const { protect } = require('../middlewares/authMiddleware');
 
 /** GET /api/decision?crop=xxx */
-router.get('/', protect, getDecision);
+router.get('/', getDecision);
 
 /** GET /api/decision/commodities */
-router.get('/commodities', protect, getCommodities);
+router.get('/commodities', getCommodities);
 
 module.exports = router;

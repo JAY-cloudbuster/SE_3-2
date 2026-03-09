@@ -5,14 +5,14 @@
  * showing all crop listings created by the currently logged-in farmer.
  * Data is fetched from the backend via cropService.getMyCrops().
  * 
- * Table columns: Crop Name, Location (with MapPin icon), Quantity (kg),
- * Price/kg (₹), Quality Grade (A/B/C badge), and Actions (Edit/Delete).
+ * Table columns: Crop Name, Location (with MapPin icon), Quantity (quintals),
+ * Price/quintal (₹), Quality Grade (A/B/C badge), and Actions (Edit/Delete).
  * 
  * Current status:
  * - ✅ Data fetching and display works correctly
  * - ✅ Location column with MapPin icon
  * - ✅ Quality grade color-coded badges (A=green, B=yellow, C=grey)
- * - ✅ Price trend indicator (↑ for prices > ₹20/kg)
+ * - ✅ Price trend indicator (↑ for prices > ₹20/quintal)
  * - ⚠️ Edit button (Edit3 icon) - UI only, handler NOT implemented
  * - ⚠️ Delete button (Trash2 icon) - UI only, handler NOT implemented
  * 
@@ -147,7 +147,7 @@ export default function CropList() {
                                 <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider"><T>Crop Name</T></th>
                                 <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider"><T>Location</T></th>
                                 <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider"><T>Quantity</T></th>
-                                <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider"><T>Price/kg</T></th>
+                                <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider"><T>Price/quintal</T></th>
                                 <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider"><T>Quality</T></th>
                                 <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider text-right"><T>Actions</T></th>
                             </tr>
@@ -208,15 +208,15 @@ export default function CropList() {
                                                     required
                                                 />
                                             ) : (
-                                                <span className="font-semibold text-emerald-700">{crop.quantity} kg</span>
+                                                <span className="font-semibold text-emerald-700">{crop.quantity} quintals</span>
                                             )}
                                         </td>
                                         <td className="p-4">
                                             {editingCropId === crop._id ? (
                                                 <input
                                                     type="number"
-                                                    min="1"
-                                                    max="500"
+                                                    min="0"
+                                                    max="10000"
                                                     value={editData.price}
                                                     onChange={(e) => setEditData((prev) => ({ ...prev, price: e.target.value }))}
                                                     className="w-24 bg-emerald-50/50 p-2 rounded-lg border border-emerald-100 outline-none focus:ring-2 focus:ring-emerald-500"

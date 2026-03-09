@@ -23,6 +23,7 @@ import { ShoppingBag, MapPin } from 'lucide-react';
 import { T } from '../../../context/TranslationContext';
 import { mockCrops } from '../../../data/mockTradingData';
 import CropActionButtons from '../../../features/trade/components/CropActionButtons';
+import { formatQuintalRate } from '../../../utils/formatters';
 
 export default function FarmerMarketplace({ currentFarmerId = 'farmer_1' }) {
     // Filter out current farmer's own crops
@@ -91,7 +92,7 @@ export default function FarmerMarketplace({ currentFarmerId = 'farmer_1' }) {
                                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                                         <div className="bg-slate-900 text-white px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap shadow-xl">
                                             <p>{crop.name}</p>
-                                            <p className="text-emerald-300">₹{crop.price}/kg</p>
+                                            <p className="text-emerald-300">{formatQuintalRate(crop.price)}</p>
                                             <p className="text-slate-300">{crop.farmerLocation}</p>
                                         </div>
                                         <div className="w-2 h-2 bg-slate-900 rotate-45 absolute top-full left-1/2 -translate-x-1/2 -mt-1"></div>
@@ -146,7 +147,7 @@ export default function FarmerMarketplace({ currentFarmerId = 'farmer_1' }) {
                                         <h4 className="text-lg font-black text-slate-900">{crop.name}</h4>
                                         <div className="text-right">
                                             <p className="text-xl font-black text-emerald-600">₹{crop.price}</p>
-                                            <p className="text-xs text-slate-500">per kg</p>
+                                            <p className="text-xs text-slate-500">per quintal</p>
                                         </div>
                                     </div>
 

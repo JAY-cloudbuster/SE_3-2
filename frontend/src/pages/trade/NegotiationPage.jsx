@@ -29,6 +29,7 @@ import { ArrowLeft, Home, ShoppingCart, Package, User } from 'lucide-react';
 import { T } from '../../context/TranslationContext';
 import { AuthContext } from '../../context/AuthContext';
 import NegotiationChat from '../../features/trade/components/NegotiationChat';
+import { formatQuintalQuantity, formatQuintalRate } from '../../utils/formatters';
 
 export default function NegotiationPage() {
     const { negotiationId } = useParams();
@@ -190,11 +191,11 @@ export default function NegotiationPage() {
                                 <div className="space-y-3 pt-4 border-t border-slate-200">
                                     <div className="flex justify-between">
                                         <span className="text-sm text-slate-600"><T>Listed Price</T></span>
-                                        <span className="text-lg font-black text-emerald-600">₹{crop.price}/kg</span>
+                                        <span className="text-lg font-black text-emerald-600">{formatQuintalRate(crop.price)}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-sm text-slate-600"><T>Available</T></span>
-                                        <span className="font-bold text-slate-900">{crop.quantity}kg</span>
+                                        <span className="font-bold text-slate-900">{formatQuintalQuantity(crop.quantity)}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-sm text-slate-600"><T>Farmer</T></span>

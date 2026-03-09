@@ -8,8 +8,8 @@
  * Currently empty — planned validators include:
  * - Phone number validation (10-digit Indian format)
  * - Password strength validation (min 6 chars)
- * - Crop quantity validation (1-200 kg range)
- * - Crop price validation (₹1-₹500/kg range)
+ * - Crop quantity validation (1-200 quintal range)
+ * - Crop price validation (₹0-₹10,000/quintal range)
  * - Email format validation (optional field)
  * 
  * @module utils/validators

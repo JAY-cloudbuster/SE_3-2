@@ -22,6 +22,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Smile, Check, CheckCheck, Clock, TrendingUp, TrendingDown } from 'lucide-react';
 import { T } from '../../../context/TranslationContext';
+import { formatQuintalQuantity } from '../../../utils/formatters';
 
 export default function NegotiationChat({ negotiationId, currentUserId, currentUserRole }) {
     const [messages, setMessages] = useState([]);
@@ -71,12 +72,15 @@ export default function NegotiationChat({ negotiationId, currentUserId, currentU
     const sendProposal = () => {
         if (!proposedPrice || !proposedQuantity) return;
 
+        const numericPrice = Number(proposedPrice);
+        if (Number.isNaN(numericPrice) || numericPrice < 0 || numericPrice > 10000) return;
+
         const message = {
             id: `msg_${Date.now()}`,
             sender: currentUserRole,
             type: 'proposal',
-            content: `Proposing ₹${proposedPrice}/kg for ${proposedQuantity}kg`,
-            proposedPrice: Number(proposedPrice),
+            content: `Proposing ₹${proposedPrice}/quintal for ${formatQuintalQuantity(proposedQuantity)}`,
+            proposedPrice: numericPrice,
             proposedQuantity: Number(proposedQuantity),
             timestamp: new Date().toISOString(),
         };
@@ -95,7 +99,7 @@ export default function NegotiationChat({ negotiationId, currentUserId, currentU
             id: `msg_${Date.now()}`,
             sender: currentUserRole,
             type: 'accept',
-            content: `Deal accepted! ₹${message.proposedPrice}/kg for ${message.proposedQuantity}kg.`,
+            content: `Deal accepted! ₹${message.proposedPrice}/quintal for ${formatQuintalQuantity(message.proposedQuantity)}.`,
             timestamp: new Date().toISOString(),
         };
 
@@ -189,12 +193,12 @@ export default function NegotiationChat({ negotiationId, currentUserId, currentU
                         {isProposal && (
                             <div className="mt-3 pt-3 border-t border-emerald-200 space-y-1">
                                 <div className="flex justify-between text-xs">
-                                    <span className="font-semibold"><T>Price per kg:</T></span>
+                                    <span className="font-semibold"><T>Price per quintal:</T></span>
                                     <span className="font-bold">₹{message.proposedPrice}</span>
                                 </div>
                                 <div className="flex justify-between text-xs">
                                     <span className="font-semibold"><T>Quantity:</T></span>
-                                    <span className="font-bold">{message.proposedQuantity}kg</span>
+                                    <span className="font-bold">{formatQuintalQuantity(message.proposedQuantity)}</span>
                                 </div>
                                 <div className="flex justify-between text-xs font-bold text-emerald-700 pt-1 border-t border-emerald-200">
                                     <span><T>Total:</T></span>
@@ -299,14 +303,16 @@ export default function NegotiationChat({ negotiationId, currentUserId, currentU
                         <div className="grid grid-cols-2 gap-3 mb-3">
                             <input
                                 type="number"
-                                placeholder="Price per kg (₹)"
+                                placeholder="Price per quintal (₹)"
                                 value={proposedPrice}
+                                min="0"
+                                max="10000"
                                 onChange={(e) => setProposedPrice(e.target.value)}
                                 className="px-3 py-2 rounded-lg border border-emerald-300 text-sm"
                             />
                             <input
                                 type="number"
-                                placeholder="Quantity (kg)"
+                                placeholder="Quantity (quintals)"
                                 value={proposedQuantity}
                                 onChange={(e) => setProposedQuantity(e.target.value)}
                                 className="px-3 py-2 rounded-lg border border-emerald-300 text-sm"

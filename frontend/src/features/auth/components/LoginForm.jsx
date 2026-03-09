@@ -5,11 +5,10 @@
  * Upon successful authentication, it:
  * 1. Stores the JWT token and user data via AuthContext.login()
  * 2. Sets the user's preferred language via TranslationContext.changeLanguage()
- * 3. Redirects to the role-specific dashboard (/dashboard/farmer or /dashboard/buyer)
+ * 3. Redirects to the role-specific home route based on the backend user role
  * 
  * Features:
- * - Two login buttons: "Login as Farmer" and "Login as Buyer"
- *   (both call the same endpoint; the role is determined by the database)
+ * - Single login button; the backend user role determines the destination page
  * - Shows a success banner when redirected from registration (?registered=1)
  * - LanguageSelector in the top-right corner for pre-login language switching
  * - All visible text wrapped in <T> for automatic translation
@@ -29,6 +28,7 @@ import { AuthContext } from '../../../context/AuthContext';
 import { T, useTranslation } from '../../../context/TranslationContext';
 import LanguageSelector from '../../../components/common/LanguageSelector';
 import { authService } from '../../../services/authService';
+import { getRoleHomePath } from '../../../utils/authRedirect';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react';
 
@@ -43,23 +43,12 @@ export default function LoginForm() {
 
   const justRegistered = new URLSearchParams(location.search).get('registered') === '1';
 
-  const handleLogin = async (e, role = null) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const res = await authService.login({ phone, password });
 
       const userRole = res.data.user.role;
-
-      // Enforce strict role matching: if user clicks "Login as Buyer"
-      // but their account is registered as FARMER (or vice versa), block login.
-      if (role && userRole !== role) {
-        // Clear the stored auth data since we're rejecting this login
-        localStorage.removeItem('user');
-        toast.error(
-          `Your account is registered as a ${userRole.charAt(0) + userRole.slice(1).toLowerCase()}. Please click "Login as ${userRole.charAt(0) + userRole.slice(1).toLowerCase()}" instead.`
-        );
-        return;
-      }
 
       login(res.data);
 
@@ -69,7 +58,7 @@ export default function LoginForm() {
       }
 
       toast.success('Login successful! Welcome back.');
-      navigate(`/dashboard/${userRole.toLowerCase()}`);
+      navigate(getRoleHomePath(userRole));
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.message || 'Invalid credentials. Please try again.');
@@ -117,7 +106,7 @@ export default function LoginForm() {
           <p className="text-slate-400 mb-6 text-[11px] uppercase font-black tracking-[0.25em]">
             Buyer: Starts with “1” · Farmer: Any other number
           </p>
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={handleLogin}>
             <div>
               <label className="label-text">Phone Number</label>
               <input
@@ -149,20 +138,12 @@ export default function LoginForm() {
                 </button>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="pt-2">
               <button
-                type="button"
-                onClick={(e) => handleLogin(e, 'FARMER')}
-                className="btn-primary bg-gradient-to-br from-emerald-600 to-emerald-700 shadow-emerald-500/25"
+                type="submit"
+                className="btn-primary w-full bg-gradient-to-br from-emerald-600 to-emerald-700 shadow-emerald-500/25"
               >
-                <T>Login as Farmer</T>
-              </button>
-              <button
-                type="button"
-                onClick={(e) => handleLogin(e, 'BUYER')}
-                className="btn-secondary text-emerald-800 border-emerald-200 hover:bg-emerald-50"
-              >
-                <T>Login as Buyer</T>
+                <T>Login</T>
               </button>
             </div>
           </form>

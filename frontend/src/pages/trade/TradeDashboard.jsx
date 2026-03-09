@@ -28,6 +28,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Gavel, MessageSquare, Package, CheckCircle, TrendingUp, ArrowLeft } from 'lucide-react';
 import { T } from '../../context/TranslationContext';
+import { formatQuintalRate } from '../../utils/formatters';
 import { AuthContext } from '../../context/AuthContext';
 import { getTradingData, initializeTradingData } from '../../data/mockTradingData';
 import AuctionCard from '../../features/trade/components/AuctionCard';
@@ -242,7 +243,7 @@ export default function TradeDashboard() {
                                                 {neg.currentOffer && (
                                                     <div className="flex items-center gap-2 text-emerald-600">
                                                         <TrendingUp size={16} />
-                                                        <span className="font-bold">₹{neg.currentOffer.price}/kg</span>
+                                                        <span className="font-bold">{formatQuintalRate(neg.currentOffer.price)}</span>
                                                     </div>
                                                 )}
                                             </motion.div>

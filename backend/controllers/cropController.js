@@ -32,8 +32,8 @@ const Crop = require('../models/Crop');
  * 
  * @param {Object} req.body - Crop listing details
  * @param {String} req.body.name - Crop name (required, e.g., "Organic Wheat")
- * @param {Number} req.body.quantity - Quantity in kg, range 1-200 (required)
- * @param {Number} req.body.price - Price per kg in ₹, range 1-500 (required)
+ * @param {Number} req.body.quantity - Quantity in quintals, range 1-200 (required)
+ * @param {Number} req.body.price - Price per quintal in ₹, range 0-10000 (required)
  * @param {String} req.body.quality - Quality grade: 'A', 'B', or 'C' (required)
  * @param {String} req.body.description - Optional description (max 500 chars)
  * @param {String} req.body.location - Crop location (optional, falls back to user location)
@@ -57,7 +57,7 @@ const createCrop = asyncHandler(async (req, res) => {
     const { name, quantity, price, quality, description, location } = req.body;
 
     // Validate that all required fields are present
-    if (!name || !quantity || !price || !quality) {
+    if (!name || !quantity || price === undefined || price === null || !quality) {
         res.status(400);
         throw new Error('Please add all required fields');
     }

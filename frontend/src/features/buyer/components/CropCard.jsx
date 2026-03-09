@@ -16,8 +16,7 @@
  */
 import { motion } from 'framer-motion';
 import { Star, MapPin, ShieldCheck } from 'lucide-react';
-import { formatCurrency } from '../../../utils/formatters';
-import CurrencyLabel from '../../../components/shared/CurrencyLabel';
+import { formatQuintalRate } from '../../../utils/formatters';
 import CropActionButtons from '../../../features/trade/components/CropActionButtons';
 
 export default function CropCard({ crop, onBuy }) {
@@ -76,8 +75,8 @@ export default function CropCard({ crop, onBuy }) {
         <div className="flex justify-between items-start">
           <h4 className="text-lg font-black text-slate-800 leading-tight">{crop.name}</h4>
           <div className="text-right">
-            <CurrencyLabel amount={crop.price} className="text-emerald-600 font-black text-lg" />
-            <span className="text-xs text-slate-500 block">per kg</span>
+            <div className="text-emerald-600 font-black text-lg">{formatQuintalRate(crop.price)}</div>
+            <span className="text-xs text-slate-500 block">per quintal</span>
           </div>
         </div>
 

@@ -30,6 +30,7 @@ import { ArrowLeft, Package, MapPin, CreditCard, CheckCircle, Smartphone, Bankno
 import { T } from '../../context/TranslationContext';
 import { AuthContext } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
+import { formatQuintalQuantity, formatQuintalRate } from '../../utils/formatters';
 
 export default function BuyNowPaymentPage() {
     const navigate = useNavigate();
@@ -38,7 +39,7 @@ export default function BuyNowPaymentPage() {
     const [crop, setCrop] = useState(null);
 
     // Order state
-    const [quantity, setQuantity] = useState(10);
+    const [quantity, setQuantity] = useState(1);
     const [deliveryAddress, setDeliveryAddress] = useState({
         street: '',
         city: '',
@@ -244,11 +245,11 @@ export default function BuyNowPaymentPage() {
                                 <div className="space-y-3 pt-4 border-t border-slate-200">
                                     <div className="flex justify-between">
                                         <span className="text-sm text-slate-600"><T>Price</T></span>
-                                        <span className="text-lg font-black text-emerald-600">₹{crop.price}/kg</span>
+                                        <span className="text-lg font-black text-emerald-600">{formatQuintalRate(crop.price)}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-sm text-slate-600"><T>Available</T></span>
-                                        <span className="font-bold text-slate-900">{crop.quantity}kg</span>
+                                        <span className="font-bold text-slate-900">{formatQuintalQuantity(crop.quantity)}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-sm text-slate-600"><T>Farmer</T></span>
@@ -266,7 +267,7 @@ export default function BuyNowPaymentPage() {
                                 <h3 className="font-bold text-emerald-900"><T>Order Summary</T></h3>
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between">
-                                        <span className="text-slate-600"><T>Subtotal</T> ({quantity}kg)</span>
+                                        <span className="text-slate-600"><T>Subtotal</T> ({formatQuintalQuantity(quantity)})</span>
                                         <span className="font-bold">₹{subtotal}</span>
                                     </div>
                                     <div className="flex justify-between">
@@ -303,7 +304,7 @@ export default function BuyNowPaymentPage() {
                                         </label>
                                         <div className="flex items-center gap-4">
                                             <button
-                                                onClick={() => setQuantity(Math.max(1, quantity - 10))}
+                                                onClick={() => setQuantity(Math.max(1, quantity - 1))}
                                                 className="w-14 h-14 bg-slate-200 rounded-xl font-bold text-2xl hover:bg-slate-300 transition-colors"
                                             >
                                                 -
@@ -315,14 +316,14 @@ export default function BuyNowPaymentPage() {
                                                 className="flex-1 text-center text-3xl font-black py-4 border-2 border-emerald-200 rounded-xl focus:border-emerald-500 focus:outline-none"
                                             />
                                             <button
-                                                onClick={() => setQuantity(Math.min(crop.quantity, quantity + 10))}
+                                                onClick={() => setQuantity(Math.min(crop.quantity, quantity + 1))}
                                                 className="w-14 h-14 bg-emerald-600 text-white rounded-xl font-bold text-2xl hover:bg-emerald-700 transition-colors"
                                             >
                                                 +
                                             </button>
                                         </div>
                                         <p className="text-sm text-slate-500 mt-3 text-center">
-                                            <T>Available:</T> {crop.quantity}kg
+                                            <T>Available:</T> {formatQuintalQuantity(crop.quantity)}
                                         </p>
                                     </div>
                                 </div>
@@ -540,7 +541,7 @@ export default function BuyNowPaymentPage() {
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-slate-600"><T>Quantity:</T></span>
-                                                <span className="font-bold">{quantity}kg</span>
+                                                <span className="font-bold">{formatQuintalQuantity(quantity)}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-slate-600"><T>Delivery to:</T></span>

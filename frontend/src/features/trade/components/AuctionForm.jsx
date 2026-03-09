@@ -16,6 +16,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Gavel, Calendar, DollarSign, Package } from 'lucide-react';
 import { T } from '../../../context/TranslationContext';
+import { formatQuintalQuantity } from '../../../utils/formatters';
 
 export default function AuctionForm({ crop, onSuccess }) {
     const [formData, setFormData] = useState({
@@ -28,6 +29,13 @@ export default function AuctionForm({ crop, onSuccess }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const startingPrice = Number(formData.startingPrice);
+        const reservePrice = Number(formData.reservePrice);
+
+        if (startingPrice < 0 || startingPrice > 10000 || reservePrice < 0 || reservePrice > 10000) {
+            return;
+        }
+
         setSubmitting(true);
 
         const auction = {
@@ -36,9 +44,9 @@ export default function AuctionForm({ crop, onSuccess }) {
             farmerId: crop.farmerId,
             farmerName: crop.farmerName,
             cropName: crop.name,
-            startingPrice: Number(formData.startingPrice),
-            currentBid: Number(formData.startingPrice),
-            reservePrice: Number(formData.reservePrice),
+            startingPrice,
+            currentBid: startingPrice,
+            reservePrice,
             highestBidder: null,
             highestBidderName: null,
             startTime: new Date().toISOString(),
@@ -80,7 +88,7 @@ export default function AuctionForm({ crop, onSuccess }) {
                 <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
                     <p className="text-sm font-bold text-emerald-900 mb-1">{crop.name}</p>
                     <p className="text-xs text-emerald-600">
-                        <T>Available:</T> {crop.quantity}kg · <T>Quality:</T> {crop.quality}
+                        <T>Available:</T> {formatQuintalQuantity(crop.quantity)} · <T>Quality:</T> {crop.quality}
                     </p>
                 </div>
             )}
@@ -89,11 +97,13 @@ export default function AuctionForm({ crop, onSuccess }) {
             <div className="space-y-4">
                 <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">
-                        <T>Starting Price (₹/kg)</T>
+                        <T>Starting Price (₹/quintal)</T>
                     </label>
                     <input
                         type="number"
                         required
+                        min="0"
+                        max="10000"
                         value={formData.startingPrice}
                         onChange={(e) => setFormData({ ...formData, startingPrice: e.target.value })}
                         className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-purple-500 focus:outline-none"
@@ -103,11 +113,13 @@ export default function AuctionForm({ crop, onSuccess }) {
 
                 <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">
-                        <T>Reserve Price (₹/kg)</T>
+                        <T>Reserve Price (₹/quintal)</T>
                     </label>
                     <input
                         type="number"
                         required
+                        min="0"
+                        max="10000"
                         value={formData.reservePrice}
                         onChange={(e) => setFormData({ ...formData, reservePrice: e.target.value })}
                         className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-purple-500 focus:outline-none"
@@ -120,7 +132,7 @@ export default function AuctionForm({ crop, onSuccess }) {
 
                 <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">
-                        <T>Quantity (kg)</T>
+                        <T>Quantity (quintals)</T>
                     </label>
                     <input
                         type="number"

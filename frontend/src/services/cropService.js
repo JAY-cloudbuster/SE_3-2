@@ -36,8 +36,8 @@ export const cropService = {
    * @function create
    * @param {Object} data - Crop listing data
    * @param {string} data.name - Crop name (e.g., "Organic Wheat")
-   * @param {number} data.quantity - Quantity in kg (1-200)
-   * @param {number} data.price - Price per kg in ₹ (1-500)
+  * @param {number} data.quantity - Quantity in quintals (1-200)
+  * @param {number} data.price - Price per quintal in ₹ (0-10000)
    * @param {string} data.quality - Quality grade: 'A', 'B', or 'C'
    * @param {string} [data.description] - Optional description (max 500 chars)
    * @param {string} [data.location] - Crop location (defaults to farmer's location)

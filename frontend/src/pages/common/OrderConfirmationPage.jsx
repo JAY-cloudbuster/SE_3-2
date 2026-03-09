@@ -18,6 +18,7 @@ import { motion } from 'framer-motion';
 import { CheckCircle, Package, MapPin, Calendar, ArrowRight } from 'lucide-react';
 import { T } from '../../context/TranslationContext';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { formatQuintalQuantity, formatQuintalRate } from '../../utils/formatters';
 
 export default function OrderConfirmationPage() {
     const location = useLocation();
@@ -79,7 +80,7 @@ export default function OrderConfirmationPage() {
                             <div className="flex-1">
                                 <h3 className="font-bold text-slate-900 mb-1">{order.cropName}</h3>
                                 <p className="text-sm text-slate-600">
-                                    {order.quantity}kg × ₹{order.pricePerKg}/kg = ₹{order.totalAmount}
+                                    {formatQuintalQuantity(order.quantity)} × {formatQuintalRate(order.pricePerKg)} = ₹{order.totalAmount}
                                 </p>
                                 <p className="text-xs text-slate-500 mt-1">
                                     <T>From</T> {order.farmerName}
