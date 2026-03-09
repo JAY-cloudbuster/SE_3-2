@@ -85,7 +85,31 @@ app.use(express.json());
  * extended: false uses the querystring library for parsing
  */
 app.use(express.urlencoded({ extended: false }));
+// ============================================================
+// 4.5 HEALTH CHECK ENDPOINT
+// Provides automated monitoring for server and DB status
+// ============================================================
+const mongoose = require('mongoose');
 
+app.get('/health', async (req, res) => {
+    const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+    
+    const status = {
+        status: dbStatus === 'connected' ? 'UP' : 'DEGRADED',
+        uptime: Math.floor(process.uptime()) + 's',
+        timestamp: new Date().toISOString(),
+        database: dbStatus,
+        environment: process.env.NODE_ENV,
+        memoryUsage: {
+            heapUsed: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + 'MB',
+            rss: Math.round(process.memoryUsage().rss / 1024 / 1024) + 'MB'
+        }
+    };
+
+    // If DB is down, return 503 so load balancers know the app is struggling
+    const statusCode = dbStatus === 'connected' ? 200 : 503;
+    res.status(statusCode).json(status);
+});
 /**
  * Static File Serving - Serves uploaded files (crop images, etc.)
  * Files in the /uploads directory are accessible via /uploads/<filename>
