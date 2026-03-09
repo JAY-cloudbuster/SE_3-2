@@ -84,6 +84,8 @@ import TradingDemo from './pages/common/TradingDemo';                    // Epic
 import FarmerMarketplacePage from './pages/farmer/FarmerMarketplacePage'; // Epic 3: Marketplace view
 import NegotiationPage from './pages/trade/NegotiationPage';             // Epic 4: Price negotiation
 import BuyNowPaymentPage from './pages/trade/BuyNowPaymentPage';         // Epic 4: Buy now checkout
+import MarketPrices from './pages/MarketPrices';                          // Market Prices financial dashboard
+import { Toaster } from 'react-hot-toast';
 
 /**
  * AppContent Component - Main Application Shell
@@ -167,6 +169,7 @@ function AppContent() {
             <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
             <Route path="/trade" element={<TradeDashboard />} />
             <Route path="/marketplace" element={<FarmerMarketplacePage />} />
+            <Route path="/market-prices" element={<MarketPrices />} />
 
             {/* ==================== FARMER ROUTES (Epic 2 & 4) ==================== */}
             {/* Protected: Only accessible to users with FARMER role */}
@@ -255,6 +258,7 @@ export default function App() {
           <SocketProvider>
             <BrowserRouter>
               <AppContent />
+              <Toaster position="top-right" reverseOrder={false} toastOptions={{ style: { fontFamily: 'inherit', fontWeight: 600, fontSize: '0.875rem', borderRadius: '0.75rem', boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)' } }} />
             </BrowserRouter>
           </SocketProvider>
         </LanguageProvider>

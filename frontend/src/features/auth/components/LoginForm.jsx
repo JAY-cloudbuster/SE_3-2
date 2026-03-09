@@ -29,10 +29,13 @@ import { AuthContext } from '../../../context/AuthContext';
 import { T, useTranslation } from '../../../context/TranslationContext';
 import LanguageSelector from '../../../components/common/LanguageSelector';
 import { authService } from '../../../services/authService';
+import toast from 'react-hot-toast';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginForm() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useContext(AuthContext);
   const { changeLanguage } = useTranslation();
   const navigate = useNavigate();
@@ -57,10 +60,11 @@ export default function LoginForm() {
         changeLanguage(res.data.user.language);
       }
 
+      toast.success('Login successful! Welcome back.');
       navigate(`/dashboard/${userRole.toLowerCase()}`);
     } catch (error) {
       console.error(error);
-      alert(error.response?.data?.message || 'Login failed');
+      toast.error(error.response?.data?.message || 'Invalid credentials. Please try again.');
     }
   };
 
@@ -118,13 +122,24 @@ export default function LoginForm() {
             </div>
             <div>
               <label className="label-text">Password</label>
-              <input
-                type="password"
-                required
-                placeholder="••••••••"
-                className="input-field"
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  placeholder="••••••••"
+                  className="input-field pr-10"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                  tabIndex={-1}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button
