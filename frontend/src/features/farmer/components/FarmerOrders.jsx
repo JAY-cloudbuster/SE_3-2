@@ -27,6 +27,18 @@ const statusStyles = {
     Cancelled: 'bg-rose-100 text-rose-700 border-rose-200',
 };
 
+const paymentStatusStyles = {
+    paid: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    pending: 'bg-amber-100 text-amber-700 border-amber-200',
+    failed: 'bg-rose-100 text-rose-700 border-rose-200',
+};
+
+const paymentStatusLabel = {
+    paid: 'Payment Done',
+    pending: 'Pending',
+    failed: 'Failed',
+};
+
 export default function FarmerOrders() {
     const { user } = useContext(AuthContext);
     const socket = useContext(SocketContext);
@@ -219,6 +231,9 @@ export default function FarmerOrders() {
                         const buyerName = order.buyer?.name || order.buyer?.phone || 'Buyer';
                         const itemsSummary = order.items?.map(item => `${item.quantity} quintal ${item.name}`).join(', ') || 'N/A';
                         const status = order.orderStatus || 'Pending';
+                        const paymentStatus = String(order.paymentStatus || 'pending').toLowerCase();
+                        const orderStatusLabel =
+                            paymentStatus === 'paid' && status === 'Pending' ? 'Order Confirmed' : status;
                         const amount = order.totalAmount ? `₹${order.totalAmount.toLocaleString('en-IN')}` : 'N/A';
                         const date = order.createdAt
                             ? new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -251,9 +266,13 @@ export default function FarmerOrders() {
                                         </div>
                                     </div>
 
-                                    <span className={`px-3 py-1 rounded-full text-xs font-bold border ${statusStyles[status] || statusStyles.Pending}`}>
-                                        <T>{status}</T>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-bold border ${paymentStatusStyles[paymentStatus] || paymentStatusStyles.pending}`}>
+                                        <T>{paymentStatusLabel[paymentStatus] || paymentStatusLabel.pending}</T>
                                     </span>
+
+                                    <div className="text-[10px] text-slate-500 font-semibold min-w-18 text-right">
+                                        <T>{orderStatusLabel}</T>
+                                    </div>
 
                                     <button className="p-2 text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 rounded-full transition-colors">
                                         <ChevronRight size={20} />

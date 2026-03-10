@@ -178,6 +178,7 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/decision', require('./routes/decisionRoutes'));
 
 app.use('/api/bidmessage', require('./routes/bidMessageRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
 
 // ============================================================
 // 6. GLOBAL ERROR HANDLER MIDDLEWARE

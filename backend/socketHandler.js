@@ -6,7 +6,9 @@ module.exports = function socketHandler(io) {
         // Join user-specific room for direct notifications.
         socket.on('join_user_room', (userId) => {
             if (userId) {
-                socket.join(`user:${String(userId)}`);
+                const room = `user:${String(userId)}`;
+                socket.join(room);
+                console.log(`[Socket] ${socket.id} joined room "${room}"`);
             }
         });
 

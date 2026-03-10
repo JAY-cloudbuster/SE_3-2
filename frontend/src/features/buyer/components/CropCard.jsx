@@ -44,6 +44,7 @@ export default function CropCard({ crop, onBuy }) {
     description: `Fresh ${crop.name} from ${crop.farmer?.location || crop.location || 'local farm'}`,
     available: true,
     negotiationEnabled: true,
+    auctionEnabled: true,
   };
 
   return (

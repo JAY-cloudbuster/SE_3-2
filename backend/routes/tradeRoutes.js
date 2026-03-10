@@ -20,6 +20,7 @@ const {
     sendOffer,
     acceptNegotiation,
     rejectNegotiation,
+    getNegotiationsForBuyer,
     createOrder,
     getOrders,
     updateOrderStatus
@@ -36,6 +37,7 @@ router.put('/bids/:id/status', protect, updateBidStatus);
 // Negotiations
 router.post('/negotiation/start', protect, startNegotiation);
 router.post('/negotiation/offer', protect, sendOffer);
+router.get('/negotiations/mine', protect, getNegotiationsForBuyer);
 router.put('/negotiation/:id/accept', protect, acceptNegotiation);
 router.put('/negotiation/:id/reject', protect, rejectNegotiation);
 

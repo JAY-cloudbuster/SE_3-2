@@ -44,6 +44,7 @@ import { AuthProvider, AuthContext } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { TranslationProvider } from './context/TranslationContext';
+import { NotificationProvider } from './context/NotificationContext';
 
 // ============================================================
 // LAYOUT & GLOBAL COMPONENTS
@@ -259,8 +260,10 @@ export default function App() {
         <LanguageProvider>
           <SocketProvider>
             <BrowserRouter>
-              <AppContent />
-              <Toaster position="top-right" reverseOrder={false} toastOptions={{ style: { fontFamily: 'inherit', fontWeight: 600, fontSize: '0.875rem', borderRadius: '0.75rem', boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)' } }} />
+              <NotificationProvider>
+                <AppContent />
+                <Toaster position="top-right" reverseOrder={false} toastOptions={{ style: { fontFamily: 'inherit', fontWeight: 600, fontSize: '0.875rem', borderRadius: '0.75rem', boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)' } }} />
+              </NotificationProvider>
             </BrowserRouter>
           </SocketProvider>
         </LanguageProvider>

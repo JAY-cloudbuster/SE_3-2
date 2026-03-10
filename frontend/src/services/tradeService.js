@@ -62,6 +62,9 @@ export const tradeService = {
   /** Get accepted bids for buyer (contains payment expiry) */
   getAcceptedBids: async () => api.get('/trade/bids/accepted'),
 
+  /** Get buyer's negotiations */
+  getMyNegotiations: async () => api.get('/trade/negotiations/mine'),
+
   /** Get complete bid history for buyer */
   getBidHistory: async () => api.get('/trade/bids/history'),
 

@@ -82,14 +82,21 @@ export const SocketProvider = ({ children }) => {
       // User is authenticated - establish WebSocket connection
       const newSocket = io(import.meta.env.VITE_SOCKET_URL); // Backend Socket.io server URL from env
 
-      newSocket.on('connect', () => {
-        newSocket.emit('join_user_room', user._id);
-      });
+      // Re-emit join_user_room on every connect AND reconnect so the server
+      // always has this socket in the correct user:<id> room.
+      const joinRoom = () => {
+        newSocket.emit('join_user_room', String(user._id));
+      };
+
+      newSocket.on('connect', joinRoom);
 
       setSocket(newSocket);
 
       // Cleanup: close the socket when user logs out or component unmounts
-      return () => newSocket.close();
+      return () => {
+        newSocket.off('connect', joinRoom);
+        newSocket.close();
+      };
     }
   }, [user]); // Re-run when user changes (login/logout)
 
