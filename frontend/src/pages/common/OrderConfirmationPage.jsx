@@ -1,166 +1,180 @@
-/**
- * @fileoverview Order Confirmation Page for AgriSahayak Frontend
- * 
- * Success page shown after placing an order. Displays a spring-animated
- * checkmark, order details (crop, quantity, amount, farmer, delivery
- * address, date), and current status. Provides navigation to the
- * buyer dashboard and order tracking.
- * 
- * Reads order data from location.state; shows fallback if missing.
- * 
- * @component OrderConfirmationPage
- * @see Epic 4, Story 4.6 - Order Confirmation
- * @see BuyNowPaymentPage - Redirects here after checkout
- * @see OrderSummaryModal - Alternative checkout also redirects here
- */
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, Package, MapPin, Calendar, ArrowRight } from 'lucide-react';
+import { CheckCircle, Package, MapPin, Calendar, ArrowRight, Receipt, CreditCard, ShieldCheck } from 'lucide-react';
 import { T } from '../../context/TranslationContext';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { formatQuintalQuantity, formatQuintalRate } from '../../utils/formatters';
+
+function parseAddress(address) {
+    if (!address) return { line1: 'N/A', line2: '' };
+    if (typeof address === 'string') {
+        const parts = address.split(',').map((p) => p.trim());
+        return {
+            line1: parts[0] || address,
+            line2: parts.slice(1).join(', '),
+        };
+    }
+    return {
+        line1: address.street || 'N/A',
+        line2: `${address.city || ''}${address.state ? `, ${address.state}` : ''}${address.pincode ? ` - ${address.pincode}` : ''}`.trim(),
+    };
+}
+
+function normalizeOrder(raw) {
+    if (!raw) return null;
+
+    const item = raw.items?.[0] || null;
+    const quantity = item?.quantity ?? raw.quantity ?? 0;
+    const pricePerQuintal = item?.pricePerKg ?? raw.pricePerKg ?? raw.pricePerUnit ?? 0;
+    const subtotal = item?.total ?? (quantity * pricePerQuintal);
+    const shipping = raw.shippingCost ?? 0;
+    const total = raw.totalAmount ?? subtotal + shipping;
+
+    const address = parseAddress(raw.shippingAddress || raw.deliveryAddress);
+
+    return {
+        id: raw._id || raw.id || 'N/A',
+        cropName: item?.name || raw.cropName || 'Crop',
+        quantity,
+        pricePerQuintal,
+        subtotal,
+        shipping,
+        total,
+        farmerName: raw.farmer?.name || raw.farmerName || 'Farmer',
+        buyerName: raw.buyer?.name || raw.buyerName || 'Buyer',
+        paymentMethod: (raw.paymentMethod || 'N/A').toUpperCase(),
+        paymentStatus: raw.paymentStatus || 'pending',
+        orderStatus: raw.orderStatus || raw.status || 'Pending',
+        address,
+        createdAt: raw.createdAt || new Date().toISOString(),
+        sourceBid: raw.sourceBid,
+    };
+}
 
 export default function OrderConfirmationPage() {
     const location = useLocation();
     const navigate = useNavigate();
-    const order = location.state?.order;
+
+    const order = normalizeOrder(location.state?.order);
 
     if (!order) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <p className="text-slate-500"><T>No order found</T></p>
+            <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
+                <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-md w-full">
+                    <p className="text-slate-600 font-semibold"><T>No order found</T></p>
+                    <button
+                        onClick={() => navigate('/dashboard/buyer')}
+                        className="mt-4 px-5 py-2.5 rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-700"
+                    >
+                        <T>Go to Dashboard</T>
+                    </button>
+                </div>
             </div>
         );
     }
+
+    const orderDate = new Date(order.createdAt);
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white flex items-center justify-center p-6">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="max-w-2xl w-full"
+                className="max-w-3xl w-full"
             >
-                {/* Success Animation */}
                 <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.35 }}
                     className="text-center mb-8"
                 >
-                    <div className="w-32 h-32 mx-auto bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-emerald-500/50">
-                        <CheckCircle className="text-white" size={64} />
+                    <div className="w-28 h-28 mx-auto bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-full flex items-center justify-center mb-5 shadow-xl shadow-emerald-500/40">
+                        <CheckCircle className="text-white" size={56} />
                     </div>
                     <h1 className="text-4xl font-black text-slate-900 mb-2">
-                        <T>Order Placed Successfully!</T>
+                        <T>Purchase Successful</T>
                     </h1>
                     <p className="text-slate-600 text-lg">
-                        <T>Your order has been sent to the farmer for confirmation</T>
+                        <T>Your crop order and payment have been recorded successfully.</T>
                     </p>
                 </motion.div>
 
-                {/* Order Details Card */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="bg-white rounded-3xl shadow-xl p-8 space-y-6"
-                >
-                    {/* Order ID */}
-                    <div className="text-center pb-6 border-b border-slate-200">
-                        <p className="text-sm text-slate-500 mb-1"><T>Order ID</T></p>
-                        <p className="text-2xl font-black text-emerald-600">{order.id}</p>
+                <div className="bg-white rounded-3xl shadow-xl p-8 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 border-b border-slate-200">
+                        <div className="bg-slate-50 rounded-xl p-4">
+                            <p className="text-xs text-slate-500"><T>Order ID</T></p>
+                            <p className="text-sm font-black text-emerald-700 break-all">{order.id}</p>
+                        </div>
+                        <div className="bg-slate-50 rounded-xl p-4">
+                            <p className="text-xs text-slate-500"><T>Order Status</T></p>
+                            <p className="text-sm font-black text-slate-900">{order.orderStatus}</p>
+                        </div>
+                        <div className="bg-slate-50 rounded-xl p-4">
+                            <p className="text-xs text-slate-500"><T>Payment Status</T></p>
+                            <p className="text-sm font-black text-slate-900">{order.paymentStatus}</p>
+                        </div>
                     </div>
 
-                    {/* Order Info */}
-                    <div className="space-y-4">
-                        <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                <Package className="text-emerald-600" size={24} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="rounded-2xl border border-slate-200 p-4 space-y-3">
+                            <div className="flex items-center gap-2 text-emerald-700 font-bold">
+                                <Package size={18} /> <T>Purchase Details</T>
                             </div>
-                            <div className="flex-1">
-                                <h3 className="font-bold text-slate-900 mb-1">{order.cropName}</h3>
-                                <p className="text-sm text-slate-600">
-                                    {order.quantity}kg × ₹{order.pricePerKg}/kg = ₹{order.totalAmount}
-                                </p>
-                                <p className="text-xs text-slate-500 mt-1">
-                                    <T>From</T> {order.farmerName}
-                                </p>
+                            <div className="text-sm text-slate-700 space-y-1">
+                                <p><span className="font-semibold"><T>Crop</T>:</span> {order.cropName}</p>
+                                <p><span className="font-semibold"><T>Quantity</T>:</span> {formatQuintalQuantity(order.quantity)}</p>
+                                <p><span className="font-semibold"><T>Price/quintal</T>:</span> {formatQuintalRate(order.pricePerQuintal)}</p>
+                                <p><span className="font-semibold"><T>Farmer</T>:</span> {order.farmerName}</p>
+                                {order.sourceBid && <p><span className="font-semibold"><T>Source</T>:</span> <T>Accepted Bid Checkout</T></p>}
                             </div>
                         </div>
 
-                        <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                <MapPin className="text-blue-600" size={24} />
+                        <div className="rounded-2xl border border-slate-200 p-4 space-y-3">
+                            <div className="flex items-center gap-2 text-blue-700 font-bold">
+                                <CreditCard size={18} /> <T>Payment Report</T>
                             </div>
-                            <div className="flex-1">
-                                <h3 className="font-bold text-slate-900 mb-1"><T>Delivery Address</T></h3>
-                                <p className="text-sm text-slate-600">
-                                    {order.deliveryAddress.street}<br />
-                                    {order.deliveryAddress.city}, {order.deliveryAddress.state} - {order.deliveryAddress.pincode}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                <Calendar className="text-purple-600" size={24} />
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="font-bold text-slate-900 mb-1"><T>Order Date</T></h3>
-                                <p className="text-sm text-slate-600">
-                                    {new Date(order.createdAt).toLocaleDateString('en-IN', {
-                                        day: 'numeric',
-                                        month: 'long',
-                                        year: 'numeric',
-                                    })}
-                                </p>
+                            <div className="text-sm text-slate-700 space-y-1">
+                                <p><span className="font-semibold"><T>Method</T>:</span> {order.paymentMethod}</p>
+                                <p><span className="font-semibold"><T>Subtotal</T>:</span> ₹{Number(order.subtotal || 0).toLocaleString('en-IN')}</p>
+                                <p><span className="font-semibold"><T>Shipping</T>:</span> ₹{Number(order.shipping || 0).toLocaleString('en-IN')}</p>
+                                <p className="text-emerald-700 font-black"><span><T>Total Paid</T>:</span> ₹{Number(order.total || 0).toLocaleString('en-IN')}</p>
+                                <p className="text-xs text-slate-500 pt-1"><ShieldCheck size={12} className="inline mr-1" /><T>Payment details stored securely in encrypted form.</T></p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Status */}
-                    <div className="bg-emerald-50 rounded-2xl p-4 border-2 border-emerald-200">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-bold text-emerald-900"><T>Current Status</T></p>
-                                <p className="text-xs text-emerald-600 mt-1">
-                                    <T>Waiting for farmer confirmation</T>
-                                </p>
-                            </div>
-                            <div className="px-4 py-2 bg-emerald-600 text-white rounded-full text-xs font-bold uppercase">
-                                <T>Pending</T>
-                            </div>
+                    <div className="rounded-2xl border border-slate-200 p-4 space-y-2">
+                        <div className="flex items-center gap-2 text-purple-700 font-bold">
+                            <MapPin size={18} /> <T>Delivery Report</T>
                         </div>
+                        <p className="text-sm text-slate-700">{order.address.line1}</p>
+                        {order.address.line2 && <p className="text-sm text-slate-600">{order.address.line2}</p>}
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-3 pt-4">
+                    <div className="rounded-2xl border border-slate-200 p-4 flex items-center gap-3 text-slate-700 text-sm">
+                        <Calendar size={18} className="text-slate-500" />
+                        <span>
+                            <T>Transaction Timestamp</T>: {orderDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })} {orderDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                    </div>
+
+                    <div className="pt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
                         <button
                             onClick={() => navigate('/dashboard/buyer')}
-                            className="flex-1 bg-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-300 transition-colors"
+                            className="bg-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-300 transition-colors"
                         >
                             <T>Back to Dashboard</T>
                         </button>
                         <button
                             onClick={() => navigate('/orders')}
-                            className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-bold py-3 rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                            className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-bold py-3 rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-2"
                         >
-                            <T>Track Order</T>
-                            <ArrowRight size={18} />
+                            <Receipt size={18} />
+                            <T>View Full Order Tracking</T>
+                            <ArrowRight size={16} />
                         </button>
                     </div>
-                </motion.div>
-
-                {/* Next Steps */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6 }}
-                    className="mt-6 text-center"
-                >
-                    <p className="text-sm text-slate-500">
-                        <T>You will receive a notification once the farmer confirms your order</T>
-                    </p>
-                </motion.div>
+                </div>
             </motion.div>
         </div>
     );

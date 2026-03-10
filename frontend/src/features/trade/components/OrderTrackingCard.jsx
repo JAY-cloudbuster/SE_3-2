@@ -18,6 +18,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Package, Truck, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { T } from '../../../context/TranslationContext';
+import { formatQuintalQuantity } from '../../../utils/formatters';
 
 export default function OrderTrackingCard({ order }) {
     const statusConfig = {
@@ -87,10 +88,10 @@ export default function OrderTrackingCard({ order }) {
             <div className="mt-6 pt-6 border-t border-slate-200 space-y-2">
                 <div className="flex justify-between text-sm">
                     <span className="text-slate-600"><T>Quantity:</T></span>
-                    <span className="font-bold">{order.quantity}kg</span>
+                    <span className="font-bold">{formatQuintalQuantity(order.quantity)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                    <span className="text-slate-600"><T>Price per kg:</T></span>
+                    <span className="text-slate-600"><T>Price per quintal:</T></span>
                     <span className="font-bold">₹{order.pricePerKg}</span>
                 </div>
                 <div className="flex justify-between text-lg font-black text-emerald-600 pt-2 border-t border-slate-200">

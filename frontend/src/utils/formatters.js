@@ -42,6 +42,15 @@ export const formatCurrency = (amount) => {
   }).format(amount);
 };
 
+export const formatQuintalQuantity = (amount) => {
+  const numericAmount = Number(amount);
+  const unit = numericAmount === 1 ? 'quintal' : 'quintals';
+
+  return `${amount} ${unit}`;
+};
+
+export const formatQuintalRate = (amount) => `₹${amount}/quintal`;
+
 /**
  * Play Success Sound Effect
  * 

@@ -7,7 +7,7 @@
  * 
  * Key features:
  * - Voice input support for quantity and price fields (VoiceInput component)
- * - Input validation: quantity (1-200 kg), price (₹1-500/kg)
+ * - Input validation: quantity (1-200 quintals), price (₹0-₹10,000/quintal)
  * - Quality grade selection (A/B/C) via toggle buttons
  * - Success animation with CheckCircle icon on successful submission
  * - Auto-reset of form after 3 seconds on success
@@ -112,7 +112,7 @@ export default function CropForm({ onAiIntercept }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="text-xs font-bold uppercase text-slate-500 mb-1 block"><T>Quantity (kg)</T></label>
+          <label className="text-xs font-bold uppercase text-slate-500 mb-1 block"><T>Quantity (quintals)</T></label>
           <div className="flex gap-2">
             <input
               type="number"
@@ -131,22 +131,22 @@ export default function CropForm({ onAiIntercept }) {
             />
             <VoiceInput onResult={handleVoiceQuantity} />
           </div>
-          <p className="text-[10px] text-slate-400 mt-1">Max: 200 kg</p>
+          <p className="text-[10px] text-slate-400 mt-1">Max: 200 quintals</p>
         </div>
 
         <div>
-          <label className="text-xs font-bold uppercase text-slate-500 mb-1 block"><T>Price (₹/kg)</T></label>
+          <label className="text-xs font-bold uppercase text-slate-500 mb-1 block"><T>Price (₹/quintal)</T></label>
           <div className="flex gap-2">
             <input
               type="number"
-              placeholder="1-500"
+              placeholder="0-10000"
               value={data.price}
-              min="1"
-              max="500"
+              min="0"
+              max="10000"
               className="flex-1 bg-emerald-50/50 p-3 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 border border-emerald-100"
               onChange={(e) => {
                 const val = parseInt(e.target.value);
-                if (val > 500) return; // Prevent typing > 500
+                if (val > 10000) return; // Prevent typing > 10000
                 if (val < 0) return;   // Prevent typing < 0
                 setData({ ...data, price: e.target.value })
               }}
@@ -154,7 +154,7 @@ export default function CropForm({ onAiIntercept }) {
             />
             <VoiceInput onResult={handleVoicePrice} />
           </div>
-          <p className="text-[10px] text-slate-400 mt-1">Max: ₹500/kg</p>
+          <p className="text-[10px] text-slate-400 mt-1">Range: ₹0-₹10,000/quintal</p>
         </div>
       </div>
 

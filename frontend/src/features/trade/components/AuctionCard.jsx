@@ -18,6 +18,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Clock, TrendingUp, Users, Gavel } from 'lucide-react';
 import { T } from '../../../context/TranslationContext';
+import { formatQuintalQuantity } from '../../../utils/formatters';
 
 export default function AuctionCard({ auction, onBidClick }) {
     const [timeLeft, setTimeLeft] = useState('');
@@ -91,7 +92,7 @@ export default function AuctionCard({ auction, onBidClick }) {
                         <div className="flex items-center gap-1 text-emerald-600">
                             <TrendingUp size={16} />
                             <span className="text-2xl font-black">₹{auction.currentBid}</span>
-                            <span className="text-sm font-bold">/kg</span>
+                            <span className="text-sm font-bold">/quintal</span>
                         </div>
                     </div>
 
@@ -110,7 +111,7 @@ export default function AuctionCard({ auction, onBidClick }) {
                     </div>
                     <div className="bg-slate-50 rounded-xl p-3">
                         <p className="text-xs text-slate-500 mb-1"><T>Quantity</T></p>
-                        <p className="text-lg font-bold text-slate-900">{auction.quantity}kg</p>
+                        <p className="text-lg font-bold text-slate-900">{formatQuintalQuantity(auction.quantity)}</p>
                     </div>
                 </div>
 
@@ -138,7 +139,7 @@ export default function AuctionCard({ auction, onBidClick }) {
                             <T>Winner:</T> {auction.highestBidderName}
                         </p>
                         <p className="text-xs text-emerald-600 mt-1">
-                            <T>Winning bid:</T> ₹{auction.currentBid}/kg
+                            <T>Winning bid:</T> ₹{auction.currentBid}/quintal
                         </p>
                     </div>
                 )}

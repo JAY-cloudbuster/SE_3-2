@@ -21,12 +21,14 @@ import React from 'react';
 import { T } from '../../../context/TranslationContext';
 import BuyNowButton from './BuyNowButton';
 import NegotiateButton from './NegotiateButton';
+import PlaceBidButton from './PlaceBidButton';
 
 export default function CropActionButtons({
     crop,
     currentUserId = 'buyer_1',
     currentUserRole = 'buyer',
-    onOrderComplete
+    onOrderComplete,
+    onBidPlaced
 }) {
     return (
         <div className="space-y-3">
@@ -40,6 +42,11 @@ export default function CropActionButtons({
                     currentUserId={currentUserId}
                     currentUserRole={currentUserRole}
                 />
+            )}
+
+            {/* Place Bid Button — only for auction-enabled crops */}
+            {crop.auctionEnabled && (
+                <PlaceBidButton crop={crop} onBidPlaced={onBidPlaced} />
             )}
 
             {/* Info Text */}

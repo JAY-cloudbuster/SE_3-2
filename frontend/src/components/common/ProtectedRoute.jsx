@@ -23,6 +23,7 @@
 import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
+import { getRoleHomePath } from '../../utils/authRedirect';
 
 const ProtectedRoute = ({ children, role }) => {
   const { user, loading } = useContext(AuthContext);
@@ -31,7 +32,7 @@ const ProtectedRoute = ({ children, role }) => {
   if (!user) return <Navigate to="/login" />;
   if (role && user.role !== role) {
     // Redirect user back to their own dashboard if they hit a different role path
-    return <Navigate to={`/dashboard/${user.role.toLowerCase()}`} replace />;
+    return <Navigate to={getRoleHomePath(user.role)} replace />;
   }
 
   return children;

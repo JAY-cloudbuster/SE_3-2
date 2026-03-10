@@ -16,11 +16,13 @@
  */
 import { motion } from 'framer-motion';
 import { Star, MapPin, ShieldCheck } from 'lucide-react';
-import { formatCurrency } from '../../../utils/formatters';
-import CurrencyLabel from '../../../components/shared/CurrencyLabel';
+import { formatQuintalRate } from '../../../utils/formatters';
 import CropActionButtons from '../../../features/trade/components/CropActionButtons';
+import { useContext } from 'react';
+import { AuthContext } from '../../../context/AuthContext';
 
 export default function CropCard({ crop, onBuy }) {
+  const { user } = useContext(AuthContext);
   // Story 3.9: Virtual Crop Inspection with quality indicators [cite: 130]
   const qualityColors = {
     A: 'bg-emerald-500 text-white',
@@ -42,6 +44,7 @@ export default function CropCard({ crop, onBuy }) {
     description: `Fresh ${crop.name} from ${crop.farmer?.location || crop.location || 'local farm'}`,
     available: true,
     negotiationEnabled: true,
+    auctionEnabled: true,
   };
 
   return (
@@ -76,8 +79,8 @@ export default function CropCard({ crop, onBuy }) {
         <div className="flex justify-between items-start">
           <h4 className="text-lg font-black text-slate-800 leading-tight">{crop.name}</h4>
           <div className="text-right">
-            <CurrencyLabel amount={crop.price} className="text-emerald-600 font-black text-lg" />
-            <span className="text-xs text-slate-500 block">per kg</span>
+            <div className="text-emerald-600 font-black text-lg">{formatQuintalRate(crop.price)}</div>
+            <span className="text-xs text-slate-500 block">per quintal</span>
           </div>
         </div>
 
@@ -94,8 +97,8 @@ export default function CropCard({ crop, onBuy }) {
           {/* Buy Now & Negotiate Buttons */}
           <CropActionButtons
             crop={cropData}
-            currentUserId="buyer_1"
-            currentUserRole="buyer"
+            currentUserId={user?._id}
+            currentUserRole={(user?.role || 'BUYER').toLowerCase()}
             onOrderComplete={(order) => {
               console.log('Order placed:', order);
               onBuy?.(crop);

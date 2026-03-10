@@ -3,8 +3,7 @@
  * 
  * This is the primary entry point for the AgriSahayak backend application.
  * It initializes the Express server, connects to MongoDB, configures
- * middleware, mounts API routes, sets up Socket.io for real-time
- * communication, and starts listening for incoming requests.
+ * middleware, mounts API routes, and starts listening for requests.
  * 
  * Architecture Overview:
  * ┌──────────────────────────────────────────────┐
@@ -14,18 +13,12 @@
  * │  │Middleware│    │ Parser   │    │ Handler │ │
  * │  └─────────┘    └──────────┘    └─────────┘ │
  * │                                              │
- * │  ┌──────────────────────────────────────────┐│
- * │  │            Socket.io Server              ││
- * │  │  (Real-time bids, chat, notifications)   ││
- * │  └──────────────────────────────────────────┘│
  * └──────────────────────────────────────────────┘
  * 
  * @module server
  * @requires express - Web application framework
  * @requires dotenv - Environment variable loader
  * @requires cors - Cross-Origin Resource Sharing middleware
- * @requires http - Node.js HTTP server (for Socket.io)
- * @requires socket.io - Real-time bidirectional event-based communication
  * @requires config/db - MongoDB connection function
  */
 
@@ -34,8 +27,6 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
 const connectDB = require('./config/db');
-const { createServer } = require('http');
-const { Server } = require('socket.io');
 
 // ============================================================
 // 1. ENVIRONMENT CONFIGURATION
@@ -54,12 +45,10 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 // ============================================================
-// 3. EXPRESS APP & HTTP SERVER INITIALIZATION
-// Create the Express app and wrap it in an HTTP server
-// for Socket.io compatibility (Socket.io needs raw HTTP server)
+// 3. EXPRESS APP INITIALIZATION
+// Create the Express application instance
 // ============================================================
 const app = express();
-const httpServer = createServer(app);
 
 // ============================================================
 // 4. MIDDLEWARE CONFIGURATION
@@ -68,10 +57,15 @@ const httpServer = createServer(app);
 
 /**
  * CORS Middleware - Enables Cross-Origin Resource Sharing
- * Allows the frontend (running on localhost:5173) to make
- * API requests to this backend (running on localhost:5000)
+ * Uses origin reflection so both localhost and deployed frontend origins work
+ * without fragile hardcoded allowlists.
  */
-app.use(cors());
+app.use(cors({
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
 /**
  * JSON Body Parser - Parses incoming request bodies as JSON
@@ -96,6 +90,7 @@ app.get('/health', async (req, res) => {
     
     const status = {
         status: dbStatus === 'connected' ? 'UP' : 'DEGRADED',
+        version: 'v2-841c86d',
         uptime: Math.floor(process.uptime()) + 's',
         timestamp: new Date().toISOString(),
         database: dbStatus,
@@ -177,6 +172,10 @@ app.use('/api/admin', require('./routes/adminRoutes'));
  */
 app.use('/api/decision', require('./routes/decisionRoutes'));
 
+app.use('/api/bids', require('./routes/bidRoutes'));
+app.use('/api/messages', require('./routes/messageRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
+
 // ============================================================
 // 6. GLOBAL ERROR HANDLER MIDDLEWARE
 // Catches all errors thrown by route handlers and middleware
@@ -214,80 +213,8 @@ app.use((err, req, res, next) => {
 });
 
 // ============================================================
-// 7. SOCKET.IO REAL-TIME SERVER SETUP
-// Provides WebSocket-based real-time communication for:
-// - Live auction bidding (Epic 4, Story 4.3)
-// - Negotiation chat messages (Epic 4, Story 4.4)
-// - Real-time order status updates (Epic 4, Story 4.8)
-// ============================================================
-
-/**
- * Socket.io Server Instance
- * 
- * Configured with CORS to allow connections from the Vite dev server
- * (running on port 5173). Supports GET and POST methods for the
- * Socket.io handshake and transport.
- * 
- * @see Epic 4, Story 4.3 - Place Bids (real-time bid updates)
- * @see Epic 4, Story 4.4 - Negotiate Price (real-time chat)
- * @see SocketContext.jsx - Frontend Socket.io client provider
- */
-const io = new Server(httpServer, {
-    cors: {
-        origin: "http://localhost:5173", // Frontend Vite dev server URL
-        methods: ["GET", "POST"]
-    }
-});
-
-/**
- * Socket.io Connection Event Handler
- * 
- * Listens for new WebSocket connections and sets up event handlers
- * for each connected client (user). Currently supports:
- * 
- * 1. join_room - Client joins a specific room (e.g., auction room, negotiation thread)
- * 2. send_message - Client sends a message to a room (broadcast to other room members)
- * 3. disconnect - Client disconnects (cleanup)
- */
-io.on("connection", (socket) => {
-    /** Join Room — client joins auction room, negotiation thread, etc. */
-    socket.on("join_room", (data) => {
-        socket.join(data);
-    });
-
-    /** Send Message — broadcasts chat message to room members */
-    socket.on("send_message", (data) => {
-        socket.to(data.room).emit("receive_message", data);
-    });
-
-    /** Place Bid — broadcasts new bid to all auction room members */
-    socket.on("place_bid", (data) => {
-        socket.to(data.room).emit("new_bid", data);
-    });
-
-    /** Negotiation Offer — broadcasts new price offer to negotiation room */
-    socket.on("negotiation_offer", (data) => {
-        socket.to(data.room).emit("new_offer", data);
-    });
-
-    /** Negotiation Accept — notifies room that deal was accepted */
-    socket.on("negotiation_accept", (data) => {
-        socket.to(data.room).emit("offer_accepted", data);
-    });
-
-    /** Order Update — broadcasts status change to relevant parties */
-    socket.on("order_update", (data) => {
-        socket.to(data.room).emit("order_status_changed", data);
-    });
-
-    /** Disconnect — cleanup and logging */
-    socket.on("disconnect", () => {});
-});
-
-// ============================================================
-// 8. START THE HTTP SERVER
+// 7. START THE HTTP SERVER
 // Listen on the configured port (from .env) or default to 5000
-// Uses httpServer (not app) to support both Express AND Socket.io
 // ============================================================
 module.exports = app;
 app.get("/", (req, res) => {
@@ -297,7 +224,7 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 if (require.main === module) {
-    httpServer.listen(PORT, () => {
+    app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });
 }

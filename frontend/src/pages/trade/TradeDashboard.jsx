@@ -1,77 +1,96 @@
-/**
- * @fileoverview Trade Dashboard Page for AgriSahayak Frontend
- * 
- * Standalone full-screen page that provides a unified view of all
- * trading activities: auctions, negotiations, and orders.
- * 
- * Features:
- * - Stats cards showing counts for active auctions, negotiations, and orders
- * - Tabbed interface: Active Auctions, Negotiations, My Orders
- * - Auction tab: Grid of AuctionCard components
- * - Negotiation tab: Split view (list + NegotiationChat)
- * - Orders tab: Grid of OrderTrackingCard components
- * - Top navbar with Back to Dashboard and Marketplace buttons
- * - Animated tab transitions using Framer Motion AnimatePresence
- * 
- * Uses mock trading data from localStorage (mockTradingData module).
- * 
- * @component TradeDashboard
- * @route /trade (Standalone, no Sidebar/Navbar)
- * 
- * @see Epic 4, Story 4.1 - View Available Auctions
- * @see Epic 4, Story 4.4 - Negotiate Price
- * @see Epic 4, Story 4.7 - Order Tracking
- * @see mockTradingData.js - Data source for trading activities
- */
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Gavel, MessageSquare, Package, CheckCircle, TrendingUp, ArrowLeft } from 'lucide-react';
+import { Gavel, MessageSquare, Package, ArrowLeft, XCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { T } from '../../context/TranslationContext';
+import { formatQuintalRate, formatQuintalQuantity } from '../../utils/formatters';
 import { AuthContext } from '../../context/AuthContext';
-import { getTradingData, initializeTradingData } from '../../data/mockTradingData';
+import { cropService } from '../../services/cropService';
+import { tradeService } from '../../services/tradeService';
 import AuctionCard from '../../features/trade/components/AuctionCard';
-import NegotiationChat from '../../features/trade/components/NegotiationChat';
-import OrderTrackingCard from '../../features/trade/components/OrderTrackingCard';
+import TradeRoom from '../../components/TradeRoom';
 
 export default function TradeDashboard() {
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
     const [activeTab, setActiveTab] = useState('auctions');
-    const [tradingData, setTradingData] = useState({
-        auctions: [],
-        negotiations: [],
-        orders: [],
-    });
-    const [selectedNegotiation, setSelectedNegotiation] = useState(null);
+    const [listings, setListings] = useState([]);
+    const [orders, setOrders] = useState([]);
+    const [selectedAuction, setSelectedAuction] = useState(null);
+    const [selectedNegotiationListing, setSelectedNegotiationListing] = useState(null);
 
-    // Determine correct dashboard route based on user role
-    const dashboardRoute = user?.role === 'BUYER' ? '/dashboard/buyer' : '/dashboard/farmer';
+    const dashboardRoute =
+        user?.role === 'BUYER' ? '/dashboard/buyer' : '/dashboard/farmer';
 
-    // Load data
+    const loadTradeData = async () => {
+        try {
+            const [listingRes, orderRes] = await Promise.all([
+                cropService.getAll(),
+                tradeService.getOrders(),
+            ]);
+            setListings(listingRes.data || []);
+            setOrders(orderRes.data || []);
+        } catch {
+            toast.error('Unable to load trade dashboard data');
+        }
+    };
+
     useEffect(() => {
-        initializeTradingData();
-        const data = getTradingData();
-        setTradingData({
-            auctions: data.auctions.filter(a => a.status === 'active'),
-            negotiations: data.negotiations,
-            orders: data.orders,
-        });
+        loadTradeData();
     }, []);
 
+    const auctions = useMemo(
+        () =>
+            listings.map((listing) => {
+                const created = listing.createdAt ? new Date(listing.createdAt) : new Date();
+                const endTime = new Date(created.getTime() + 6 * 60 * 60 * 1000);
+                return {
+                    id: listing._id,
+                    cropName: listing.name,
+                    farmerName: listing.farmer?.name || 'Farmer',
+                    endTime: endTime.toISOString(),
+                    currentBid: listing.price,
+                    startingPrice: listing.price,
+                    quantity: listing.quantity,
+                    bids: [],
+                    highestBidder: null,
+                    highestBidderName: null,
+                };
+            }),
+        [listings]
+    );
+
+    const handleCancelOrder = async (orderId) => {
+        try {
+            await tradeService.updateOrderStatus(orderId, { status: 'Cancelled' });
+            setOrders((prev) =>
+                prev.map((o) =>
+                    (o._id || o.id) === orderId ? { ...o, status: 'Cancelled' } : o
+                )
+            );
+            toast.success('Order cancelled');
+        } catch {
+            toast.error('Failed to cancel order');
+        }
+    };
+
     const tabs = [
-        { id: 'auctions', label: 'Active Auctions', icon: Gavel, count: tradingData.auctions.length },
-        { id: 'negotiations', label: 'Negotiations', icon: MessageSquare, count: tradingData.negotiations.length },
-        { id: 'orders', label: 'My Orders', icon: Package, count: tradingData.orders.length },
+        { id: 'auctions', label: 'Active Auctions', icon: Gavel, count: auctions.length },
+        {
+            id: 'negotiations',
+            label: 'Negotiations',
+            icon: MessageSquare,
+            count: listings.length,
+        },
+        { id: 'orders', label: 'My Orders', icon: Package, count: orders.length },
     ];
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-            {/* Top Navigation Bar */}
             <div className="bg-white border-b border-slate-200 shadow-md sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-6 py-4">
                     <div className="flex items-center justify-between">
-                        {/* Left: Back Button */}
                         <button
                             onClick={() => navigate(dashboardRoute)}
                             className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-colors shadow-lg"
@@ -79,31 +98,21 @@ export default function TradeDashboard() {
                             <ArrowLeft size={20} />
                             <span><T>Back to Dashboard</T></span>
                         </button>
-
-                        {/* Center: Page Title */}
                         <div className="text-center">
                             <h1 className="text-2xl font-black text-slate-900"><T>Trade Dashboard</T></h1>
                             <p className="text-sm text-slate-500"><T>Manage your trading activities</T></p>
                         </div>
-
-                        {/* Right: Quick Actions */}
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={() => navigate('/marketplace')}
-                                className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-bold transition-colors"
-                                title="Price Negotiation"
-                            >
-                                <T>Marketplace</T>
-                            </button>
-                        </div>
+                        <button
+                            onClick={() => navigate('/marketplace')}
+                            className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-bold transition-colors"
+                        >
+                            <T>Marketplace</T>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            {/* Main Content */}
             <div className="max-w-7xl mx-auto p-8 space-y-8">
-
-                {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -113,7 +122,7 @@ export default function TradeDashboard() {
                     >
                         <div className="flex items-center justify-between mb-4">
                             <Gavel size={32} />
-                            <span className="text-3xl font-black">{tradingData.auctions.length}</span>
+                            <span className="text-3xl font-black">{auctions.length}</span>
                         </div>
                         <p className="text-purple-100 text-sm font-bold"><T>Active Auctions</T></p>
                     </motion.div>
@@ -126,7 +135,7 @@ export default function TradeDashboard() {
                     >
                         <div className="flex items-center justify-between mb-4">
                             <MessageSquare size={32} />
-                            <span className="text-3xl font-black">{tradingData.negotiations.length}</span>
+                            <span className="text-3xl font-black">{listings.length}</span>
                         </div>
                         <p className="text-emerald-100 text-sm font-bold"><T>Ongoing Negotiations</T></p>
                     </motion.div>
@@ -139,24 +148,28 @@ export default function TradeDashboard() {
                     >
                         <div className="flex items-center justify-between mb-4">
                             <Package size={32} />
-                            <span className="text-3xl font-black">{tradingData.orders.length}</span>
+                            <span className="text-3xl font-black">{orders.length}</span>
                         </div>
                         <p className="text-blue-100 text-sm font-bold"><T>Total Orders</T></p>
                     </motion.div>
                 </div>
 
-                {/* Tabs */}
                 <div className="flex gap-2 border-b-2 border-slate-200">
                     {tabs.map((tab) => {
                         const Icon = tab.icon;
                         return (
                             <button
                                 key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`flex items-center gap-2 px-6 py-3 font-bold transition-all relative ${activeTab === tab.id
-                                    ? 'text-emerald-600'
-                                    : 'text-slate-500 hover:text-slate-700'
-                                    }`}
+                                onClick={() => {
+                                    setActiveTab(tab.id);
+                                    setSelectedAuction(null);
+                                    setSelectedNegotiationListing(null);
+                                }}
+                                className={`flex items-center gap-2 px-6 py-3 font-bold transition-all relative ${
+                                    activeTab === tab.id
+                                        ? 'text-emerald-600'
+                                        : 'text-slate-500 hover:text-slate-700'
+                                }`}
                             >
                                 <Icon size={20} />
                                 <span><T>{tab.label}</T></span>
@@ -177,7 +190,6 @@ export default function TradeDashboard() {
                     })}
                 </div>
 
-                {/* Tab Content */}
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={activeTab}
@@ -186,99 +198,143 @@ export default function TradeDashboard() {
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ duration: 0.2 }}
                     >
-                        {/* Auctions Tab */}
                         {activeTab === 'auctions' && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {tradingData.auctions.length === 0 ? (
-                                    <div className="col-span-full text-center py-12">
-                                        <Gavel className="mx-auto text-slate-300 mb-4" size={64} />
-                                        <p className="text-slate-500"><T>No active auctions</T></p>
+                            <>
+                                {selectedAuction ? (
+                                    <div className="space-y-4">
+                                        <button
+                                            onClick={() => setSelectedAuction(null)}
+                                            className="flex items-center gap-2 text-sm text-emerald-600 font-bold hover:underline"
+                                        >
+                                            <ArrowLeft size={16} /> <T>Back to auctions</T>
+                                        </button>
+                                        <TradeRoom
+                                            listingId={selectedAuction.id}
+                                            currentUserRole={user?.role === 'FARMER' ? 'Farmer' : 'Buyer'}
+                                        />
                                     </div>
                                 ) : (
-                                    tradingData.auctions.map((auction) => (
-                                        <AuctionCard
-                                            key={auction.id}
-                                            auction={auction}
-                                            onBidClick={(a) => console.log('Bid on', a)}
-                                        />
-                                    ))
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {auctions.length === 0 ? (
+                                            <div className="col-span-full text-center py-12">
+                                                <Gavel className="mx-auto text-slate-300 mb-4" size={64} />
+                                                <p className="text-slate-500"><T>No active auctions</T></p>
+                                            </div>
+                                        ) : (
+                                            auctions.map((auction) => (
+                                                <AuctionCard
+                                                    key={auction.id}
+                                                    auction={auction}
+                                                    onBidClick={() => setSelectedAuction(auction)}
+                                                />
+                                            ))
+                                        )}
+                                    </div>
                                 )}
-                            </div>
+                            </>
                         )}
 
-                        {/* Negotiations Tab */}
                         {activeTab === 'negotiations' && (
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                {/* Negotiation List */}
-                                <div className="space-y-4">
-                                    {tradingData.negotiations.length === 0 ? (
+                                <div className="space-y-3">
+                                    {listings.length === 0 ? (
                                         <div className="text-center py-12">
                                             <MessageSquare className="mx-auto text-slate-300 mb-4" size={64} />
                                             <p className="text-slate-500"><T>No negotiations</T></p>
                                         </div>
                                     ) : (
-                                        tradingData.negotiations.map((neg) => (
-                                            <motion.div
-                                                key={neg.id}
-                                                onClick={() => setSelectedNegotiation(neg)}
-                                                className={`bg-white rounded-2xl p-6 border-2 cursor-pointer transition-all ${selectedNegotiation?.id === neg.id
-                                                    ? 'border-emerald-500 shadow-lg'
-                                                    : 'border-slate-200 hover:border-emerald-300'
-                                                    }`}
-                                                whileHover={{ scale: 1.02 }}
+                                        listings.map((listing) => (
+                                            <button
+                                                key={listing._id}
+                                                onClick={() => setSelectedNegotiationListing(listing)}
+                                                className={`w-full text-left bg-white rounded-xl p-5 border-2 transition-all ${
+                                                    selectedNegotiationListing?._id === listing._id
+                                                        ? 'border-emerald-500 shadow-lg'
+                                                        : 'border-slate-200 hover:border-emerald-300'
+                                                }`}
                                             >
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <h3 className="font-bold text-lg">{neg.farmerName}</h3>
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${neg.status === 'active' ? 'bg-blue-100 text-blue-700' :
-                                                        neg.status === 'accepted' ? 'bg-green-100 text-green-700' :
-                                                            'bg-red-100 text-red-700'
-                                                        }`}>
-                                                        <T>{neg.status}</T>
+                                                <div className="flex items-center justify-between">
+                                                    <h3 className="font-bold text-slate-900">{listing.name}</h3>
+                                                    <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-bold">
+                                                        <T>ACTIVE</T>
                                                     </span>
                                                 </div>
-                                                <p className="text-sm text-slate-600 mb-2">
-                                                    {neg.messages[neg.messages.length - 1]?.content}
-                                                </p>
-                                                {neg.currentOffer && (
-                                                    <div className="flex items-center gap-2 text-emerald-600">
-                                                        <TrendingUp size={16} />
-                                                        <span className="font-bold">₹{neg.currentOffer.price}/kg</span>
-                                                    </div>
-                                                )}
-                                            </motion.div>
+                                                <p className="text-sm text-slate-500 mt-1">{listing.farmer?.name || 'Farmer'}</p>
+                                                <p className="text-sm text-emerald-600 font-bold mt-2">{formatQuintalRate(listing.price)}</p>
+                                            </button>
                                         ))
                                     )}
                                 </div>
 
-                                {/* Chat View */}
                                 <div>
-                                    {selectedNegotiation ? (
-                                        <NegotiationChat
-                                            negotiationId={selectedNegotiation.id}
-                                            currentUserId="buyer_1"
-                                            currentUserRole="buyer"
+                                    {selectedNegotiationListing ? (
+                                        <TradeRoom
+                                            listingId={selectedNegotiationListing._id}
+                                            currentUserRole={user?.role === 'FARMER' ? 'Farmer' : 'Buyer'}
                                         />
                                     ) : (
                                         <div className="bg-slate-50 rounded-2xl h-[600px] flex items-center justify-center border-2 border-dashed border-slate-300">
-                                            <p className="text-slate-400"><T>Select a negotiation to view chat</T></p>
+                                            <p className="text-slate-400"><T>Select a negotiation to open chat</T></p>
                                         </div>
                                     )}
                                 </div>
                             </div>
                         )}
 
-                        {/* Orders Tab */}
                         {activeTab === 'orders' && (
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                {tradingData.orders.length === 0 ? (
+                                {orders.length === 0 ? (
                                     <div className="col-span-full text-center py-12">
                                         <Package className="mx-auto text-slate-300 mb-4" size={64} />
                                         <p className="text-slate-500"><T>No orders yet</T></p>
                                     </div>
                                 ) : (
-                                    tradingData.orders.map((order) => (
-                                        <OrderTrackingCard key={order.id} order={order} />
-                                    ))
+                                    orders.map((order) => {
+                                        const id = order._id || order.id;
+                                        const item = order.items?.[0];
+                                        return (
+                                            <div key={id} className="bg-white rounded-xl shadow-md p-6 space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                    <h3 className="font-bold text-lg text-gray-900">{item?.name || order.cropName || 'Crop'}</h3>
+                                                    <span
+                                                        className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                                            order.status === 'Delivered'
+                                                                ? 'bg-emerald-100 text-emerald-700'
+                                                                : order.status === 'Cancelled'
+                                                                ? 'bg-red-100 text-red-700'
+                                                                : 'bg-blue-100 text-blue-700'
+                                                        }`}
+                                                    >
+                                                        {order.status || 'Pending'}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs text-gray-400">Order ID: {id}</p>
+                                                <div className="grid grid-cols-3 gap-2 text-sm">
+                                                    <div>
+                                                        <p className="text-gray-400">Quantity</p>
+                                                        <p className="font-bold">{formatQuintalQuantity(item?.quantity || order.quantity)}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-400">Price/quintal</p>
+                                                        <p className="font-bold">{formatQuintalRate(item?.pricePerKg || order.pricePerUnit)}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-400">Total</p>
+                                                        <p className="font-bold text-emerald-600">₹{(order.totalAmount || item?.total || 0).toLocaleString('en-IN')}</p>
+                                                    </div>
+                                                </div>
+                                                {order.status !== 'Cancelled' && order.status !== 'Delivered' && (
+                                                    <button
+                                                        onClick={() => handleCancelOrder(id)}
+                                                        className="flex items-center gap-1 text-sm text-red-600 font-semibold hover:text-red-700 mt-2"
+                                                    >
+                                                        <XCircle size={14} />
+                                                        <T>Cancel Order</T>
+                                                    </button>
+                                                )}
+                                            </div>
+                                        );
+                                    })
                                 )}
                             </div>
                         )}

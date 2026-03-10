@@ -23,9 +23,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Package, MapPin, CreditCard, CheckCircle } from 'lucide-react';
 import { T } from '../../../context/TranslationContext';
 import { useNavigate } from 'react-router-dom';
+import { formatQuintalQuantity, formatQuintalRate } from '../../../utils/formatters';
 
 export default function OrderSummaryModal({ crop, onClose, onConfirm }) {
-    const [quantity, setQuantity] = useState(10);
+    const [quantity, setQuantity] = useState(1);
     const [deliveryAddress, setDeliveryAddress] = useState({
         street: '',
         city: '',
@@ -135,18 +136,18 @@ export default function OrderSummaryModal({ crop, onClose, onConfirm }) {
                                         <p className="text-sm text-slate-500">
                                             <T>From</T> {crop.farmerName} · {crop.farmerLocation}
                                         </p>
-                                        <p className="text-emerald-600 font-bold mt-1">₹{crop.price}/kg</p>
+                                        <p className="text-emerald-600 font-bold mt-1">{formatQuintalRate(crop.price)}</p>
                                     </div>
                                 </div>
 
                                 {/* Quantity Selector */}
                                 <div>
                                     <label className="block text-sm font-bold text-slate-700 mb-2">
-                                        <T>Quantity (kg)</T>
+                                        <T>Quantity (quintals)</T>
                                     </label>
                                     <div className="flex items-center gap-4">
                                         <button
-                                            onClick={() => setQuantity(Math.max(1, quantity - 10))}
+                                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
                                             className="w-12 h-12 bg-slate-200 rounded-xl font-bold text-xl hover:bg-slate-300 transition-colors"
                                         >
                                             -
@@ -158,14 +159,14 @@ export default function OrderSummaryModal({ crop, onClose, onConfirm }) {
                                             className="flex-1 text-center text-2xl font-bold py-3 border-2 border-emerald-200 rounded-xl"
                                         />
                                         <button
-                                            onClick={() => setQuantity(Math.min(crop.quantity, quantity + 10))}
+                                            onClick={() => setQuantity(Math.min(crop.quantity, quantity + 1))}
                                             className="w-12 h-12 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-colors"
                                         >
                                             +
                                         </button>
                                     </div>
                                     <p className="text-xs text-slate-500 mt-2">
-                                        <T>Available:</T> {crop.quantity}kg
+                                        <T>Available:</T> {formatQuintalQuantity(crop.quantity)}
                                     </p>
                                 </div>
 
@@ -299,7 +300,7 @@ export default function OrderSummaryModal({ crop, onClose, onConfirm }) {
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-slate-600"><T>Quantity:</T></span>
-                                        <span className="font-bold">{quantity}kg</span>
+                                        <span className="font-bold">{formatQuintalQuantity(quantity)}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-slate-600"><T>Total Amount:</T></span>

@@ -17,15 +17,16 @@
  * @see App.jsx - Controls visibility based on route and auth status
  */
 import { useContext } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, ShoppingBag, BarChart2, ShieldCheck, Sprout, Store } from 'lucide-react';
+import { Home, ShoppingBag, BarChart2, ShieldCheck, Sprout, Store, MessageSquare, Package } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 import { T } from '../../context/TranslationContext';
 
 export default function Sidebar({ role }) {
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     navigate('/login');
@@ -40,8 +41,9 @@ export default function Sidebar({ role }) {
     { to: '/dashboard/farmer/analytics', icon: <BarChart2 size={20} />, label: 'Market Prices' },
     { to: '/profile/verify', icon: <ShieldCheck size={20} />, label: 'Get Verified' },
   ] : [
-    { to: '/dashboard/buyer', icon: <Home size={20} />, label: 'Discover' },
-    { to: '/dashboard/buyer/orders', icon: <ShoppingBag size={20} />, label: 'My Orders' },
+    { to: '/dashboard/buyer?tab=marketplace', icon: <Store size={20} />, label: 'Marketplace' },
+    { to: '/dashboard/buyer?tab=negotiations', icon: <MessageSquare size={20} />, label: 'Negotiations' },
+    { to: '/dashboard/buyer?tab=orders', icon: <Package size={20} />, label: 'My Orders' },
   ];
 
   return (
@@ -74,29 +76,43 @@ export default function Sidebar({ role }) {
             >
               <NavLink
                 to={link.to}
-                end={link.to === '/dashboard/farmer' || link.to === '/dashboard/buyer'}
-                className={({ isActive }) =>
-                  `flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-medium transition-all duration-300 relative group overflow-hidden ${isActive
-                    ? 'text-emerald-900 bg-emerald-50/80 shadow-sm shadow-emerald-100/50'
-                    : 'text-slate-500 hover:text-emerald-700 hover:bg-white/50'
-                  }`
-                }
+                end={link.to === '/dashboard/farmer'}
+                className={() => {
+                  // For buyer tab links, match by ?tab= search param
+                  const tabParam = new URLSearchParams(link.to.split('?')[1] || '').get('tab');
+                  const currentTab = new URLSearchParams(location.search).get('tab');
+                  const isActive = tabParam
+                    ? currentTab === tabParam || (!currentTab && tabParam === 'marketplace')
+                    : location.pathname === link.to;
+                  return `flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-medium transition-all duration-300 relative group overflow-hidden ${
+                    isActive
+                      ? 'text-emerald-900 bg-emerald-50/80 shadow-sm shadow-emerald-100/50'
+                      : 'text-slate-500 hover:text-emerald-700 hover:bg-white/50'
+                  }`;
+                }}
               >
-                {({ isActive }) => (
-                  <>
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeTab"
-                        className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500"
-                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                      />
-                    )}
-                    <div className={`relative z-10 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
-                      {link.icon}
-                    </div>
-                    <span className="relative z-10"><T>{link.label}</T></span>
-                  </>
-                )}
+                {(() => {
+                  const tabParam = new URLSearchParams(link.to.split('?')[1] || '').get('tab');
+                  const currentTab = new URLSearchParams(location.search).get('tab');
+                  const isActive = tabParam
+                    ? currentTab === tabParam || (!currentTab && tabParam === 'marketplace')
+                    : location.pathname === link.to;
+                  return (
+                    <>
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeTab"
+                          className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500"
+                          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                        />
+                      )}
+                      <div className={`relative z-10 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
+                        {link.icon}
+                      </div>
+                      <span className="relative z-10"><T>{link.label}</T></span>
+                    </>
+                  );
+                })()}
               </NavLink>
             </motion.div>
           ))}

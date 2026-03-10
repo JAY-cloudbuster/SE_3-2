@@ -138,7 +138,12 @@ async function translateInsights({ recommendationLabel, explanation }, targetLan
 const getDecision = asyncHandler(async (req, res) => {
     // Wait for CSV to finish loading if it hasn't yet
     if (!dataLoaded) {
-        await loadCSV();
+        try {
+            await loadCSV();
+        } catch {
+            mandiData = [];
+            dataLoaded = true;
+        }
     }
 
     const { crop } = req.query;
@@ -188,6 +193,23 @@ const getDecision = asyncHandler(async (req, res) => {
 
     // 4. Grab the last 5 aggregated data-points
     const last5 = aggregatedData.slice(-5);
+
+    if (last5.length < 2) {
+        return res.status(200).json({
+            recommendation: 'HOLD',
+            recommendationLabel: 'HOLD',
+            explanation: `Not enough recent data points for "${crop}" to generate a trend forecast.`,
+            predictedPrice: null,
+            projectedPrice3Days: null,
+            slope: null,
+            demandLevel: 'Unknown',
+            chartData: last5.map((row) => ({
+                day: dayLabel(row.priceDate),
+                price: Math.round(row.modalPrice),
+                isPrediction: false,
+            })),
+        });
+    }
 
     // Build regression pairs: x = 1..n, y = averaged modalPrice
     const pairs = last5.map((row, i) => [i + 1, row.modalPrice]);
@@ -262,7 +284,14 @@ const getDecision = asyncHandler(async (req, res) => {
     });
 });
 const getCommodities = asyncHandler(async (_req, res) => {
-    if (!dataLoaded) await loadCSV();
+    if (!dataLoaded) {
+        try {
+            await loadCSV();
+        } catch {
+            mandiData = [];
+            dataLoaded = true;
+        }
+    }
 
     const commodities = [...new Set(mandiData.map((r) => r.commodity))].sort();
     const states = [...new Set(mandiData.map((r) => r.state))].sort();

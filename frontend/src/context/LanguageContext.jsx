@@ -40,7 +40,7 @@ export const LanguageContext = createContext();
  * state and the ability to change it. Used in the App.jsx provider chain.
  * 
  * Provider hierarchy (in App.jsx):
- * AuthProvider → TranslationProvider → LanguageProvider → SocketProvider → BrowserRouter
+ * AuthProvider → TranslationProvider → LanguageProvider → BrowserRouter
  * 
  * @component
  * @param {Object} props
