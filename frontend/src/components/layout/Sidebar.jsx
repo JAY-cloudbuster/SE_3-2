@@ -19,7 +19,7 @@
 import { useContext } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, ShoppingBag, BarChart2, ShieldCheck, Sprout, Store, MessageSquare, Package, Users } from 'lucide-react';
+import { Home, ShoppingBag, BarChart2, ShieldCheck, Sprout, Store, MessageSquare, Package, Users, User } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 import { T } from '../../context/TranslationContext';
 
@@ -41,6 +41,7 @@ export default function Sidebar({ role }) {
     { to: '/dashboard/farmer/inventory', icon: <ShoppingBag size={20} />, label: 'My Crops' },
     { to: '/dashboard/farmer/orders', icon: <ShoppingBag size={20} />, label: 'My Orders' },
     { to: '/dashboard/farmer/analytics', icon: <BarChart2 size={20} />, label: 'Market Prices' },
+    { to: '/dashboard/farmer/profile', icon: <User size={20} />, label: 'Profile' },
     { to: '/profile/verify', icon: <ShieldCheck size={20} />, label: 'Get Verified' },
   ] : [
     { to: '/dashboard/buyer?tab=marketplace', icon: <Store size={20} />, label: 'Marketplace' },

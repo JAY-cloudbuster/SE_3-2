@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, Package, MapPin, Calendar, ArrowRight, Receipt, CreditCard, ShieldCheck } from 'lucide-react';
+import { CheckCircle, Package, MapPin, Calendar, ArrowRight, Receipt, CreditCard, ShieldCheck, Star } from 'lucide-react';
 import { T } from '../../context/TranslationContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { formatQuintalQuantity, formatQuintalRate } from '../../utils/formatters';
+import RateFarmerModal from '../../components/RateFarmerModal';
 
 function parseAddress(address) {
     if (!address) return { line1: 'N/A', line2: '' };
@@ -40,6 +41,7 @@ function normalizeOrder(raw) {
         subtotal,
         shipping,
         total,
+        farmerId: raw.farmer?._id || raw.farmer || null,
         farmerName: raw.farmer?.name || raw.farmerName || 'Farmer',
         buyerName: raw.buyer?.name || raw.buyerName || 'Buyer',
         paymentMethod: (raw.paymentMethod || 'N/A').toUpperCase(),
@@ -54,6 +56,7 @@ function normalizeOrder(raw) {
 export default function OrderConfirmationPage() {
     const location = useLocation();
     const navigate = useNavigate();
+    const [isRateModalOpen, setIsRateModalOpen] = useState(false);
 
     const order = normalizeOrder(location.state?.order);
 
@@ -158,24 +161,44 @@ export default function OrderConfirmationPage() {
                         </span>
                     </div>
 
-                    <div className="pt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="pt-2 grid grid-cols-1 md:grid-cols-3 gap-3">
                         <button
                             onClick={() => navigate('/dashboard/buyer')}
                             className="bg-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-300 transition-colors"
                         >
                             <T>Back to Dashboard</T>
                         </button>
+                        
+                        {order.farmerId && (
+                            <button
+                                onClick={() => setIsRateModalOpen(true)}
+                                className="bg-yellow-50 text-yellow-700 font-bold py-3 rounded-xl hover:bg-yellow-100 transition-colors flex items-center justify-center gap-2 border border-yellow-200"
+                            >
+                                <Star size={18} className="fill-yellow-500 text-yellow-500" />
+                                <T>Rate Farmer</T>
+                            </button>
+                        )}
+                        
                         <button
                             onClick={() => navigate('/orders')}
                             className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-bold py-3 rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-2"
                         >
                             <Receipt size={18} />
-                            <T>View Full Order Tracking</T>
+                            <T>Order Tracking</T>
                             <ArrowRight size={16} />
                         </button>
                     </div>
                 </div>
             </motion.div>
+
+            {order.farmerId && (
+                <RateFarmerModal
+                    isOpen={isRateModalOpen}
+                    onClose={() => setIsRateModalOpen(false)}
+                    farmerId={order.farmerId}
+                    farmerName={order.farmerName}
+                />
+            )}
         </div>
     );
 }

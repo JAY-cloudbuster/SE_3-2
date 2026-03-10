@@ -509,6 +509,11 @@ const createOrder = asyncHandler(async (req, res) => {
         throw new Error('Crop not found');
     }
 
+    if (!crop.farmer) {
+        res.status(404);
+        throw new Error('Associated farmer account not found for this crop');
+    }
+
     if (crop.isSold || crop.status === 'Sold') {
         res.status(400);
         throw new Error('This crop is no longer available');

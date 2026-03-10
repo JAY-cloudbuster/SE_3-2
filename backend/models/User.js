@@ -70,14 +70,32 @@ const userSchema = new mongoose.Schema({
         enum: ['en', 'hi', 'ta', 'bn', 'mr', 'gu', 'kn', 'ml', 'pa', 'or', 'as', 'ur', 'te']
     },
 
-    avatarUrl: {
-        type: String,
-        default: 'avatar_1.png'
+    city: {
+        type: String
     },
 
-    location: {
+    state: {
+        type: String
+    },
+
+    bio: {
         type: String,
-        default: ''
+        maxlength: 200
+    },
+
+    ratings: {
+        type: [Number],
+        default: []
+    },
+
+    ratingAverage: {
+        type: Number,
+        default: 0
+    },
+
+    ratingCount: {
+        type: Number,
+        default: 0
     },
 
     trustScore: {

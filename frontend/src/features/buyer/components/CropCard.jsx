@@ -15,14 +15,16 @@
  * @see CropActionButtons - Buy Now and Negotiate action buttons
  */
 import { motion } from 'framer-motion';
-import { Star, MapPin, ShieldCheck } from 'lucide-react';
+import { Star, MapPin, ShieldCheck, User } from 'lucide-react';
 import { formatQuintalRate } from '../../../utils/formatters';
 import CropActionButtons from '../../../features/trade/components/CropActionButtons';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { AuthContext } from '../../../context/AuthContext';
+import ViewFarmerProfile from '../../../components/ViewFarmerProfile';
 
 export default function CropCard({ crop, onBuy }) {
   const { user } = useContext(AuthContext);
+  const [showProfile, setShowProfile] = useState(false);
   // Story 3.9: Virtual Crop Inspection with quality indicators [cite: 130]
   const qualityColors = {
     A: 'bg-emerald-500 text-white',
@@ -90,8 +92,17 @@ export default function CropCard({ crop, onBuy }) {
         </div>
 
         <div className="pt-2 border-t border-emerald-50">
-          <p className="text-xs text-slate-600 mb-3">
-            By <span className="font-bold text-emerald-700">{crop.farmer?.name || 'Local Farmer'}</span>
+          <p className="text-xs text-slate-600 mb-3 flex justify-between items-center">
+            <span>By <span className="font-bold text-emerald-700">{crop.farmer?.name || 'Local Farmer'}</span></span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowProfile(true);
+              }}
+              className="px-2 py-1 text-[10px] font-bold bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-colors flex items-center gap-1"
+            >
+              <User size={10} /> View Profile
+            </button>
           </p>
 
           {/* Buy Now & Negotiate Buttons */}
@@ -106,6 +117,14 @@ export default function CropCard({ crop, onBuy }) {
           />
         </div>
       </div>
+
+      {showProfile && (
+        <ViewFarmerProfile
+          isOpen={showProfile}
+          onClose={() => setShowProfile(false)}
+          farmerId={cropData.farmerId}
+        />
+      )}
     </motion.div>
   );
 }

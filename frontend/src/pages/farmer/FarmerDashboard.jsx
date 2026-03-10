@@ -26,6 +26,7 @@ import TrustGauge from '../../components/shared/TrustGauge';
 import SmartPostModal from '../../components/SmartPostModal';
 import { cropService } from '../../services/cropService';
 import MarketPrices from '../MarketPrices';
+import FarmerProfile from '../FarmerProfile';
 
 function DashboardOverview() {
   const [refreshKey, setRefreshKey] = React.useState(0);
@@ -109,8 +110,7 @@ export default function FarmerDashboard() {
           <Route index element={<DashboardOverview />} />
           <Route path="inventory" element={<CropList />} />
           <Route path="orders" element={<FarmerOrders />} />
-          <Route path="analytics" element={<MarketPrices />} />
-          {/* Add other sub-routes here as needed */}
+          <Route path="analytics" element={<MarketPrices />} />            <Route path="profile" element={<FarmerProfile />} />          {/* Add other sub-routes here as needed */}
         </Routes>
       </AnimatePresence>
     </div>
