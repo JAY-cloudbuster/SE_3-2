@@ -73,7 +73,7 @@ export default function PriceChart({ crop = 'Tomato' }) {
     labels: dataPoints.map((p) => p.date),
     datasets: [
       {
-        label: `${crop} price (₹/kg)`,
+        label: `${crop} price (₹/quintal)`,
         data: dataPoints.map((p) => p.price),
         borderColor: 'rgba(16, 185, 129, 1)',
         backgroundColor: 'rgba(16, 185, 129, 0.15)',

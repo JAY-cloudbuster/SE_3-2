@@ -6,8 +6,8 @@
  * on the marketplace. Each crop is linked to a farmer (User) via a
  * reference ObjectId.
  * 
- * The schema includes validation rules for quantity (1-200 kg),
- * price (₹1-₹500/kg), and quality grades (A/B/C).
+ * The schema includes validation rules for quantity (1-200 quintals),
+ * price (₹1-₹500/quintal), and quality grades (A/B/C).
  * 
  * @module models/Crop
  * @requires mongoose - MongoDB object modeling tool
@@ -58,8 +58,8 @@ const cropSchema = new mongoose.Schema({
     },
 
     /**
-     * Available quantity of the crop in kilograms.
-     * Restricted to 1-200 kg range per listing to ensure
+    * Available quantity of the crop in quintals.
+    * Restricted to 1-200 quintals per listing to ensure
      * reasonable marketplace listings.
      * Voice input (VoiceInput.jsx) can be used to fill this field.
      * @type {Number}
@@ -71,25 +71,25 @@ const cropSchema = new mongoose.Schema({
     quantity: {
         type: Number,
         required: [true, 'Quantity is required'],
-        min: [1, 'Quantity must be at least 1 kg'],
-        max: [200, 'Quantity cannot exceed 200 kg']
+          min: [0, 'Quantity cannot be negative'],
+          max: [200, 'Quantity cannot exceed 200 quintals']
     },
 
     /**
-     * Price per kilogram in Indian Rupees (₹).
-     * Restricted to ₹1-₹500/kg range to prevent unreasonable pricing.
+      * Price per quintal in Indian Rupees (₹).
+    * Restricted to ₹0-₹10,000/quintal range to prevent unreasonable pricing.
      * Displayed using Indian number formatting (₹1,00,000) via formatCurrency().
      * @type {Number}
      * @required
-     * @min 1
-     * @max 500
+    * @min 0
+    * @max 10000
      * @see Epic 6, Story 6.10 - Indian Number Formatting
      */
     price: {
         type: Number,
         required: [true, 'Price is required'],
-        min: [1, 'Price must be at least ₹1'],
-        max: [500, 'Price cannot exceed ₹500/kg']
+        min: [0, 'Price cannot be negative'],
+        max: [10000, 'Price cannot exceed ₹10,000/quintal']
     },
 
     /**
@@ -106,7 +106,7 @@ const cropSchema = new mongoose.Schema({
     quality: {
         type: String,
         enum: ['A', 'B', 'C'],
-        required: [true, 'Quality grade is required']
+        min: [0, 'Quantity cannot be negative'],
     },
 
     /**

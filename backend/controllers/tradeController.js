@@ -17,6 +17,83 @@ const asyncHandler = require('express-async-handler');
 const Crop = require('../models/Crop');
 const Order = require('../models/Order');
 const Negotiation = require('../models/Negotiation');
+const Bid = require('../models/Bid');
+const User = require('../models/User');
+const { encryptPaymentDetails } = require('../utils/paymentCrypto');
+const { createNotification } = require('../utils/notificationEmitter');
+
+const CARD_NUMBER_REGEX = /^\d{16}$/;
+const CARD_CVV_REGEX = /^\d{3}$/;
+const CARD_NAME_REGEX = /^[A-Za-z ]+$/;
+const UPI_ID_REGEX = /^[^\s@]+@[^\s@]+$/;
+
+function validateExpiryMMYY(expiry) {
+    if (!expiry || typeof expiry !== 'string') {
+        return false;
+    }
+
+    const match = expiry.match(/^(\d{2})\/(\d{2})$/);
+    if (!match) {
+        return false;
+    }
+
+    const month = Number(match[1]);
+    const year = Number(`20${match[2]}`);
+    if (!month || month < 1 || month > 12 || !year) {
+        return false;
+    }
+
+    const now = new Date();
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const selectedMonthStart = new Date(year, month - 1, 1);
+
+    return selectedMonthStart > currentMonthStart;
+}
+
+function validatePaymentPayload(paymentMethod, paymentDetails) {
+    if (!['card', 'upi', 'cod'].includes(paymentMethod)) {
+        return 'Invalid payment method';
+    }
+
+    if (paymentMethod === 'cod') {
+        return '';
+    }
+
+    if (!paymentDetails || typeof paymentDetails !== 'object') {
+        return 'Payment details are required for online payment';
+    }
+
+    if (paymentMethod === 'card') {
+        const number = String(paymentDetails.number || '').replace(/\D/g, '');
+        const cvv = String(paymentDetails.cvv || '').replace(/\D/g, '');
+        const name = String(paymentDetails.name || '').trim();
+        const expiry = String(paymentDetails.expiry || '').trim();
+
+        if (!CARD_NUMBER_REGEX.test(number)) {
+            return 'Card number must contain exactly 16 digits';
+        }
+        if (!CARD_CVV_REGEX.test(cvv)) {
+            return 'CVV must be a 3-digit number';
+        }
+        if (!CARD_NAME_REGEX.test(name)) {
+            return 'Cardholder name must contain only letters and spaces';
+        }
+        if (!validateExpiryMMYY(expiry)) {
+            return 'Card expiry date must be in MM/YY format and in the future';
+        }
+
+        return '';
+    }
+
+    if (paymentMethod === 'upi') {
+        const upiId = String(paymentDetails.upiId || '').trim();
+        if (!UPI_ID_REGEX.test(upiId)) {
+            return 'Enter a valid UPI ID (example: name@upi)';
+        }
+    }
+
+    return '';
+}
 
 /**
  * Place a Bid on an Auction-type Crop
@@ -49,16 +126,155 @@ const placeBid = asyncHandler(async (req, res) => {
         throw new Error(`Bid must be higher than current price of ₹${crop.price}`);
     }
 
+    const bid = await Bid.create({
+        listingId: crop._id,
+        buyerId: req.user.id,
+        farmerId: crop.farmer,
+        amount,
+        status: 'Pending'
+    });
+
     // Update crop price to highest bid
     crop.price = amount;
     await crop.save();
 
+    await createNotification({
+        userId: crop.farmer,
+        role: 'FARMER',
+        title: 'New Bid Received',
+        message: `${req.user.name || 'A buyer'} placed a bid of ₹${amount}/quintal for ${crop.quantity} quintals of ${crop.name}.`,
+        type: 'bid',
+    });
+
     res.status(200).json({
         message: 'Bid placed successfully',
+        bid,
         cropId: crop._id,
         newPrice: amount,
         bidder: req.user.id
     });
+});
+
+/**
+ * Get Incoming Bids for Farmer
+ *
+ * @route GET /api/trade/bids/incoming
+ * @access Private (Farmer)
+ */
+const getIncomingBids = asyncHandler(async (req, res) => {
+    const bids = await Bid.find({ farmerId: req.user.id })
+        .populate('buyerId', 'name phone')
+        .populate('listingId', 'name quantity price quality')
+        .sort({ createdAt: -1 });
+
+    res.status(200).json(bids);
+});
+
+/**
+ * Get Accepted Bids for Buyer
+ *
+ * @route GET /api/trade/bids/accepted
+ * @access Private (Buyer)
+ */
+const getAcceptedBidsForBuyer = asyncHandler(async (req, res) => {
+    await Bid.updateMany(
+        {
+            buyerId: req.user.id,
+            status: 'Accepted',
+            expiresAt: { $lt: new Date() }
+        },
+        {
+            $set: { status: 'Expired' }
+        }
+    );
+
+    const bids = await Bid.find({
+        buyerId: req.user.id,
+        status: 'Accepted',
+        expiresAt: { $gte: new Date() }
+    })
+        .populate('farmerId', 'name phone')
+        .populate('listingId', 'name quantity price quality image location')
+        .sort({ updatedAt: -1 });
+
+    res.status(200).json(bids);
+});
+
+/**
+ * Get Buyer Bid History (posted/accepted/failed/expired/completed)
+ *
+ * @route GET /api/trade/bids/history
+ * @access Private (Buyer)
+ */
+const getBidHistoryForBuyer = asyncHandler(async (req, res) => {
+    await Bid.updateMany(
+        {
+            buyerId: req.user.id,
+            status: 'Accepted',
+            expiresAt: { $lt: new Date() }
+        },
+        {
+            $set: { status: 'Expired' }
+        }
+    );
+
+    const bids = await Bid.find({ buyerId: req.user.id })
+        .populate('farmerId', 'name phone')
+        .populate('listingId', 'name quantity price quality image location')
+        .sort({ createdAt: -1 });
+
+    res.status(200).json(bids);
+});
+
+/**
+ * Update Bid Status
+ *
+ * @route PUT /api/trade/bids/:id/status
+ * @access Private (Farmer)
+ */
+const updateBidStatus = asyncHandler(async (req, res) => {
+    const { status } = req.body;
+
+    if (!status || !['Accepted', 'Rejected'].includes(status)) {
+        res.status(400);
+        throw new Error('Status must be Accepted or Rejected');
+    }
+
+    const bid = await Bid.findById(req.params.id);
+    if (!bid) {
+        res.status(404);
+        throw new Error('Bid not found');
+    }
+
+    if (bid.farmerId.toString() !== req.user.id) {
+        res.status(403);
+        throw new Error('Not authorized to update this bid');
+    }
+
+    bid.status = status;
+    if (status === 'Accepted') {
+        bid.acceptedAt = new Date();
+        bid.expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
+    }
+    await bid.save();
+
+    const listing = await Crop.findById(bid.listingId).select('name quantity');
+    await createNotification({
+        userId: bid.buyerId,
+        role: 'BUYER',
+        title: status === 'Accepted' ? 'Bid Accepted' : 'Bid Rejected',
+        message:
+            status === 'Accepted'
+                ? `Your bid of ₹${bid.amount}/quintal for ${listing?.name || 'crop'} was accepted by Farmer ${req.user.name || ''}.`
+                : `Your bid of ₹${bid.amount}/quintal for ${listing?.name || 'crop'} was rejected by Farmer ${req.user.name || ''}.`,
+        type: 'bid',
+    });
+
+    const populated = await Bid.findById(bid._id)
+        .populate('buyerId', 'name phone')
+        .populate('listingId', 'name quantity price quality');
+
+    res.status(200).json(populated);
 });
 
 /**
@@ -115,6 +331,14 @@ const startNegotiation = asyncHandler(async (req, res) => {
         .populate('farmer', 'name phone')
         .populate('crop', 'name price');
 
+    await createNotification({
+        userId: crop.farmer._id,
+        role: 'FARMER',
+        title: 'New Negotiation Request',
+        message: `${req.user.name || 'A buyer'} started a negotiation for ${crop.name}${offerAmount ? ` with offer ₹${offerAmount}/quintal.` : '.'}`,
+        type: 'message',
+    });
+
     res.status(201).json(populated);
 });
 
@@ -160,6 +384,22 @@ const sendOffer = asyncHandler(async (req, res) => {
     negotiation.messages.push(newMessage);
     negotiation.lastActivity = Date.now();
     await negotiation.save();
+
+    const crop = await Crop.findById(negotiation.crop).select('name');
+    const isBuyerSender = negotiation.buyer.toString() === userId;
+    const targetUserId = isBuyerSender ? negotiation.farmer : negotiation.buyer;
+    const targetRole = isBuyerSender ? 'FARMER' : 'BUYER';
+    const senderLabel = req.user.name || (isBuyerSender ? 'Buyer' : 'Farmer');
+
+    await createNotification({
+        userId: targetUserId,
+        role: targetRole,
+        title: 'New Negotiation Message',
+        message: isBuyerSender
+            ? `${senderLabel} sent a negotiation message for ${crop?.name || 'your crop'}${amount ? ` with offer ₹${amount}/quintal.` : '.'}`
+            : `Farmer ${senderLabel} replied in negotiation for ${crop?.name || 'crop'}${amount ? ` with offer ₹${amount}/quintal.` : '.'}`,
+        type: 'message',
+    });
 
     res.status(200).json(negotiation);
 });
@@ -245,11 +485,22 @@ const rejectNegotiation = asyncHandler(async (req, res) => {
  * @access Private (Buyer)
  */
 const createOrder = asyncHandler(async (req, res) => {
-    const { cropId, quantity, paymentMethod, shippingAddress, negotiationId } = req.body;
+    const { cropId, quantity, paymentMethod, shippingAddress, negotiationId, bidId, paymentDetails } = req.body;
 
     if (!cropId || !paymentMethod || !shippingAddress) {
         res.status(400);
         throw new Error('Crop ID, payment method, and shipping address are required');
+    }
+
+    if (paymentMethod !== 'cod' && (!paymentDetails || Object.keys(paymentDetails).length === 0)) {
+        res.status(400);
+        throw new Error('Payment details are required for online payment');
+    }
+
+    const paymentValidationError = validatePaymentPayload(paymentMethod, paymentDetails);
+    if (paymentValidationError) {
+        res.status(400);
+        throw new Error(paymentValidationError);
     }
 
     const crop = await Crop.findById(cropId).populate('farmer');
@@ -264,7 +515,50 @@ const createOrder = asyncHandler(async (req, res) => {
     }
 
     let pricePerKg = crop.price;
-    let orderQuantity = quantity || crop.quantity;
+    const orderQuantity = Number(quantity || 0);
+
+    if (!orderQuantity || orderQuantity <= 0) {
+        res.status(400);
+        throw new Error('Valid quantity is required');
+    }
+
+    if (orderQuantity > crop.quantity) {
+        res.status(400);
+        throw new Error(`Only ${crop.quantity} quintal(s) available for this crop`);
+    }
+
+    let linkedBid = null;
+
+    // If order is from an accepted bid, enforce buyer ownership and 2-hour expiry.
+    if (bidId) {
+        linkedBid = await Bid.findById(bidId);
+        if (!linkedBid) {
+            res.status(404);
+            throw new Error('Bid not found');
+        }
+
+        if (linkedBid.buyerId.toString() !== req.user.id) {
+            res.status(403);
+            throw new Error('You are not authorized to checkout this bid');
+        }
+
+        if (linkedBid.listingId.toString() !== crop._id.toString()) {
+            res.status(400);
+            throw new Error('Bid does not belong to this crop listing');
+        }
+
+        if (linkedBid.status !== 'Accepted') {
+            res.status(400);
+            throw new Error('Only accepted bids can proceed to payment');
+        }
+
+        if (!linkedBid.expiresAt || new Date(linkedBid.expiresAt) < new Date()) {
+            res.status(400);
+            throw new Error('Bid payment window expired. Please place a new bid.');
+        }
+
+        pricePerKg = linkedBid.amount;
+    }
 
     // If order is from an accepted negotiation, use negotiated price
     if (negotiationId) {
@@ -276,10 +570,15 @@ const createOrder = asyncHandler(async (req, res) => {
 
     const itemTotal = orderQuantity * pricePerKg;
     const shippingCost = 0; // Free shipping
+    const encryptedPayment = encryptPaymentDetails(paymentDetails || {});
+
+    // Determine order type
+    const orderType = linkedBid ? 'bid' : negotiationId ? 'negotiation' : 'buyNow';
 
     const order = await Order.create({
         buyer: req.user.id,
         farmer: crop.farmer._id,
+        listingId: crop._id,
         items: [{
             crop: crop._id,
             name: crop.name,
@@ -290,19 +589,84 @@ const createOrder = asyncHandler(async (req, res) => {
         totalAmount: itemTotal + shippingCost,
         shippingCost,
         paymentMethod,
-        shippingAddress
+        paymentStatus: paymentMethod === 'cod' ? 'pending' : 'paid',
+        orderStatus: 'Pending',
+        shippingAddress,
+        paymentDetailsEncrypted: encryptedPayment.encrypted,
+        paymentDetailsIv: encryptedPayment.iv,
+        paymentDetailsTag: encryptedPayment.tag,
+        sourceBid: linkedBid ? linkedBid._id : undefined,
+        orderType
     });
 
-    // Mark crop as sold
-    crop.isSold = true;
-    crop.status = 'Sold';
+    // Decrement available crop quantity on successful purchase.
+    crop.quantity = Math.max(0, crop.quantity - orderQuantity);
+    if (crop.quantity === 0) {
+        crop.isSold = true;
+        crop.status = 'Sold';
+    }
     await crop.save();
+
+    // Save delivery address user-wise for reuse.
+    await User.findByIdAndUpdate(
+        req.user.id,
+        { $addToSet: { savedAddresses: shippingAddress } },
+        { new: true }
+    );
+
+    if (linkedBid) {
+        linkedBid.status = 'Completed';
+        linkedBid.expiresAt = new Date();
+        await linkedBid.save();
+    }
+
+    // Always notify the farmer — message differs for direct buy vs bid payment
+    if (linkedBid) {
+        await createNotification({
+            userId: crop.farmer._id,
+            role: 'FARMER',
+            title: 'Bid Payment Received',
+            message: `${req.user.name || 'A buyer'} has paid ₹${pricePerKg}/quintal for ${orderQuantity} quintal(s) of ${crop.name}. Order is confirmed.`,
+            type: 'order',
+        });
+    } else {
+        await createNotification({
+            userId: crop.farmer._id,
+            role: 'FARMER',
+            title: 'New Direct Purchase',
+            message: `${req.user.name || 'A buyer'} bought ${orderQuantity} quintal(s) of ${crop.name} at ₹${pricePerKg}/quintal.`,
+            type: 'buy',
+        });
+    }
+
+    await createNotification({
+        userId: req.user.id,
+        role: 'BUYER',
+        title: 'Order Confirmed',
+        message: `Your order for ${crop.name} (${orderQuantity} quintals) is confirmed at ₹${pricePerKg}/quintal.`,
+        type: 'order',
+    });
 
     const populated = await Order.findById(order._id)
         .populate('buyer', 'name phone')
         .populate('farmer', 'name phone');
 
     res.status(201).json(populated);
+});
+
+/**
+ * Get Negotiations for Buyer
+ *
+ * @route GET /api/trade/negotiations/mine
+ * @access Private (Buyer)
+ */
+const getNegotiationsForBuyer = asyncHandler(async (req, res) => {
+    const negotiations = await Negotiation.find({ buyer: req.user.id })
+        .populate('crop', 'name price quantity quality image')
+        .populate('farmer', 'name phone location')
+        .sort({ lastActivity: -1 });
+
+    res.status(200).json(negotiations);
 });
 
 /**
@@ -369,10 +733,15 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
 
 module.exports = {
     placeBid,
+    getIncomingBids,
+    getAcceptedBidsForBuyer,
+    getBidHistoryForBuyer,
+    updateBidStatus,
     startNegotiation,
     sendOffer,
     acceptNegotiation,
     rejectNegotiation,
+    getNegotiationsForBuyer,
     createOrder,
     getOrders,
     updateOrderStatus

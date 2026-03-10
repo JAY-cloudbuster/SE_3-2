@@ -5,14 +5,14 @@
  * showing all crop listings created by the currently logged-in farmer.
  * Data is fetched from the backend via cropService.getMyCrops().
  * 
- * Table columns: Crop Name, Location (with MapPin icon), Quantity (kg),
- * Price/kg (₹), Quality Grade (A/B/C badge), and Actions (Edit/Delete).
+ * Table columns: Crop Name, Location (with MapPin icon), Quantity (quintals),
+ * Price/quintal (₹), Quality Grade (A/B/C badge), and Actions (Edit/Delete).
  * 
  * Current status:
  * - ✅ Data fetching and display works correctly
  * - ✅ Location column with MapPin icon
  * - ✅ Quality grade color-coded badges (A=green, B=yellow, C=grey)
- * - ✅ Price trend indicator (↑ for prices > ₹20/kg)
+ * - ✅ Price trend indicator (↑ for prices > ₹20/quintal)
  * - ⚠️ Edit button (Edit3 icon) - UI only, handler NOT implemented
  * - ⚠️ Delete button (Trash2 icon) - UI only, handler NOT implemented
  * 
@@ -27,7 +27,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Package, TrendingUp, Edit3, Trash2, MapPin } from 'lucide-react';
-
+import { T } from '../../../context/TranslationContext';
 import { cropService } from '../../../services/cropService';
 
 export default function CropList() {
@@ -132,10 +132,10 @@ export default function CropList() {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <Package className="text-emerald-600" size={24} />
-                    <h2 className="text-2xl font-black text-emerald-900">My Harvest Inventory</h2>
+                    <h2 className="text-2xl font-black text-emerald-900"><T>My Harvest Inventory</T></h2>
                 </div>
                 <div className="bg-white/50 px-4 py-2 rounded-xl text-xs font-bold text-emerald-800 border border-emerald-100">
-                    Total Items: {crops.length}
+                    <T>Total Items</T>: {crops.length}
                 </div>
             </div>
 
@@ -144,25 +144,25 @@ export default function CropList() {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-emerald-50/50 border-b border-emerald-100">
-                                <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider">Crop Name</th>
-                                <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider">Location</th>
-                                <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider">Quantity</th>
-                                <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider">Price/kg</th>
-                                <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider">Quality</th>
-                                <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider text-right">Actions</th>
+                                <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider"><T>Crop Name</T></th>
+                                <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider"><T>Location</T></th>
+                                <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider"><T>Quantity</T></th>
+                                <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider"><T>Price/quintal</T></th>
+                                <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider"><T>Quality</T></th>
+                                <th className="p-4 text-xs font-bold uppercase text-slate-500 tracking-wider text-right"><T>Actions</T></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-emerald-50">
                             {loading ? (
                                 <tr>
                                     <td colSpan="6" className="p-8 text-center text-slate-400 text-sm font-medium">
-                                        Loading inventory...
+                                        <T>Loading inventory...</T>
                                     </td>
                                 </tr>
                             ) : crops.length === 0 ? (
                                 <tr>
                                     <td colSpan="6" className="p-8 text-center text-slate-400 text-sm font-medium">
-                                        No crops listed yet. Start by listing a new harvest!
+                                        <T>No crops listed yet. Start by listing a new harvest!</T>
                                     </td>
                                 </tr>
                             ) : (
@@ -208,15 +208,15 @@ export default function CropList() {
                                                     required
                                                 />
                                             ) : (
-                                                <span className="font-semibold text-emerald-700">{crop.quantity} kg</span>
+                                                <span className="font-semibold text-emerald-700">{crop.quantity} quintals</span>
                                             )}
                                         </td>
                                         <td className="p-4">
                                             {editingCropId === crop._id ? (
                                                 <input
                                                     type="number"
-                                                    min="1"
-                                                    max="500"
+                                                    min="0"
+                                                    max="10000"
                                                     value={editData.price}
                                                     onChange={(e) => setEditData((prev) => ({ ...prev, price: e.target.value }))}
                                                     className="w-24 bg-emerald-50/50 p-2 rounded-lg border border-emerald-100 outline-none focus:ring-2 focus:ring-emerald-500"
@@ -243,8 +243,8 @@ export default function CropList() {
                                             ) : (
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-bold
                         ${crop.quality === 'A' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
-                                                    crop.quality === 'B' ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' :
-                                                        'bg-slate-100 text-slate-600 border border-slate-200'}`}>
+                                                        crop.quality === 'B' ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' :
+                                                            'bg-slate-100 text-slate-600 border border-slate-200'}`}>
                                                     Grade {crop.quality}
                                                 </span>
                                             )}
@@ -295,10 +295,10 @@ export default function CropList() {
 
                 {editingCropId && (
                     <div className="p-4 border-t border-emerald-100 bg-emerald-50/30 space-y-3">
-                        <h4 className="text-sm font-bold text-emerald-900">Edit Listing Details</h4>
+                        <h4 className="text-sm font-bold text-emerald-900"><T>Edit Listing Details</T></h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
-                                <label className="text-xs font-bold uppercase text-slate-500 mb-1 block">Description</label>
+                                <label className="text-xs font-bold uppercase text-slate-500 mb-1 block"><T>Description</T></label>
                                 <textarea
                                     value={editData.description}
                                     onChange={(e) => setEditData((prev) => ({ ...prev, description: e.target.value }))}
@@ -308,7 +308,7 @@ export default function CropList() {
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-bold uppercase text-slate-500 mb-1 block">Category</label>
+                                <label className="text-xs font-bold uppercase text-slate-500 mb-1 block"><T>Category</T></label>
                                 <select
                                     value={editData.category}
                                     onChange={(e) => setEditData((prev) => ({ ...prev, category: e.target.value }))}
@@ -324,7 +324,7 @@ export default function CropList() {
                                 </select>
                             </div>
                             <div>
-                                <label className="text-xs font-bold uppercase text-slate-500 mb-1 block">Image Path</label>
+                                <label className="text-xs font-bold uppercase text-slate-500 mb-1 block"><T>Image Path</T></label>
                                 <input
                                     value={editData.image}
                                     onChange={(e) => setEditData((prev) => ({ ...prev, image: e.target.value }))}
@@ -332,7 +332,7 @@ export default function CropList() {
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-bold uppercase text-slate-500 mb-1 block">Status</label>
+                                <label className="text-xs font-bold uppercase text-slate-500 mb-1 block"><T>Status</T></label>
                                 <select
                                     value={editData.status}
                                     onChange={(e) => setEditData((prev) => ({ ...prev, status: e.target.value }))}
@@ -351,7 +351,7 @@ export default function CropList() {
                                     checked={editData.isSold}
                                     onChange={(e) => setEditData((prev) => ({ ...prev, isSold: e.target.checked }))}
                                 />
-                                <label htmlFor="isSold" className="text-sm text-slate-700 font-medium">Mark as sold</label>
+                                <label htmlFor="isSold" className="text-sm text-slate-700 font-medium"><T>Mark as sold</T></label>
                             </div>
                         </div>
                     </div>

@@ -24,8 +24,8 @@ export default function PaymentPage() {
     const order = {
         id: 'ORD-7890',
         items: [
-            { name: 'Organic Red Onions', qty: '50 kg', price: '₹35/kg', total: 1750 },
-            { name: 'Fresh Potatoes', qty: '100 kg', price: '₹18/kg', total: 1800 },
+            { name: 'Organic Red Onions', qty: '50 quintals', price: '₹35/quintal', total: 1750 },
+            { name: 'Fresh Potatoes', qty: '100 quintals', price: '₹18/quintal', total: 1800 },
         ],
         subtotal: 3550,
         shipping: 450,

@@ -9,7 +9,6 @@
  * - ProtectedRoute.jsx (to check if user is authenticated and has correct role)
  * - App.jsx (to conditionally render Sidebar/Navbar based on auth state)
  * - Navbar.jsx (to display user info and logout button)
- * - SocketContext.jsx (to establish WebSocket connection when user is logged in)
  * 
  * Data flow:
  * 1. On app load → checks localStorage for existing session

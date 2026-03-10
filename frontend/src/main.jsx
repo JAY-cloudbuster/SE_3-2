@@ -6,8 +6,7 @@
  * to the DOM, and imports global CSS styles.
  * 
  * Note: React.StrictMode is intentionally not used here to avoid
- * double-rendering in development mode, which can cause issues
- * with Socket.io connections and translation API calls.
+ * double-rendering in development mode.
  * 
  * @module main
  * @requires react - React library
@@ -27,7 +26,7 @@ import './index.css'
  * Finds the HTML element with id="root" (in index.html)
  * and renders the App component tree inside it.
  * The App component wraps the entire application with
- * context providers (Auth, Translation, Language, Socket).
+ * context providers (Auth, Translation, Language, Notifications).
  */
 ReactDOM.createRoot(document.getElementById('root')).render(
   <App />

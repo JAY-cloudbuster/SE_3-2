@@ -168,6 +168,50 @@ const orderSchema = new mongoose.Schema({
     shippingAddress: {
         type: String,
         required: true
+    },
+
+    /**
+     * Encrypted payment payload storage (AES-GCM).
+     */
+    paymentDetailsEncrypted: {
+        type: String,
+        default: ''
+    },
+    paymentDetailsIv: {
+        type: String,
+        default: ''
+    },
+    paymentDetailsTag: {
+        type: String,
+        default: ''
+    },
+
+    /**
+     * Optional accepted bid used for this order checkout.
+     */
+    sourceBid: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Bid'
+    },
+
+    /**
+     * Type of order: direct buy, accepted bid checkout, or negotiated purchase.
+     * @type {String}
+     * @enum {('buyNow'|'bid'|'negotiation')}
+     * @default 'buyNow'
+     */
+    orderType: {
+        type: String,
+        enum: ['buyNow', 'bid', 'negotiation'],
+        default: 'buyNow'
+    },
+
+    /**
+     * Reference to the primary crop listing for quick retrieval.
+     */
+    listingId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Crop'
     }
 }, { timestamps: true }); // Automatically adds createdAt and updatedAt fields
 

@@ -1,8 +1,20 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import LoginForm from './LoginForm';
-import { BrowserRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';
+
+const { mockNavigate } = vi.hoisted(() => ({
+    mockNavigate: vi.fn()
+}));
+
+vi.mock('react-router-dom', async () => {
+    const actual = await vi.importActual('react-router-dom');
+    return {
+        ...actual,
+        useNavigate: () => mockNavigate,
+    };
+});
 
 // Mock LanguageSelector
 vi.mock('../../../components/common/LanguageSelector', () => ({
@@ -31,9 +43,9 @@ describe('Module 1: LoginForm', () => {
     it('renders login form', () => {
         render(
             <AuthContext.Provider value={mockAuthContext}>
-                <BrowserRouter>
+                <MemoryRouter>
                     <LoginForm />
-                </BrowserRouter>
+                </MemoryRouter>
             </AuthContext.Provider>
         );
         expect(screen.getByText('Sign in to your')).toBeInTheDocument();
@@ -51,9 +63,9 @@ describe('Module 1: LoginForm', () => {
 
         render(
             <AuthContext.Provider value={mockAuthContext}>
-                <BrowserRouter>
+                <MemoryRouter>
                     <LoginForm />
-                </BrowserRouter>
+                </MemoryRouter>
             </AuthContext.Provider>
         );
 
@@ -61,12 +73,12 @@ describe('Module 1: LoginForm', () => {
         fireEvent.change(screen.getByPlaceholderText('e.g. 9876543210'), { target: { value: '9999999999' } });
         fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
 
-        // Click Login as Farmer
-        fireEvent.click(screen.getByText('Login as Farmer'));
+        fireEvent.click(screen.getByText('Login'));
 
         await waitFor(() => {
             expect(mockLogin).toHaveBeenCalledWith({ phone: '9999999999', password: 'password123' });
             expect(mockAuthContext.login).toHaveBeenCalled();
+            expect(mockNavigate).toHaveBeenCalledWith('/dashboard/farmer');
         });
     });
 });

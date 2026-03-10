@@ -20,8 +20,8 @@
 ## 4. Data Model (fields & constraints)
 - `name` (String, required)
 - `farmer` (ObjectId → `User`, required)
-- `quantity` (Number, required, min:1, max:200 kg)
-- `price` (Number, required, min:1, max:500 ₹/kg)
+- `quantity` (Number, required, min:1, max:200 quintals)
+- `price` (Number, required, min:0, max:10,000 ₹/quintal)
 - `quality` (String, enum: A|B|C, required)
 - `description` (String, optional, max 500 chars)
 - `image` (String, optional, default: `default_crop.jpg`)
@@ -36,8 +36,8 @@
 - `GET /api/crops` — Get all available (unsold) crops for marketplace; populates farmer name/location/trustScore.
 
 ## 6. Business rules & validation
-- Quantity constrained to 1–200 kg per listing.
-- Price constrained to ₹1–₹500 per kg.
+- Quantity constrained to 1–200 quintals per listing.
+- Price constrained to ₹0–₹10,000 per quintal.
 - Quality limited to A/B/C.
 - Listings with `isSold: true` are excluded from marketplace results.
 

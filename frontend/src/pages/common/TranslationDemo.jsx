@@ -112,7 +112,7 @@ export default function TranslationDemo() {
                         </div>
                         <div>
                             <label className="text-xs font-bold text-slate-600 block mb-1">
-                                <T>Quantity (kg)</T>
+                                <T>Quantity (quintals)</T>
                             </label>
                             <input
                                 type="number"

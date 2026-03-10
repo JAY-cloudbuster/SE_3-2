@@ -1,8 +1,7 @@
 /**
  * @fileoverview Negotiator Component for AgriSahayak Trade System
  * 
- * Minimal real-time price negotiation widget using Socket.IO.
- * Listens for 'receive_offer' events and emits 'send_offer' events.
+ * Minimal price negotiation widget using callback-driven REST flow.
  * Displays a chat-like interface with offer amounts formatted via
  * formatCurrency. Simpler alternative to NegotiationChat; used for
  * quick inline negotiations within modals or panels.
@@ -12,31 +11,23 @@
  * @param {string} props.listingId - The crop listing ID
  * @param {string} props.recipientId - The other party's user ID
  * 
- * @see Epic 4, Story 4.4 - Negotiate Price (Socket-Based)
- * @see SocketContext - Provides the WebSocket connection
+ * @see Epic 4, Story 4.4 - Negotiate Price
  */
-import { useState, useEffect, useContext } from 'react';
-import { SocketContext } from '../../../context/SocketContext';
+import { useState } from 'react';
 import { formatCurrency } from '../../../utils/formatters';
 
-export default function Negotiator({ listingId, recipientId }) {
-  const socket = useContext(SocketContext);
+export default function Negotiator({ listingId, recipientId, onSendOffer }) {
   const [messages, setMessages] = useState([]);
   const [proposal, setProposal] = useState('');
 
-  useEffect(() => {
-    if (!socket) return;
-    // Listen for incoming offers (Story 4.4)
-    socket.on('receive_offer', (data) => {
-      setMessages((prev) => [...prev, data]);
-    });
-    return () => socket.off('receive_offer');
-  }, [socket]);
-
-  const sendOffer = (e) => {
+  const sendOffer = async (e) => {
     e.preventDefault();
+    if (!proposal) return;
+
     const offerData = { listingId, recipientId, amount: proposal, type: 'OFFER' };
-    socket.emit('send_offer', offerData); // Story 4.4
+    if (onSendOffer) {
+      await onSendOffer(offerData);
+    }
     setMessages((prev) => [...prev, { ...offerData, sender: 'me' }]);
     setProposal('');
   };

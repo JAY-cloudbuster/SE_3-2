@@ -22,6 +22,7 @@ import NegotiationChat from '../../features/trade/components/NegotiationChat';
 import AuctionForm from '../../features/trade/components/AuctionForm';
 import AuctionCard from '../../features/trade/components/AuctionCard';
 import OrderTrackingCard from '../../features/trade/components/OrderTrackingCard';
+import { formatQuintalQuantity, formatQuintalRate } from '../../utils/formatters';
 
 export default function TradingDemo() {
     const [activeDemo, setActiveDemo] = useState('buynow');
@@ -129,8 +130,8 @@ export default function TradingDemo() {
                                     <h3 className="font-bold text-xl mb-2">{sampleCrop.name}</h3>
                                     <p className="text-sm text-slate-600 mb-4">{sampleCrop.description}</p>
                                     <div className="flex items-center justify-between mb-4">
-                                        <span className="text-2xl font-black text-emerald-600">₹{sampleCrop.price}/kg</span>
-                                        <span className="text-sm text-slate-500">{sampleCrop.quantity}kg available</span>
+                                        <span className="text-2xl font-black text-emerald-600">{formatQuintalRate(sampleCrop.price)}</span>
+                                        <span className="text-sm text-slate-500">{formatQuintalQuantity(sampleCrop.quantity)} available</span>
                                     </div>
                                 </div>
                                 <BuyNowButton
