@@ -110,6 +110,7 @@ export default function LoginForm() {
     try {
       const res = await authService.adminLogin({ email: adminEmail, password: adminPassword });
       login(res.data);
+      if (res.data.user.language) changeLanguage(res.data.user.language);
       toast.success('Admin login successful!');
       navigate(getRoleHomePath(res.data.user.role));
     } catch (error) {

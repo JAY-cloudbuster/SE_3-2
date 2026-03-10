@@ -43,7 +43,6 @@ export default function Sidebar({ role }) {
   ] : role === 'FARMER' ? [
     { to: '/dashboard/farmer', icon: <Home size={20} />, label: 'Overview' },
     { to: '/dashboard/farmer/inventory', icon: <ShoppingBag size={20} />, label: 'My Crops' },
-    { to: '/marketplace', icon: <Store size={20} />, label: 'Marketplace' },
     { to: '/dashboard/farmer/orders', icon: <ShoppingBag size={20} />, label: 'My Orders' },
     { to: '/dashboard/farmer/analytics', icon: <BarChart2 size={20} />, label: 'Market Prices' },
     { to: '/profile/verify', icon: <ShieldCheck size={20} />, label: 'Get Verified' },

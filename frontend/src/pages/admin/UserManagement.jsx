@@ -11,7 +11,7 @@ export default function UserManagement() {
   const [search, setSearch] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', phone: '', role: 'FARMER' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', role: 'FARMER', language: 'en' });
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -40,7 +40,7 @@ export default function UserManagement() {
     try {
       await adminService.createUser(form);
       toast.success(`${form.role} account created! Activation email sent.`);
-      setForm({ name: '', email: '', phone: '', role: roleFilter });
+      setForm({ name: '', email: '', phone: '', role: roleFilter, language: 'en' });
       setShowCreateForm(false);
       fetchUsers();
     } catch (error) {
@@ -92,7 +92,7 @@ export default function UserManagement() {
           />
         </div>
 
-        <button onClick={() => { setForm({ ...form, role: roleFilter }); setShowCreateForm(true); }} className="btn-primary flex items-center gap-2 bg-gradient-to-br from-emerald-600 to-emerald-700">
+          <button onClick={() => { setForm({ ...form, role: roleFilter, language: 'en' }); setShowCreateForm(true); }} className="btn-primary flex items-center gap-2 bg-gradient-to-br from-emerald-600 to-emerald-700">
           <UserPlus size={16} /> <T>Create User</T>
         </button>
         <button onClick={fetchUsers} className="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-200 transition-all">
@@ -143,6 +143,30 @@ export default function UserManagement() {
                       {r}
                     </button>
                   ))}
+                </div>
+              </div>
+              <div>
+                <label className="label-text"><T>Preferred Language</T></label>
+                <div className="relative">
+                  <select
+                    className="input-field pl-3 w-full"
+                    value={form.language || 'en'}
+                    onChange={e => setForm({ ...form, language: e.target.value })}
+                  >
+                    <option value="en">English</option>
+                    <option value="hi">Hindi</option>
+                    <option value="bn">Bengali</option>
+                    <option value="te">Telugu</option>
+                    <option value="mr">Marathi</option>
+                    <option value="ta">Tamil</option>
+                    <option value="gu">Gujarati</option>
+                    <option value="kn">Kannada</option>
+                    <option value="ml">Malayalam</option>
+                    <option value="pa">Punjabi</option>
+                    <option value="or">Odia</option>
+                    <option value="as">Assamese</option>
+                    <option value="ur">Urdu</option>
+                  </select>
                 </div>
               </div>
               <div className="flex gap-3 pt-2">
