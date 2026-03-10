@@ -19,176 +19,277 @@
 
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const asyncHandler = require('express-async-handler');
+const { sendOTPEmail } = require('../utils/emailService');
 
-/**
- * Generate a JSON Web Token (JWT) for user authentication.
- * 
- * Creates a signed JWT containing the user's MongoDB ObjectId as payload.
- * The token uses the secret key from environment variable JWT_SECRET
- * and expires after 30 days.
- * 
- * This token is sent to the client on successful login/register and
- * must be included in the Authorization header (as Bearer token)
- * for all subsequent protected API requests.
- * 
- * @function generateToken
- * @param {String} id - The user's MongoDB ObjectId (_id)
- * @returns {String} Signed JWT string
- * @see Epic 1, Story 1.2 (Task 3) - JWT generation on successful login
- */
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: '30d', // Token valid for 30 days
+        expiresIn: '30d',
     });
 };
 
 /**
- * Register a New User
- * 
- * Creates a new user account in the database with the provided details.
- * The password is automatically hashed by the User model's pre-save middleware
- * (see User.js). On success, returns the created user data along with
- * a JWT token for immediate authentication.
- * 
- * @route POST /api/auth/register
- * @access Public - No authentication required
- * 
- * @param {Object} req.body - Registration payload
- * @param {String} req.body.phone - 10-digit phone number (required, must be unique)
- * @param {String} req.body.password - Password, minimum 6 characters (required)
- * @param {String} req.body.role - User role: 'FARMER' or 'BUYER' (optional, defaults to FARMER)
- * @param {String} req.body.language - Preferred language code, e.g., 'hi' (optional, defaults to 'en')
- * @param {String} req.body.avatarUrl - Selected avatar filename (optional, defaults to 'avatar_1.png')
- * @param {String} req.body.name - User's display name (optional)
- * 
- * @returns {Object} 201 - Success response with token and user data
- * @returns {Object} 400 - Missing required fields or user already exists
- * 
- * @example
- * // Request body
- * { "phone": "9876543210", "password": "secure123", "role": "FARMER", "language": "hi" }
- * 
- * // Response
- * { "success": true, "token": "eyJhb...", "user": { "_id": "...", "phone": "9876543210", "role": "FARMER" } }
- * 
- * @see Epic 1, Story 1.1 - Register as Farmer/Buyer
- */
-const registerUser = asyncHandler(async (req, res) => {
-    // Destructure registration fields from request body
-    const { phone, password, role, language, avatarUrl, name } = req.body;
-
-    // Validate that required fields are present
-    if (!phone || !password) {
-        res.status(400);
-        throw new Error('Please add all required fields');
-    }
-
-    // Check if a user with this phone number already exists in the database
-    const userExists = await User.findOne({ phone });
-
-    if (userExists) {
-        res.status(400);
-        throw new Error('User already exists');
-    }
-
-    // Password hashing is handled automatically by the User model's
-    // pre-save middleware (bcryptjs with 10 salt rounds)
-
-    // Create the new user document in MongoDB
-    const user = await User.create({
-        phone,
-        password,   // Will be hashed by pre-save middleware
-        role,       // 'FARMER' or 'BUYER' (defaults to 'FARMER')
-        language,   // Language preference code (defaults to 'en')
-        avatarUrl,  // Avatar image filename (defaults to 'avatar_1.png')
-        name        // Display name
-    });
-
-    // If user was created successfully, respond with user data and JWT token
-    if (user) {
-        res.status(201).json({
-            success: true,
-            token: generateToken(user._id), // Generate JWT for immediate auth
-            user: {
-                _id: user._id,
-                phone: user.phone,
-                role: user.role,
-                name: user.name,
-                language: user.language
-            }
-        });
-    } else {
-        // This catch handles unexpected creation failures
-        res.status(400);
-        throw new Error('Invalid user data');
-    }
-});
-
-/**
- * Authenticate/Login User
- * 
- * Authenticates a user by verifying their phone number and password.
- * Looks up the user by phone, then uses bcrypt to compare the entered
- * password against the stored hash. On success, returns user data
- * with a fresh JWT token.
- * 
- * Note: The `.select('+password')` is required because the password
- * field has `select: false` in the User schema (excluded by default).
- * 
- * @route POST /api/auth/login
- * @access Public - No authentication required
- * 
- * @param {Object} req.body - Login credentials
- * @param {String} req.body.phone - 10-digit phone number
- * @param {String} req.body.password - Plain-text password to verify
- * 
- * @returns {Object} 200 - Success response with token and user data (including role for redirect)
- * @returns {Object} 401 - Invalid phone number or password
- * 
- * @example
- * // Request body
- * { "phone": "9876543210", "password": "secure123" }
- * 
- * // Response (used by frontend for role-based redirect)
- * { "success": true, "token": "eyJhb...", "user": { "role": "FARMER" } }
- * 
- * @see Epic 1, Story 1.2 - Login with Phone & Password
- * @see Epic 1, Story 1.8 - Role-Based Redirect (response includes role)
+ * Normal Login - Phone Number + Password (for activated accounts)
+ * POST /api/auth/login
  */
 const loginUser = asyncHandler(async (req, res) => {
-    // Extract login credentials from request body
     const { phone, password } = req.body;
 
-    // Find user by phone number and explicitly include the password field
-    // (.select('+password') overrides the schema's `select: false` setting)
+    if (!phone || !password) {
+        res.status(400);
+        throw new Error('Phone number and password are required');
+    }
+
     const user = await User.findOne({ phone }).select('+password');
 
-    // Verify both that the user exists AND the password matches
-    // user.matchPassword() uses bcrypt.compare() internally
-    if (user && (await user.matchPassword(password))) {
-        // Authentication successful - return user data with JWT
-        res.json({
-            success: true,
-            token: generateToken(user._id), // Fresh JWT valid for 30 days
-            user: {
-                _id: user._id,
-                phone: user.phone,
-                role: user.role,        // Used by frontend for role-based redirect
-                name: user.name,
-                language: user.language  // Used to set initial UI language
-            }
-        });
-    } else {
-        // Authentication failed - generic message to avoid leaking info
-        // about whether the phone number exists
+    if (!user) {
         res.status(401);
         throw new Error('Invalid credentials');
     }
+
+    if (!user.isActive) {
+        res.status(403);
+        throw new Error('Account not activated. Please activate your account first.');
+    }
+
+    if (user.isBanned) {
+        res.status(403);
+        throw new Error('Your account has been banned. Contact admin.');
+    }
+
+    if (!(await user.matchPassword(password))) {
+        res.status(401);
+        throw new Error('Invalid credentials');
+    }
+
+    // Admin can also login with phone+password
+    res.json({
+        success: true,
+        token: generateToken(user._id),
+        user: {
+            _id: user._id,
+            phone: user.phone,
+            role: user.role,
+            name: user.name,
+            language: user.language,
+            isActive: user.isActive,
+            isFirstLogin: user.isFirstLogin,
+        },
+    });
 });
 
-// Export controller functions for use in authRoutes.js
+/**
+ * Admin Login - Email + Password (Admin uses email to login)
+ * POST /api/auth/admin-login
+ */
+const adminLogin = asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+    const normalizedEmail = (email || '').trim().toLowerCase();
+
+    if (!normalizedEmail || !password) {
+        res.status(400);
+        throw new Error('Email and password are required');
+    }
+
+    const user = await User.findOne({ email: normalizedEmail, role: 'ADMIN' }).select('+password');
+
+    if (!user || !(await user.matchPassword(password))) {
+        res.status(401);
+        throw new Error('Invalid admin credentials');
+    }
+
+    res.json({
+        success: true,
+        token: generateToken(user._id),
+        user: {
+            _id: user._id,
+            phone: user.phone,
+            email: user.email,
+            role: user.role,
+            name: user.name,
+            language: user.language,
+            isActive: user.isActive,
+            isFirstLogin: user.isFirstLogin,
+        },
+    });
+});
+
+/**
+ * Activate Account - Step 1: Verify email + temp password
+ * POST /api/auth/activate
+ */
+const activateAccount = asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        res.status(400);
+        throw new Error('Email and temporary password are required');
+    }
+
+    const user = await User.findOne({ email }).select('+password');
+
+    if (!user) {
+        res.status(404);
+        throw new Error('Account not found');
+    }
+
+    if (user.isActive && !user.isFirstLogin) {
+        res.status(400);
+        throw new Error('Account is already activated');
+    }
+
+    if (!(await user.matchPassword(password))) {
+        res.status(401);
+        throw new Error('Invalid temporary password');
+    }
+
+    res.json({
+        success: true,
+        message: 'Credentials verified. Please set your new password.',
+        userId: user._id,
+    });
+});
+
+/**
+ * Set New Password - Step 2: Change password during activation
+ * POST /api/auth/set-password
+ */
+const setNewPassword = asyncHandler(async (req, res) => {
+    const { userId, newPassword } = req.body;
+
+    if (!userId || !newPassword) {
+        res.status(400);
+        throw new Error('User ID and new password are required');
+    }
+
+    // Validate password complexity
+    if (newPassword.length < 8) {
+        res.status(400);
+        throw new Error('Password must be at least 8 characters');
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+        res.status(400);
+        throw new Error('Password must contain at least one uppercase letter');
+    }
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword)) {
+        res.status(400);
+        throw new Error('Password must contain at least one special symbol');
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    user.password = newPassword; // Will be hashed by pre-save middleware
+    await user.save();
+
+    // Generate and send OTP
+    const otp = crypto.randomInt(100000, 999999).toString();
+    user.otp = otp;
+    user.otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    await User.updateOne(
+        { _id: user._id },
+        { otp, otpExpiry: user.otpExpiry }
+    );
+
+    await sendOTPEmail(user.email, otp);
+
+    res.json({
+        success: true,
+        message: 'Password updated. OTP sent to your email.',
+        userId: user._id,
+    });
+});
+
+/**
+ * Verify OTP - Step 3: Complete activation
+ * POST /api/auth/verify-otp
+ */
+const verifyOTP = asyncHandler(async (req, res) => {
+    const { userId, otp } = req.body;
+
+    if (!userId || !otp) {
+        res.status(400);
+        throw new Error('User ID and OTP are required');
+    }
+
+    const user = await User.findById(userId).select('+otp +otpExpiry');
+
+    if (!user) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    if (!user.otp || !user.otpExpiry) {
+        res.status(400);
+        throw new Error('No OTP requested. Please restart the activation process.');
+    }
+
+    if (new Date() > user.otpExpiry) {
+        res.status(400);
+        throw new Error('OTP has expired. Please restart the activation process.');
+    }
+
+    if (user.otp !== otp) {
+        res.status(400);
+        throw new Error('Invalid OTP');
+    }
+
+    // Activation complete
+    user.isActive = true;
+    user.isFirstLogin = false;
+    user.otp = undefined;
+    user.otpExpiry = undefined;
+    await user.save();
+
+    res.json({
+        success: true,
+        message: 'Account activated successfully. You can now login with your phone number and password.',
+    });
+});
+
+/**
+ * Resend OTP
+ * POST /api/auth/resend-otp
+ */
+const resendOTP = asyncHandler(async (req, res) => {
+    const { userId } = req.body;
+
+    if (!userId) {
+        res.status(400);
+        throw new Error('User ID is required');
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    const otp = crypto.randomInt(100000, 999999).toString();
+    user.otp = otp;
+    user.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+    await User.updateOne(
+        { _id: user._id },
+        { otp, otpExpiry: user.otpExpiry }
+    );
+
+    await sendOTPEmail(user.email, otp);
+
+    res.json({
+        success: true,
+        message: 'OTP resent to your email.',
+    });
+});
+
 module.exports = {
-    registerUser,
     loginUser,
+    adminLogin,
+    activateAccount,
+    setNewPassword,
+    verifyOTP,
+    resendOTP,
 };

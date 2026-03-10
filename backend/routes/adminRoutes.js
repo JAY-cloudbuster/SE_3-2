@@ -11,6 +11,7 @@
 const express = require('express');
 const router = express.Router();
 const {
+    createUser,
     getAllUsers,
     verifyUser,
     banUser,
@@ -19,6 +20,7 @@ const {
 const { protect, admin } = require('../middlewares/authMiddleware');
 
 // All admin routes require authentication AND admin role
+router.post('/create-user', protect, admin, createUser);
 router.get('/users', protect, admin, getAllUsers);
 router.put('/users/:id/verify', protect, admin, verifyUser);
 router.put('/users/:id/ban', protect, admin, banUser);

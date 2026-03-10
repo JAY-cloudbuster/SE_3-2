@@ -19,7 +19,11 @@
 import { useContext } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+<<<<<<< HEAD
 import { Home, ShoppingBag, BarChart2, ShieldCheck, Sprout, Store, MessageSquare, Package } from 'lucide-react';
+=======
+import { Home, ShoppingBag, BarChart2, ShieldCheck, Sprout, Store, MessageSquare, Package, Users } from 'lucide-react';
+>>>>>>> b8cb29e328c529878dcef292c96e56eca1d76026
 import { AuthContext } from '../../context/AuthContext';
 import { T } from '../../context/TranslationContext';
 
@@ -33,7 +37,10 @@ export default function Sidebar({ role }) {
     logout();
   };
 
-  const links = role === 'FARMER' ? [
+  const links = role === 'ADMIN' ? [
+    { to: '/admin/users', icon: <Users size={20} />, label: 'User Management' },
+    { to: '/admin/moderation', icon: <ShieldCheck size={20} />, label: 'Moderation' },
+  ] : role === 'FARMER' ? [
     { to: '/dashboard/farmer', icon: <Home size={20} />, label: 'Overview' },
     { to: '/dashboard/farmer/inventory', icon: <ShoppingBag size={20} />, label: 'My Crops' },
     { to: '/marketplace', icon: <Store size={20} />, label: 'Marketplace' },

@@ -21,20 +21,25 @@
 
 const express = require('express');
 const router = express.Router();
-const { registerUser, loginUser } = require('../controllers/authController');
+const {
+    loginUser,
+    adminLogin,
+    activateAccount,
+    setNewPassword,
+    verifyOTP,
+    resendOTP,
+} = require('../controllers/authController');
 
-/**
- * @route POST /api/auth/register
- * @description Register a new user with phone, password, and role
- * @access Public
- */
-router.post('/register', registerUser);
-
-/**
- * @route POST /api/auth/login
- * @description Authenticate user and return JWT token
- * @access Public
- */
+// Normal login (Phone + Password) - for activated farmers/buyers
 router.post('/login', loginUser);
+
+// Admin login (Email + Password)
+router.post('/admin-login', adminLogin);
+
+// Activation flow
+router.post('/activate', activateAccount);
+router.post('/set-password', setNewPassword);
+router.post('/verify-otp', verifyOTP);
+router.post('/resend-otp', resendOTP);
 
 module.exports = router;

@@ -31,181 +31,102 @@ const bcrypt = require('bcryptjs');
  * via the { timestamps: true } option.
  */
 const userSchema = new mongoose.Schema({
-    /**
-     * User's phone number - serves as the primary login identifier.
-     * Must be exactly 10 digits (Indian phone number format).
-     * Enforced as unique to prevent duplicate registrations.
-     * @type {String}
-     * @required
-     * @unique
-     */
     phone: {
         type: String,
-        required: [true, 'Phone number is required'],
         unique: true,
+        sparse: true,
         trim: true,
         match: [/^\d{10}$/, 'Please enter a valid 10-digit phone number']
     },
 
-    /**
-     * User's email address (optional).
-     * The `sparse: true` index allows multiple users to have null/undefined email
-     * while still enforcing uniqueness for users who do provide an email.
-     * @type {String}
-     * @optional
-     */
     email: {
         type: String,
         trim: true,
         unique: true,
-        sparse: true // Allows null/unique - permits multiple null values in unique index
+        sparse: true
     },
 
-    /**
-     * User's hashed password.
-     * The `select: false` option ensures the password field is excluded from
-     * query results by default. Use `.select('+password')` to explicitly include it
-     * (e.g., during login authentication).
-     * 
-     * Raw password is hashed automatically by the pre-save middleware below.
-     * @type {String}
-     * @required
-     * @minlength 6
-     */
     password: {
         type: String,
         required: [true, 'Password is required'],
         minlength: 6,
-        select: false // Excluded from queries by default for security
+        select: false
     },
 
-    /**
-     * User's role on the platform, determining their access level and UI experience.
-     * - FARMER: Can create crop listings, manage harvests, participate in auctions
-     * - BUYER: Can browse marketplace, purchase crops, place bids
-     * - ADMIN: Can access moderation dashboard, approve verifications
-     * 
-     * Defaults to 'FARMER' if not specified during registration.
-     * @type {String}
-     * @enum {('FARMER'|'BUYER'|'ADMIN')}
-     * @default 'FARMER'
-     */
     role: {
         type: String,
         enum: ['FARMER', 'BUYER', 'ADMIN'],
         default: 'FARMER'
     },
 
-    /**
-     * User's display name shown across the platform (profile, listings, chat).
-     * @type {String}
-     * @optional
-     */
     name: {
         type: String,
         trim: true
     },
 
-    /**
-     * User's preferred language code for UI translation.
-     * Supported languages include major Indian languages.
-     * Used by the TranslationContext on the frontend to render
-     * the interface in the user's chosen language.
-     * 
-     * Language codes follow ISO 639-1 standard:
-     * en=English, hi=Hindi, ta=Tamil, bn=Bengali, mr=Marathi,
-     * gu=Gujarati, kn=Kannada, ml=Malayalam, pa=Punjabi,
-     * or=Odia, as=Assamese, ur=Urdu, te=Telugu
-     * 
-     * @type {String}
-     * @default 'en'
-     * @see Epic 1, Story 1.3 - Select Preferred Language
-     * @see Epic 6, Story 6.1 - Persist Interface Language
-     */
     language: {
         type: String,
         default: 'en',
         enum: ['en', 'hi', 'ta', 'bn', 'mr', 'gu', 'kn', 'ml', 'pa', 'or', 'as', 'ur', 'te']
     },
 
-    /**
-     * Filename of the user's selected avatar image.
-     * Users choose from a set of predefined avatar images (no file upload).
-     * The frontend resolves this to a full image path for display.
-     * @type {String}
-     * @default 'avatar_1.png'
-     * @see Epic 1, Story 1.4 - Set Profile Picture
-     */
     avatarUrl: {
         type: String,
         default: 'avatar_1.png'
     },
 
-    /**
-     * User's location as a free-text string (e.g., "Pune, Maharashtra").
-     * Used as a default location when creating crop listings
-     * and for display on user profiles.
-     * @type {String}
-     * @default ''
-     * @see Epic 1, Story 1.5 - Add Location
-     */
     location: {
         type: String,
         default: ''
     },
 
-    /**
-     * Numerical trust/reputation score for the user (0-100 scale).
-     * Intended to be computed from:
-     * - Verification status (30%)
-     * - Ratings received (40%)
-     * - Dispute history (20%)
-     * - Platform activity (10%)
-     * 
-     * Currently defaults to 100 for new users. Backend calculation
-     * logic is planned for future implementation.
-     * @type {Number}
-     * @default 100
-     * @see Epic 7, Story 7.10 - Trust Score Calculation
-     */
     trustScore: {
         type: Number,
         default: 100
     },
 
-    /**
-     * Whether the user has been verified by an admin.
-     * Verified users get a badge and higher trust score.
-     * @type {Boolean}
-     * @default false
-     * @see Epic 7, Story 7.1 - Request Verification
-     */
     isVerified: {
         type: Boolean,
         default: false
     },
 
-    /**
-     * Whether the user has been banned by an admin.
-     * Banned users cannot login or perform any actions.
-     * @type {Boolean}
-     * @default false
-     * @see Epic 7, Story 7.7 - Moderation Dashboard
-     */
     isBanned: {
         type: Boolean,
         default: false
     },
 
+<<<<<<< HEAD
     /**
      * Saved delivery addresses used during checkout.
      * Stored user-wise to auto-reuse previous addresses.
      */
+=======
+    isActive: {
+        type: Boolean,
+        default: false
+    },
+
+    isFirstLogin: {
+        type: Boolean,
+        default: true
+    },
+
+    otp: {
+        type: String,
+        select: false
+    },
+
+    otpExpiry: {
+        type: Date,
+        select: false
+    },
+
+>>>>>>> b8cb29e328c529878dcef292c96e56eca1d76026
     savedAddresses: {
         type: [String],
         default: []
     }
-}, { timestamps: true }); // Automatically adds createdAt and updatedAt fields
+}, { timestamps: true });
 
 /**
  * Pre-save Middleware: Password Hashing

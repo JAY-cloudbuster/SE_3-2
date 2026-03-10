@@ -60,8 +60,8 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 // RegisterForm: Multi-step registration with role, language, avatar selection
 // LoginForm: Phone + password authentication
 // ============================================================
-import RegisterForm from './features/auth/components/RegisterForm';
 import LoginForm from './features/auth/components/LoginForm';
+import UserManagement from './pages/admin/UserManagement';
 
 // ============================================================
 // DASHBOARD PAGE COMPONENTS
@@ -119,7 +119,7 @@ function AppContent() {
    * - /trade (full-screen trade dashboard)
    * - /buy/* (full-screen buy now/payment page)
    */
-  const isStandalonePage = location.pathname === '/login' || location.pathname === '/register' || location.pathname.startsWith('/negotiation') || location.pathname.startsWith('/trade') || location.pathname.startsWith('/buy');
+  const isStandalonePage = location.pathname === '/login' || location.pathname.startsWith('/negotiation') || location.pathname.startsWith('/trade') || location.pathname.startsWith('/buy');
 
   // Show loading screen while AuthContext checks for stored session
   if (loading) {
@@ -153,7 +153,6 @@ function AppContent() {
           <Routes>
             {/* ==================== PUBLIC ROUTES ==================== */}
             {/* These routes are accessible without authentication */}
-            <Route path="/register" element={<RegisterForm />} />
             <Route path="/login" element={<LoginForm />} />
 
             {/* ==================== STANDALONE ROUTES ==================== */}
@@ -213,6 +212,14 @@ function AppContent() {
               element={
                 <ProtectedRoute role="ADMIN">
                   <ModerationDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute role="ADMIN">
+                  <UserManagement />
                 </ProtectedRoute>
               }
             />

@@ -41,7 +41,10 @@ dotenv.config();
 // Skipped in test environment (tests manage their own connection)
 // ============================================================
 if (process.env.NODE_ENV !== 'test') {
-    connectDB();
+    connectDB().then(() => {
+        const seedAdmin = require('./scripts/seedAdmin');
+        seedAdmin();
+    });
 }
 
 // ============================================================
