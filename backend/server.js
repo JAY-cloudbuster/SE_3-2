@@ -60,13 +60,25 @@ const app = express();
 
 /**
  * CORS Middleware - Enables Cross-Origin Resource Sharing
- * Uses origin reflection so both localhost and deployed frontend origins work
- * without fragile hardcoded allowlists.
- */
-app.use(cors({
-    origin: true,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+   * Allows requests from both localhost and deployed Vercel frontend.
+   */
+  const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'https://se-3-2.vercel.app',
+      'https://agritechse.onrender.com'
+  ];
+
+  app.use(cors({
+      origin: function (origin, callback) {
+          // Allow requests with no origin (like mobile apps or curl requests)
+          if (!origin) return callback(null, true);
+          if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost:')) {
+              callback(null, true);
+          } else {
+              callback(new Error('Not allowed by CORS'));
+          }
+      },
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 

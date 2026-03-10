@@ -37,7 +37,7 @@ const seedAdmin = async () => {
         await User.create({
             name: 'Admin',
             email: TARGET_ADMIN_EMAIL,
-            phone: '0000000000',
+            phone: '9999999999',
             password: hashedPassword,
             role: 'ADMIN',
             isActive: true,
