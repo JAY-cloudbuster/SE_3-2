@@ -5,15 +5,15 @@ const API_BASE_URL = import.meta.env.VITE_APP_URL || "http://localhost:5000";
 /**
  * Configured Axios Instance
  *
- * Pre-configured with the backend API base URL.
+ * Pre-configured with the backend API base URL including the /api prefix.
  * All relative paths in API calls are resolved against this base URL.
  *
- * Example: api.get('/api/crops')
+ * Example: api.get('/crops') -> resolves to http://localhost:5000/api/crops
  *
  * @type {import('axios').AxiosInstance}
  */
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: `${API_BASE_URL}/api`,
   withCredentials: true
 });
 
