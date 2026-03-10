@@ -1,8 +1,7 @@
 /**
  * @fileoverview Bid Panel Component for AgriSahayak Trade System
  * 
- * Real-time bidding interface for live auctions. Connects via SocketContext
- * to receive 'new_high_bid' events and emit 'place_bid' events.
+ * Bidding interface for auctions using REST handlers passed from parent.
  * Shows current highest bid (animated on change), countdown timer
  * (via useAuctionTimer hook), and a bid input form with validation.
  * Displays brief success feedback after placing a bid.
@@ -13,39 +12,33 @@
  * @param {number} [props.initialBid=500] - Starting bid amount
  * @param {Date} [props.expiryDate] - Auction end time
  * 
- * @see Epic 4, Story 4.3 - Real-Time Bid Updates
- * @see SocketContext - WebSocket connection for live events
+ * @see Epic 4, Story 4.3 - Bid Placement
  * @see useAuctionTimer - Hook for countdown display
  */
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SocketContext } from '../../../context/SocketContext';
 import { Gavel, TrendingUp, Clock } from 'lucide-react';
 import useAuctionTimer from '../../../hooks/useAuctionTimer';
 import CurrencyLabel from '../../../components/shared/CurrencyLabel';
 
-export default function BidPanel({ auctionId, initialBid = 500, expiryDate }) {
-  const socket = useContext(SocketContext);
+export default function BidPanel({ auctionId, initialBid = 500, expiryDate, onPlaceBid }) {
   const [highestBid, setHighestBid] = useState(initialBid);
   const [myBid, setMyBid] = useState('');
   const [bidPlaced, setBidPlaced] = useState(false);
   const timeLeft = useAuctionTimer(expiryDate || new Date(Date.now() + 3600000));
 
   useEffect(() => {
-    if (!socket) return;
-    socket.on('new_high_bid', (data) => {
-      if (data.auctionId === auctionId) {
-        setHighestBid(data.amount); // Story 4.3: Real-time bid updates [cite: 148, 150]
-      }
-    });
-    return () => socket.off('new_high_bid');
-  }, [socket, auctionId]);
+    setHighestBid(initialBid);
+  }, [initialBid, auctionId]);
 
-  const placeBid = (e) => {
+  const placeBid = async (e) => {
     e.preventDefault();
-    if (!socket || !myBid || Number(myBid) <= highestBid) return;
+    if (!myBid || Number(myBid) <= highestBid) return;
 
-    socket.emit('place_bid', { auctionId, amount: Number(myBid) }); // Story 4.3 [cite: 149]
+    if (onPlaceBid) {
+      await onPlaceBid({ auctionId, amount: Number(myBid) });
+    }
+    setHighestBid(Number(myBid));
     setBidPlaced(true);
     setMyBid('');
     setTimeout(() => setBidPlaced(false), 2000);

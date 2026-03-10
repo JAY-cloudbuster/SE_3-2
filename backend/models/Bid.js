@@ -22,6 +22,10 @@ const bidSchema = new mongoose.Schema({
         min: [0, 'Bid amount cannot be negative'],
         max: [10000, 'Bid cannot exceed ₹10,000/quintal']
     },
+    quantity: {
+        type: Number,
+        min: [0, 'Bid quantity cannot be negative']
+    },
     status: {
         type: String,
         enum: ['Pending', 'Accepted', 'Rejected', 'Completed', 'Expired'],

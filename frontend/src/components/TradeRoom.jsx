@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import {
     Send,
     CheckCircle,
@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { AuthContext } from '../context/AuthContext';
-import useTradeSocket from '../hooks/useTradeSocket';
 import ChatBubble from './ChatBubble';
 import BidInputForm from './BidInputForm';
 import AuctionLeaderboard from './AuctionLeaderboard';
@@ -36,42 +35,54 @@ const statusChipClass = {
 export default function TradeRoom({ listingId, currentUserRole }) {
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
-    const {
-        bids,
-        setBids,
-        messages,
-        setMessages,
-        bidStatusUpdate,
-        sendBid,
-        sendMessage,
-        updateBidStatus,
-    } = useTradeSocket(listingId);
+    const [bids, setBids] = useState([]);
+    const [messages, setMessages] = useState([]);
+    const [bidStatusUpdate, setBidStatusUpdate] = useState(null);
 
     const [msgText, setMsgText] = useState('');
     const chatEndRef = useRef(null);
     const [crop, setCrop] = useState(null);
 
-    // Load initial data
-    useEffect(() => {
-        if (!listingId) return;
-        const load = async () => {
-            try {
-                const [bidRes, msgRes, cropRes] = await Promise.all([
-                    api.get(`/bidmessage/bids/${listingId}`),
-                    api.get(`/bidmessage/messages/${listingId}`),
-                    api.get(`/crops`).then((r) =>
-                        r.data.find?.((c) => c._id === listingId) || null
-                    ),
-                ]);
-                setBids(bidRes.data);
-                setMessages(msgRes.data);
-                if (cropRes) setCrop(cropRes);
-            } catch {
-                // silent — data may not exist yet
+    const loadTradeData = useCallback(async () => {
+        if (!listingId || !user?._id) return;
+
+        try {
+            const [bidRes, cropListRes] = await Promise.all([
+                api.get(`/bids/${listingId}`),
+                api.get('/crops'),
+            ]);
+
+            const bidList = bidRes.data || [];
+            const cropRes = cropListRes.data.find?.((c) => c._id === listingId) || null;
+            setBids(bidList);
+            if (cropRes) setCrop(cropRes);
+
+            const farmerId = cropRes?.farmer?._id || cropRes?.farmer;
+            const latestBidBuyerId = bidList[0]?.buyerId?._id || bidList[0]?.buyerId;
+            const conversationPeer = currentUserRole === 'Buyer' ? farmerId : latestBidBuyerId;
+
+            const params = { listingId };
+            if (conversationPeer) {
+                params.user1 = user._id;
+                params.user2 = conversationPeer;
             }
-        };
-        load();
-    }, [listingId, setBids, setMessages]);
+
+            const msgRes = await api.get('/messages/conversation', { params });
+            setMessages(msgRes.data || []);
+        } catch {
+            // silent — data may not exist yet
+        }
+    }, [listingId, user?._id, currentUserRole]);
+
+    useEffect(() => {
+        loadTradeData();
+    }, [loadTradeData]);
+
+    useEffect(() => {
+        if (!listingId || !user?._id) return;
+        const id = setInterval(loadTradeData, 6000);
+        return () => clearInterval(id);
+    }, [listingId, user?._id, loadTradeData]);
 
     // Scroll chat on new message
     useEffect(() => {
@@ -88,16 +99,65 @@ export default function TradeRoom({ listingId, currentUserRole }) {
     const handleSendMessage = (e) => {
         e.preventDefault();
         if (!msgText.trim()) return;
+
         const farmerId = crop?.farmer?._id || crop?.farmer;
-        sendMessage({
-            senderId: user._id,
-            receiverId:
-                currentUserRole === 'Buyer'
-                    ? farmerId
-                    : bids[0]?.buyerId?._id || bids[0]?.buyerId,
-            text: msgText.trim(),
-        });
-        setMsgText('');
+        const receiverId =
+            currentUserRole === 'Buyer'
+                ? farmerId
+                : bids[0]?.buyerId?._id || bids[0]?.buyerId;
+
+        if (!receiverId) {
+            toast.error('No recipient available for this conversation yet');
+            return;
+        }
+
+        api
+            .post('/messages/send', {
+                listingId,
+                fromId: user._id,
+                toId: receiverId,
+                text: msgText.trim(),
+            })
+            .then((res) => {
+                const created = res.data;
+                setMessages((prev) => {
+                    const exists = prev.some((m) => m._id === created._id);
+                    return exists ? prev : [...prev, created];
+                });
+                setMsgText('');
+            })
+            .catch(() => {
+                toast.error('Failed to send message');
+            });
+    };
+
+    const handlePlaceBid = async (amount) => {
+        try {
+            const created = await api.post('/bids/place', {
+                listingId,
+                buyerId: user._id,
+                amount,
+                quantity: crop?.quantity,
+            });
+
+            setBids((prev) => {
+                const exists = prev.some((b) => b._id === created.data._id);
+                return exists ? prev : [created.data, ...prev];
+            });
+            toast.success('Bid placed successfully');
+        } catch {
+            toast.error('Failed to place bid');
+        }
+    };
+
+    const handleUpdateBidStatus = async (bidId, status) => {
+        try {
+            const updated = await api.put(`/bids/${bidId}/status`, { status });
+            setBidStatusUpdate(updated.data);
+            setBids((prev) => prev.map((b) => (b._id === updated.data._id ? updated.data : b)));
+        } catch {
+            toast.error('Failed to update bid status');
+        }
     };
 
     const highestBid = bids.length
@@ -154,14 +214,7 @@ export default function TradeRoom({ listingId, currentUserRole }) {
                         </h3>
                         <BidInputForm
                             minAmount={highestBid}
-                            onPlaceBid={(amount) =>
-                                sendBid({
-                                    buyerId: user._id,
-                                    farmerId:
-                                        crop?.farmer?._id || crop?.farmer,
-                                    amount,
-                                })
-                            }
+                            onPlaceBid={handlePlaceBid}
                         />
                     </div>
                 </div>
@@ -182,10 +235,10 @@ export default function TradeRoom({ listingId, currentUserRole }) {
                             <ChatBubble
                                 key={m._id || i}
                                 text={m.text}
-                                senderName={m.senderId?.name || 'User'}
+                                senderName={m.fromId?.name || m.senderId?.name || 'User'}
                                 timestamp={m.createdAt}
                                 isOwn={
-                                    (m.senderId?._id || m.senderId) ===
+                                    (m.fromId?._id || m.fromId || m.senderId?._id || m.senderId) ===
                                     user._id
                                 }
                             />
@@ -249,7 +302,7 @@ export default function TradeRoom({ listingId, currentUserRole }) {
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() =>
-                                                updateBidStatus(
+                                                handleUpdateBidStatus(
                                                     bid._id,
                                                     'Accepted'
                                                 )
@@ -260,7 +313,7 @@ export default function TradeRoom({ listingId, currentUserRole }) {
                                         </button>
                                         <button
                                             onClick={() =>
-                                                updateBidStatus(
+                                                handleUpdateBidStatus(
                                                     bid._id,
                                                     'Rejected'
                                                 )
@@ -296,10 +349,10 @@ export default function TradeRoom({ listingId, currentUserRole }) {
                         <ChatBubble
                             key={m._id || i}
                             text={m.text}
-                            senderName={m.senderId?.name || 'User'}
+                            senderName={m.fromId?.name || m.senderId?.name || 'User'}
                             timestamp={m.createdAt}
                             isOwn={
-                                (m.senderId?._id || m.senderId) === user._id
+                                (m.fromId?._id || m.fromId || m.senderId?._id || m.senderId) === user._id
                             }
                         />
                     ))}

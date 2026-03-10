@@ -6,12 +6,12 @@ const messageSchema = new mongoose.Schema({
         ref: 'Crop',
         required: true
     },
-    senderId: {
+    fromId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    receiverId: {
+    toId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
@@ -22,6 +22,18 @@ const messageSchema = new mongoose.Schema({
         maxlength: 2000
     }
 }, { timestamps: true });
+
+// Backward-compatible aliases used by existing UI code paths.
+messageSchema.virtual('senderId').get(function getSenderId() {
+    return this.fromId;
+});
+
+messageSchema.virtual('receiverId').get(function getReceiverId() {
+    return this.toId;
+});
+
+messageSchema.set('toJSON', { virtuals: true });
+messageSchema.set('toObject', { virtuals: true });
 
 messageSchema.index({ listingId: 1, createdAt: 1 });
 

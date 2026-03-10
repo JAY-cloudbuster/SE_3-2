@@ -8,7 +8,7 @@
  * Architecture Overview:
  * ┌─ App (Root Component) ─────────────────────────────────┐
  * │  AuthProvider → TranslationProvider → LanguageProvider  │
- * │    → SocketProvider → BrowserRouter                     │
+ * │    → BrowserRouter                                      │
  * │      → AppContent (layout + routes)                     │
  * │        ├── Sidebar (role-based navigation, hidden on    │
  * │        │   standalone pages)                             │
@@ -41,7 +41,6 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 // Provider order matters: outer providers are accessible by inner providers.
 // ============================================================
 import { AuthProvider, AuthContext } from './context/AuthContext';
-import { SocketProvider } from './context/SocketContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { TranslationProvider } from './context/TranslationContext';
 import { NotificationProvider } from './context/NotificationContext';
@@ -242,11 +241,9 @@ function AppContent() {
  * 1. AuthProvider - Authentication state (user, login, logout)
  * 2. TranslationProvider - Translation functions and language state
  * 3. LanguageProvider - Simple language code state
- * 4. SocketProvider - WebSocket connection (needs AuthContext)
- * 5. BrowserRouter - Client-side routing
+ * 4. BrowserRouter - Client-side routing
  * 
  * The order matters because:
- * - SocketProvider needs AuthContext to know when user is logged in
  * - TranslationProvider needs to be above LanguageProvider
  * - BrowserRouter must wrap all components that use routing hooks
  * 
@@ -258,14 +255,12 @@ export default function App() {
     <AuthProvider>
       <TranslationProvider>
         <LanguageProvider>
-          <SocketProvider>
-            <BrowserRouter>
-              <NotificationProvider>
-                <AppContent />
-                <Toaster position="top-right" reverseOrder={false} toastOptions={{ style: { fontFamily: 'inherit', fontWeight: 600, fontSize: '0.875rem', borderRadius: '0.75rem', boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)' } }} />
-              </NotificationProvider>
-            </BrowserRouter>
-          </SocketProvider>
+          <BrowserRouter>
+            <NotificationProvider>
+              <AppContent />
+              <Toaster position="top-right" reverseOrder={false} toastOptions={{ style: { fontFamily: 'inherit', fontWeight: 600, fontSize: '0.875rem', borderRadius: '0.75rem', boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)' } }} />
+            </NotificationProvider>
+          </BrowserRouter>
         </LanguageProvider>
       </TranslationProvider>
     </AuthProvider>

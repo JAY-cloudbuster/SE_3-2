@@ -71,7 +71,7 @@ const cropSchema = new mongoose.Schema({
     quantity: {
         type: Number,
         required: [true, 'Quantity is required'],
-          min: [1, 'Quantity must be at least 1 quintal'],
+          min: [0, 'Quantity cannot be negative'],
           max: [200, 'Quantity cannot exceed 200 quintals']
     },
 
@@ -106,7 +106,7 @@ const cropSchema = new mongoose.Schema({
     quality: {
         type: String,
         enum: ['A', 'B', 'C'],
-        required: [true, 'Quality grade is required']
+        min: [0, 'Quantity cannot be negative'],
     },
 
     /**

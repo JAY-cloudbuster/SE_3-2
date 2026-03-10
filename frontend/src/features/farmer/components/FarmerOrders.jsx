@@ -17,7 +17,6 @@ import { tradeService } from '../../../services/tradeService';
 import toast from 'react-hot-toast';
 import { useContext } from 'react';
 import { AuthContext } from '../../../context/AuthContext';
-import { SocketContext } from '../../../context/SocketContext';
 
 const statusStyles = {
     Pending: 'bg-amber-100 text-amber-700 border-amber-200',
@@ -41,7 +40,6 @@ const paymentStatusLabel = {
 
 export default function FarmerOrders() {
     const { user } = useContext(AuthContext);
-    const socket = useContext(SocketContext);
     const [orders, setOrders] = useState([]);
     const [bids, setBids] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -59,6 +57,7 @@ export default function FarmerOrders() {
                 );
                 setOrders(farmerOrders);
                 setBids(bidsRes.data || []);
+                setError(null);
             } catch (err) {
                 console.error('Failed to fetch farmer trade data:', err);
                 setError(err.response?.data?.message || 'Failed to load orders');
@@ -66,45 +65,12 @@ export default function FarmerOrders() {
                 setLoading(false);
             }
         };
+
+        if (!user?._id) return;
         fetchData();
+        const id = setInterval(fetchData, 15000);
+        return () => clearInterval(id);
     }, [user?._id]);
-
-    useEffect(() => {
-        if (!socket || !user?._id) return;
-
-        const onPaymentCompleted = (payload) => {
-            if (String(payload?.farmerId) !== String(user._id)) return;
-
-            if (payload?.type === 'accepted_bid_payment_completed') {
-                toast.success(`Payment completed for accepted bid on ${payload.cropName || 'crop'}`);
-            }
-
-            if (payload?.orderId) {
-                tradeService
-                    .getOrders()
-                    .then((ordersRes) => {
-                        const farmerOrders = (ordersRes.data || []).filter(
-                            (order) => String(order.farmer?._id || order.farmer) === String(user._id)
-                        );
-                        setOrders(farmerOrders);
-                    })
-                    .catch(() => {});
-            }
-
-            if (payload?.sourceBidId) {
-                setBids((prev) =>
-                    prev.map((b) =>
-                        String(b._id) === String(payload.sourceBidId)
-                            ? { ...b, status: 'Completed', expiresAt: payload.completedAt }
-                            : b
-                    )
-                );
-            }
-        };
-
-        socket.on('payment_completed', onPaymentCompleted);
-        return () => socket.off('payment_completed', onPaymentCompleted);
-    }, [socket, user?._id]);
 
     const handleBidDecision = async (bidId, status) => {
         try {

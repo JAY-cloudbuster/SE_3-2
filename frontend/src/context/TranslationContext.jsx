@@ -79,7 +79,7 @@ export const SUPPORTED_LANGUAGES = [
  * and preloads common translations when the language changes.
  * 
  * Provider hierarchy (in App.jsx):
- * AuthProvider → TranslationProvider → LanguageProvider → SocketProvider
+ * AuthProvider → TranslationProvider → LanguageProvider
  * 
  * @component
  * @param {Object} props

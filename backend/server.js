@@ -3,8 +3,7 @@
  * 
  * This is the primary entry point for the AgriSahayak backend application.
  * It initializes the Express server, connects to MongoDB, configures
- * middleware, mounts API routes, sets up Socket.io for real-time
- * communication, and starts listening for incoming requests.
+ * middleware, mounts API routes, and starts listening for requests.
  * 
  * Architecture Overview:
  * ┌──────────────────────────────────────────────┐
@@ -14,18 +13,12 @@
  * │  │Middleware│    │ Parser   │    │ Handler │ │
  * │  └─────────┘    └──────────┘    └─────────┘ │
  * │                                              │
- * │  ┌──────────────────────────────────────────┐│
- * │  │            Socket.io Server              ││
- * │  │  (Real-time bids, chat, notifications)   ││
- * │  └──────────────────────────────────────────┘│
  * └──────────────────────────────────────────────┘
  * 
  * @module server
  * @requires express - Web application framework
  * @requires dotenv - Environment variable loader
  * @requires cors - Cross-Origin Resource Sharing middleware
- * @requires http - Node.js HTTP server (for Socket.io)
- * @requires socket.io - Real-time bidirectional event-based communication
  * @requires config/db - MongoDB connection function
  */
 
@@ -34,8 +27,6 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
 const connectDB = require('./config/db');
-const { createServer } = require('http');
-const { Server } = require('socket.io');
 
 // ============================================================
 // 1. ENVIRONMENT CONFIGURATION
@@ -54,12 +45,10 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 // ============================================================
-// 3. EXPRESS APP & HTTP SERVER INITIALIZATION
-// Create the Express app and wrap it in an HTTP server
-// for Socket.io compatibility (Socket.io needs raw HTTP server)
+// 3. EXPRESS APP INITIALIZATION
+// Create the Express application instance
 // ============================================================
 const app = express();
-const httpServer = createServer(app);
 
 // ============================================================
 // 4. MIDDLEWARE CONFIGURATION
@@ -183,7 +172,8 @@ app.use('/api/admin', require('./routes/adminRoutes'));
  */
 app.use('/api/decision', require('./routes/decisionRoutes'));
 
-app.use('/api/bidmessage', require('./routes/bidMessageRoutes'));
+app.use('/api/bids', require('./routes/bidRoutes'));
+app.use('/api/messages', require('./routes/messageRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 
 // ============================================================
@@ -223,42 +213,8 @@ app.use((err, req, res, next) => {
 });
 
 // ============================================================
-// 7. SOCKET.IO REAL-TIME SERVER SETUP
-// Provides WebSocket-based real-time communication for:
-// - Live auction bidding (Epic 4, Story 4.3)
-// - Negotiation chat messages (Epic 4, Story 4.4)
-// - Real-time order status updates (Epic 4, Story 4.8)
-// ============================================================
-
-/**
- * Socket.io Server Instance
- * 
- * Configured with CORS to allow connections from the Vite dev server
- * (running on port 5173). Supports GET and POST methods for the
- * Socket.io handshake and transport.
- * 
- * @see Epic 4, Story 4.3 - Place Bids (real-time bid updates)
- * @see Epic 4, Story 4.4 - Negotiate Price (real-time chat)
- * @see SocketContext.jsx - Frontend Socket.io client provider
- */
-const io = new Server(httpServer, {
-    cors: {
-        origin: true,
-        methods: ["GET", "POST"],
-        credentials: true
-    }
-});
-
-// Expose io to controllers through req.app.get('io').
-app.set('io', io);
-
-const socketHandler = require('./socketHandler');
-socketHandler(io);
-
-// ============================================================
-// 8. START THE HTTP SERVER
+// 7. START THE HTTP SERVER
 // Listen on the configured port (from .env) or default to 5000
-// Uses httpServer (not app) to support both Express AND Socket.io
 // ============================================================
 module.exports = app;
 app.get("/", (req, res) => {
@@ -268,7 +224,7 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 if (require.main === module) {
-    httpServer.listen(PORT, () => {
+    app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });
 }

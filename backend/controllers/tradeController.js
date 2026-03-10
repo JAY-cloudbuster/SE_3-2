@@ -20,7 +20,7 @@ const Negotiation = require('../models/Negotiation');
 const Bid = require('../models/Bid');
 const User = require('../models/User');
 const { encryptPaymentDetails } = require('../utils/paymentCrypto');
-const { createAndEmitNotification } = require('../utils/notificationEmitter');
+const { createNotification } = require('../utils/notificationEmitter');
 
 const CARD_NUMBER_REGEX = /^\d{16}$/;
 const CARD_CVV_REGEX = /^\d{3}$/;
@@ -138,15 +138,12 @@ const placeBid = asyncHandler(async (req, res) => {
     crop.price = amount;
     await crop.save();
 
-    const io = req.app.get('io');
-    await createAndEmitNotification({
-        io,
+    await createNotification({
         userId: crop.farmer,
         role: 'FARMER',
         title: 'New Bid Received',
         message: `${req.user.name || 'A buyer'} placed a bid of ₹${amount}/quintal for ${crop.quantity} quintals of ${crop.name}.`,
         type: 'bid',
-        eventName: 'farmer_new_bid',
     });
 
     res.status(200).json({
@@ -262,9 +259,7 @@ const updateBidStatus = asyncHandler(async (req, res) => {
     await bid.save();
 
     const listing = await Crop.findById(bid.listingId).select('name quantity');
-    const io = req.app.get('io');
-    await createAndEmitNotification({
-        io,
+    await createNotification({
         userId: bid.buyerId,
         role: 'BUYER',
         title: status === 'Accepted' ? 'Bid Accepted' : 'Bid Rejected',
@@ -273,7 +268,6 @@ const updateBidStatus = asyncHandler(async (req, res) => {
                 ? `Your bid of ₹${bid.amount}/quintal for ${listing?.name || 'crop'} was accepted by Farmer ${req.user.name || ''}.`
                 : `Your bid of ₹${bid.amount}/quintal for ${listing?.name || 'crop'} was rejected by Farmer ${req.user.name || ''}.`,
         type: 'bid',
-        eventName: status === 'Accepted' ? 'buyer_bid_accepted' : 'buyer_bid_rejected',
     });
 
     const populated = await Bid.findById(bid._id)
@@ -337,15 +331,12 @@ const startNegotiation = asyncHandler(async (req, res) => {
         .populate('farmer', 'name phone')
         .populate('crop', 'name price');
 
-    const io = req.app.get('io');
-    await createAndEmitNotification({
-        io,
+    await createNotification({
         userId: crop.farmer._id,
         role: 'FARMER',
         title: 'New Negotiation Request',
         message: `${req.user.name || 'A buyer'} started a negotiation for ${crop.name}${offerAmount ? ` with offer ₹${offerAmount}/quintal.` : '.'}`,
         type: 'message',
-        eventName: 'new_negotiation_message',
     });
 
     res.status(201).json(populated);
@@ -394,15 +385,13 @@ const sendOffer = asyncHandler(async (req, res) => {
     negotiation.lastActivity = Date.now();
     await negotiation.save();
 
-    const io = req.app.get('io');
     const crop = await Crop.findById(negotiation.crop).select('name');
     const isBuyerSender = negotiation.buyer.toString() === userId;
     const targetUserId = isBuyerSender ? negotiation.farmer : negotiation.buyer;
     const targetRole = isBuyerSender ? 'FARMER' : 'BUYER';
     const senderLabel = req.user.name || (isBuyerSender ? 'Buyer' : 'Farmer');
 
-    await createAndEmitNotification({
-        io,
+    await createNotification({
         userId: targetUserId,
         role: targetRole,
         title: 'New Negotiation Message',
@@ -410,7 +399,6 @@ const sendOffer = asyncHandler(async (req, res) => {
             ? `${senderLabel} sent a negotiation message for ${crop?.name || 'your crop'}${amount ? ` with offer ₹${amount}/quintal.` : '.'}`
             : `Farmer ${senderLabel} replied in negotiation for ${crop?.name || 'crop'}${amount ? ` with offer ₹${amount}/quintal.` : '.'}`,
         type: 'message',
-        eventName: 'new_negotiation_message',
     });
 
     res.status(200).json(negotiation);
@@ -632,74 +620,36 @@ const createOrder = asyncHandler(async (req, res) => {
         await linkedBid.save();
     }
 
-    const io = req.app.get('io');
-
     // Always notify the farmer — message differs for direct buy vs bid payment
     if (linkedBid) {
-        await createAndEmitNotification({
-            io,
+        await createNotification({
             userId: crop.farmer._id,
             role: 'FARMER',
             title: 'Bid Payment Received',
             message: `${req.user.name || 'A buyer'} has paid ₹${pricePerKg}/quintal for ${orderQuantity} quintal(s) of ${crop.name}. Order is confirmed.`,
             type: 'order',
-            eventName: 'farmer_bid_paid',
         });
     } else {
-        await createAndEmitNotification({
-            io,
+        await createNotification({
             userId: crop.farmer._id,
             role: 'FARMER',
             title: 'New Direct Purchase',
             message: `${req.user.name || 'A buyer'} bought ${orderQuantity} quintal(s) of ${crop.name} at ₹${pricePerKg}/quintal.`,
             type: 'buy',
-            eventName: 'farmer_direct_buy',
         });
     }
 
-    await createAndEmitNotification({
-        io,
+    await createNotification({
         userId: req.user.id,
         role: 'BUYER',
         title: 'Order Confirmed',
         message: `Your order for ${crop.name} (${orderQuantity} quintals) is confirmed at ₹${pricePerKg}/quintal.`,
         type: 'order',
-        eventName: 'buyer_order_confirmed',
     });
 
     const populated = await Order.findById(order._id)
         .populate('buyer', 'name phone')
         .populate('farmer', 'name phone');
-
-    if (order.paymentStatus === 'paid') {
-        if (io) {
-            const paymentEvent = {
-                orderId: populated._id,
-                sourceBidId: linkedBid?._id || null,
-                listingId: crop._id,
-                cropName: crop.name,
-                buyer: {
-                    id: populated.buyer?._id,
-                    name: populated.buyer?.name || 'Buyer',
-                    phone: populated.buyer?.phone || ''
-                },
-                farmerId: populated.farmer?._id,
-                amount: populated.totalAmount,
-                quantity: orderQuantity,
-                paymentStatus: 'completed',
-                completedAt: new Date().toISOString(),
-                type: linkedBid ? 'accepted_bid_payment_completed' : 'buy_now_payment_completed'
-            };
-
-            // Farmer dashboard listeners can subscribe to user:<farmerId>.
-            io.to(`user:${String(populated.farmer?._id)}`).emit('payment_completed', paymentEvent);
-
-            if (linkedBid) {
-                // Keep trade room participants informed about accepted bid settlement.
-                io.to(String(linkedBid.listingId)).emit('accepted_bid_payment_completed', paymentEvent);
-            }
-        }
-    }
 
     res.status(201).json(populated);
 });

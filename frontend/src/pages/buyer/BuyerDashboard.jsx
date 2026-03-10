@@ -18,16 +18,13 @@ import { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { T } from '../../context/TranslationContext';
-import { SocketContext } from '../../context/SocketContext';
 import { AuthContext } from '../../context/AuthContext';
 import MarketplaceTab  from '../../features/buyer/components/MarketplaceTab';
 import NegotiationsTab from '../../features/buyer/components/NegotiationsTab';
 import MyOrdersTab     from '../../features/buyer/components/MyOrdersTab';
-import toast           from 'react-hot-toast';
 
 export default function BuyerDashboard() {
     const { user }   = useContext(AuthContext);
-    const socket     = useContext(SocketContext);
     const location   = useLocation();
 
     // Derive active tab from ?tab= URL param (defaults to marketplace)
@@ -35,33 +32,12 @@ export default function BuyerDashboard() {
 
     const [ordersRefresh, setOrdersRefresh] = useState(0);
 
-    // ── Real-time socket listeners ──────────────────────────────────────────
+    // Keep orders tab refreshed periodically in REST-only mode.
     useEffect(() => {
-        if (!socket) return;
-        const refreshOrders = () => setOrdersRefresh((n) => n + 1);
-
-        const onBidAccepted  = () => { toast.success('Your bid was ACCEPTED! Proceed to payment.'); refreshOrders(); };
-        const onBidRejected  = () => { toast.error('Your bid was rejected.');                       refreshOrders(); };
-        const onOrderDone    = () => { toast.success('Order confirmed!');                           refreshOrders(); };
-        const onPayment      = (data) => {
-            if (String(data?.buyer?.id) === String(user?._id)) {
-                toast.success('Payment completed — order is confirmed!');
-                refreshOrders();
-            }
-        };
-
-        socket.on('buyer_bid_accepted',    onBidAccepted);
-        socket.on('buyer_bid_rejected',    onBidRejected);
-        socket.on('buyer_order_confirmed', onOrderDone);
-        socket.on('payment_completed',     onPayment);
-
-        return () => {
-            socket.off('buyer_bid_accepted',    onBidAccepted);
-            socket.off('buyer_bid_rejected',    onBidRejected);
-            socket.off('buyer_order_confirmed', onOrderDone);
-            socket.off('payment_completed',     onPayment);
-        };
-    }, [socket, user]);
+        if (!user?._id) return;
+        const id = setInterval(() => setOrdersRefresh((n) => n + 1), 15000);
+        return () => clearInterval(id);
+    }, [user?._id]);
 
     return (
         <motion.div

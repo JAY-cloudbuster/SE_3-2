@@ -83,6 +83,9 @@ describe('Trade API (Epic 4)', () => {
                     cropId: cropRes.body._id,
                     quantity: 50,
                     paymentMethod: 'upi',
+                    paymentDetails: {
+                        upiId: 'buyer@upi'
+                    },
                     shippingAddress: '123 Test Street, Delhi'
                 });
 
