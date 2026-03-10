@@ -25,6 +25,14 @@
 
 import axios from 'axios';
 
+const isLocalhost =
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+const apiHost = isLocalhost
+  ? 'http://localhost:5000'
+  : import.meta.env.VITE_APP_URL || 'http://localhost:5000';
+
 /**
  * Configured Axios Instance
  * 
@@ -36,7 +44,7 @@ import axios from 'axios';
  * @type {import('axios').AxiosInstance}
  */
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_APP_URL || 'http://localhost:5000'}/api`, // Use env URL in production, fallback to localhost for dev
+  baseURL: `${apiHost}/api`, // Localhost in dev, env URL in production, localhost as final fallback
   withCredentials: true,
 });
 

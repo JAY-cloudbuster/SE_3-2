@@ -83,8 +83,20 @@ const allowedOrigins = [
 // Deduplicate in case env var repeats a hardcoded origin
 const uniqueAllowedOrigins = [...new Set(allowedOrigins)];
 
+const isAllowedOrigin = (origin = '') => {
+    return uniqueAllowedOrigins.includes(origin) || /^https:\/\/.*\.vercel\.app$/.test(origin);
+};
+
+const corsOriginHandler = (origin, callback) => {
+    // Allow non-browser requests (no Origin header) and allowed browser origins
+    if (!origin || isAllowedOrigin(origin)) {
+        return callback(null, true);
+    }
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+};
+
 app.use(cors({
-    origin: uniqueAllowedOrigins,
+    origin: corsOriginHandler,
     credentials: true,
 }));
 
@@ -252,7 +264,7 @@ app.use((err, req, res, next) => {
  */
 const io = new Server(httpServer, {
     cors: {
-        origin: uniqueAllowedOrigins,
+        origin: corsOriginHandler,
         methods: ["GET", "POST"],
         credentials: true
     }

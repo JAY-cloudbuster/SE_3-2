@@ -67,6 +67,14 @@ export const SocketProvider = ({ children }) => {
    */
   const [socket, setSocket] = useState(null);
 
+  const isLocalhost =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+  const socketUrl = isLocalhost
+    ? 'http://localhost:5000'
+    : import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+
   /**
    * Effect: Manage Socket Connection Lifecycle
    * 
@@ -81,7 +89,7 @@ export const SocketProvider = ({ children }) => {
     if (user) {
       // User is authenticated - establish WebSocket connection
       const newSocket = io(
-        import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000',
+        socketUrl,
         {
           withCredentials: true,
           transports: ['websocket'],
