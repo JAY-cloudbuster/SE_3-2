@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import RatingStars from '../components/RatingStars';
 import ProfileTab from '../components/ProfileTab';
+import api from '../services/api';
 
 export default function FarmerProfile() {
   const [profile, setProfile] = useState(null);
@@ -8,14 +9,8 @@ export default function FarmerProfile() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = JSON.parse(localStorage.getItem('user'))?.token;
-        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/user/me`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        const data = await res.json();
-        setProfile(data);
+        const res = await api.get('/user/me');
+        setProfile(res.data);
       } catch (error) {
         console.error("Failed to load profile", error);
       }

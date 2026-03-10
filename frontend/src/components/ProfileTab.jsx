@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import api from '../services/api';
 
 export default function ProfileTab({ currentProfile, onSave }) {
   const [city, setCity] = useState(currentProfile?.city || '');
@@ -10,19 +11,8 @@ export default function ProfileTab({ currentProfile, onSave }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const token = JSON.parse(localStorage.getItem('user'))?.token;
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/user/profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ city, state, bio })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (onSave) onSave(data);
-      }
+      const res = await api.put('/user/profile', { city, state, bio });
+      if (onSave) onSave(res.data);
     } catch (error) {
       console.error("Update failed", error);
     } finally {

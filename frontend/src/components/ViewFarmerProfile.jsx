@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import RatingStars from './RatingStars';
+import api from '../services/api';
 
 export default function ViewFarmerProfile({ farmerId, onClose }) {
   const [farmer, setFarmer] = useState(null);
@@ -8,14 +9,8 @@ export default function ViewFarmerProfile({ farmerId, onClose }) {
   useEffect(() => {
     const fetchFarmer = async () => {
       try {
-        const token = JSON.parse(localStorage.getItem('user'))?.token;
-        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/user/${farmerId}`, {
-          headers: {
-             'Authorization': `Bearer ${token}`
-          }
-        });
-        const data = await res.json();
-        setFarmer(data);
+        const res = await api.get(`/user/${farmerId}`);
+        setFarmer(res.data);
       } catch (error) {
         console.error("Failed to fetch farmer profile", error);
       } finally {
