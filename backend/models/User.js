@@ -113,12 +113,6 @@ const userSchema = new mongoose.Schema({
         default: false
     },
 
-<<<<<<< HEAD
-    /**
-     * Saved delivery addresses used during checkout.
-     * Stored user-wise to auto-reuse previous addresses.
-     */
-=======
     isActive: {
         type: Boolean,
         default: false
@@ -139,7 +133,10 @@ const userSchema = new mongoose.Schema({
         select: false
     },
 
->>>>>>> b8cb29e328c529878dcef292c96e56eca1d76026
+    /**
+     * Saved delivery addresses used during checkout.
+     * Stored user-wise to auto-reuse previous addresses.
+     */
     savedAddresses: {
         type: [String],
         default: []

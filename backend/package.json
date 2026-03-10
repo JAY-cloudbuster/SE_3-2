@@ -21,10 +21,7 @@
         "jsonwebtoken": "^9.0.2",
         "mongoose": "^7.6.3",
         "multer": "^2.0.2",
-<<<<<<< HEAD
-=======
         "nodemailer": "^8.0.2",
->>>>>>> b8cb29e328c529878dcef292c96e56eca1d76026
         "simple-statistics": "^7.8.8"
     },
     "devDependencies": {

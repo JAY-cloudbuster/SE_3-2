@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * @fileoverview Login Form Component for AgriSahayak Frontend
  * 
@@ -23,8 +22,6 @@
  * @see authService.login() - API call for authentication
  */
 
-=======
->>>>>>> b8cb29e328c529878dcef292c96e56eca1d76026
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';
@@ -83,20 +80,13 @@ export default function LoginForm() {
     setLoading(true);
     try {
       const res = await authService.login({ phone, password });
-<<<<<<< HEAD
 
       const userRole = res.data.user.role;
 
-=======
->>>>>>> b8cb29e328c529878dcef292c96e56eca1d76026
       login(res.data);
       if (res.data.user.language) changeLanguage(res.data.user.language);
       toast.success('Login successful! Welcome back.');
-<<<<<<< HEAD
-      navigate(getRoleHomePath(userRole));
-=======
       navigate(getRoleHomePath(res.data.user.role));
->>>>>>> b8cb29e328c529878dcef292c96e56eca1d76026
     } catch (error) {
       toast.error(error.response?.data?.message || 'Invalid credentials.');
     } finally {
@@ -285,55 +275,6 @@ export default function LoginForm() {
             </form>
           )}
 
-<<<<<<< HEAD
-          <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-2">
-            <T>Welcome back</T>
-          </h2>
-          <p className="text-slate-400 mb-6 text-[11px] uppercase font-black tracking-[0.25em]">
-            Buyer: Starts with “1” · Farmer: Any other number
-          </p>
-          <form className="space-y-5" onSubmit={handleLogin}>
-            <div>
-              <label className="label-text">Phone Number</label>
-              <input
-                type="tel"
-                required
-                placeholder="e.g. 9876543210"
-                className="input-field"
-                onChange={(e) => setPhone(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="label-text">Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  placeholder="••••••••"
-                  className="input-field pr-10"
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
-                  tabIndex={-1}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
-            <div className="pt-2">
-              <button
-                type="submit"
-                className="btn-primary w-full bg-gradient-to-br from-emerald-600 to-emerald-700 shadow-emerald-500/25"
-              >
-                <T>Login</T>
-              </button>
-            </div>
-          </form>
-=======
           {mode === 'admin-login' && (
             <form className="space-y-5" onSubmit={handleAdminLogin}>
               <div>
@@ -352,7 +293,6 @@ export default function LoginForm() {
               </button>
             </form>
           )}
->>>>>>> b8cb29e328c529878dcef292c96e56eca1d76026
 
           {mode === 'activate' && (
             <form className="space-y-5" onSubmit={handleActivate}>
