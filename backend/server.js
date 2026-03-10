@@ -79,8 +79,10 @@ const app = express();
               callback(new Error('Not allowed by CORS'));
           }
       },
-    allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+  }));
 
 /**
  * JSON Body Parser - Parses incoming request bodies as JSON
