@@ -11,6 +11,9 @@
 import api from './api';
 
 export const adminService = {
+    /** Create a new farmer or buyer account */
+    createUser: async (userData) => api.post('/admin/create-user', userData),
+
     /** Fetch all users (paginated, with optional role filter) */
     getAllUsers: async (page = 1, limit = 20, role = '') => {
         const params = { page, limit };

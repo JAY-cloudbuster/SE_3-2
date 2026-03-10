@@ -14,9 +14,71 @@
  */
 
 const asyncHandler = require('express-async-handler');
+const crypto = require('crypto');
 const User = require('../models/User');
 const Crop = require('../models/Crop');
 const Order = require('../models/Order');
+const { sendActivationEmail } = require('../utils/emailService');
+
+/**
+ * Create a new Farmer or Buyer account (Admin only)
+ * POST /api/admin/create-user
+ */
+const createUser = asyncHandler(async (req, res) => {
+    const { name, email, phone, role } = req.body;
+
+    if (!name || !email || !phone || !role) {
+        res.status(400);
+        throw new Error('Name, email, phone, and role are required');
+    }
+
+    if (!['FARMER', 'BUYER'].includes(role.toUpperCase())) {
+        res.status(400);
+        throw new Error('Role must be FARMER or BUYER');
+    }
+
+    // Check duplicates
+    const emailExists = await User.findOne({ email });
+    if (emailExists) {
+        res.status(400);
+        throw new Error('A user with this email already exists');
+    }
+
+    const phoneExists = await User.findOne({ phone });
+    if (phoneExists) {
+        res.status(400);
+        throw new Error('A user with this phone number already exists');
+    }
+
+    // Generate a temporary password
+    const tempPassword = crypto.randomBytes(4).toString('hex') + 'A1!';
+
+    const user = await User.create({
+        name,
+        email,
+        phone,
+        password: tempPassword, // Will be hashed by pre-save middleware
+        role: role.toUpperCase(),
+        isActive: false,
+        isFirstLogin: true,
+    });
+
+    // Send activation email with temp password
+    await sendActivationEmail(email, tempPassword);
+
+    res.status(201).json({
+        success: true,
+        message: `${role} account created. Activation email sent to ${email}.`,
+        user: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            role: user.role,
+            isActive: user.isActive,
+        },
+    });
+});
 
 /**
  * Get All Users (paginated)
@@ -167,6 +229,7 @@ const getPlatformStats = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
+    createUser,
     getAllUsers,
     verifyUser,
     banUser,

@@ -19,85 +19,46 @@
 
 import api from './api';
 
-/**
- * Authentication Service Object
- * 
- * Exposes methods for all auth-related API operations.
- * Each method returns the full Axios response object.
- * 
- * @namespace authService
- */
 export const authService = {
-  /**
-   * Register a New User
-   * 
-   * Sends registration data to the backend and stores the auth response
-   * (including JWT token) in localStorage for auto-login after registration.
-   * 
-   * @async
-   * @function register
-   * @param {Object} userData - Registration data
-   * @param {string} userData.phone - 10-digit phone number
-   * @param {string} userData.password - Password (min 6 characters)
-   * @param {string} [userData.role='FARMER'] - User role: 'FARMER' or 'BUYER'
-   * @param {string} [userData.language='en'] - Preferred language code
-   * @param {string} [userData.name] - Display name
-   * @param {string} [userData.avatarUrl] - Avatar filename
-   * @returns {Promise<import('axios').AxiosResponse>} Response with { success, token, user }
-   * 
-   * @see RegisterForm.jsx - Frontend component that calls this function
-   * @see POST /api/auth/register - Backend endpoint
-   */
-  register: async (userData) => {
-    const response = await api.post('/auth/register', userData);
-    if (response.data) {
-      // Store auth data in localStorage for session persistence
-      // This enables auto-login when the user returns to the app
-      localStorage.setItem('user', JSON.stringify(response.data));
-    }
-    return response;
-  },
-
-  /**
-   * Login an Existing User
-   * 
-   * Authenticates the user with phone and password, then stores
-   * the auth response (including JWT token) in localStorage.
-   * The token is automatically attached to future API requests
-   * via the Axios interceptor in api.js.
-   * 
-   * @async
-   * @function login
-   * @param {Object} userData - Login credentials
-   * @param {string} userData.phone - 10-digit phone number
-   * @param {string} userData.password - Plain-text password
-   * @returns {Promise<import('axios').AxiosResponse>} Response with { success, token, user }
-   * 
-   * @see LoginForm.jsx - Frontend component that calls this function
-   * @see POST /api/auth/login - Backend endpoint
-   */
+  /** Normal login: Phone + Password (for activated users) */
   login: async (userData) => {
     const response = await api.post('/auth/login', userData);
     if (response.data) {
-      // Store entire auth response including JWT token and user profile
-      // The Axios interceptor will read this token for subsequent requests
       localStorage.setItem('user', JSON.stringify(response.data));
     }
     return response;
   },
 
-  /**
-   * Logout the Current User
-   * 
-   * Removes the stored authentication data from localStorage.
-   * This effectively invalidates the client-side session.
-   * Note: The JWT token on the backend remains valid until expiry (30 days).
-   * 
-   * @function logout
-   * @see Epic 1, Story 1.10 - Secure Logout
-   */
+  /** Admin login: Email + Password */
+  adminLogin: async (userData) => {
+    const response = await api.post('/auth/admin-login', userData);
+    if (response.data) {
+      localStorage.setItem('user', JSON.stringify(response.data));
+    }
+    return response;
+  },
+
+  /** Activation Step 1: Verify email + temp password */
+  activateAccount: async (data) => {
+    return api.post('/auth/activate', data);
+  },
+
+  /** Activation Step 2: Set new password */
+  setNewPassword: async (data) => {
+    return api.post('/auth/set-password', data);
+  },
+
+  /** Activation Step 3: Verify OTP */
+  verifyOTP: async (data) => {
+    return api.post('/auth/verify-otp', data);
+  },
+
+  /** Resend OTP */
+  resendOTP: async (data) => {
+    return api.post('/auth/resend-otp', data);
+  },
+
   logout: () => {
-    // Remove stored session data (token + user info)
     localStorage.removeItem('user');
   },
 };
