@@ -9,7 +9,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Package } from 'lucide-react';
-import { T } from '../../../context/TranslationContext';
+import { T, useT } from '../../../context/TranslationContext';
 import { cropService } from '../../../services/cropService';
 import CropCard from './CropCard';
 import toast from 'react-hot-toast';
@@ -18,6 +18,7 @@ export default function MarketplaceTab() {
     const [crops, setCrops] = useState([]);
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
+    const tr = useT();
 
     useEffect(() => {
         const fetchCrops = async () => {
@@ -25,7 +26,7 @@ export default function MarketplaceTab() {
                 const res = await cropService.getAll();
                 setCrops(res.data || []);
             } catch {
-                toast.error('Failed to load marketplace listings');
+                toast.error(tr('Failed to load marketplace listings'));
             } finally {
                 setLoading(false);
             }
@@ -46,7 +47,7 @@ export default function MarketplaceTab() {
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search crops..."
+                    placeholder={tr('Search crops...')}
                     className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-emerald-400 bg-white"
                 />
             </div>

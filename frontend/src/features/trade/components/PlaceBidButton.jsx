@@ -13,7 +13,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gavel, X, Check } from 'lucide-react';
-import { T } from '../../../context/TranslationContext';
+import { T, useT } from '../../../context/TranslationContext';
 import { tradeService } from '../../../services/tradeService';
 import toast from 'react-hot-toast';
 
@@ -21,6 +21,7 @@ export default function PlaceBidButton({ crop, onBidPlaced }) {
     const [open, setOpen] = useState(false);
     const [amount, setAmount] = useState('');
     const [loading, setLoading] = useState(false);
+    const tr = useT();
 
     const cropId = crop._id || crop.id;
     const minBid = (crop.price || 0) + 1;
@@ -29,18 +30,18 @@ export default function PlaceBidButton({ crop, onBidPlaced }) {
         e.preventDefault();
         const bid = Number(amount);
         if (!bid || bid <= (crop.price || 0)) {
-            toast.error(`Bid must be higher than ₹${crop.price}/quintal`);
+            toast.error(tr(`Bid must be higher than ₹${crop.price}/quintal`));
             return;
         }
         setLoading(true);
         try {
             const res = await tradeService.placeBid({ cropId, amount: bid });
-            toast.success('Bid placed successfully!');
+            toast.success(tr('Bid placed successfully!'));
             setOpen(false);
             setAmount('');
             if (onBidPlaced) onBidPlaced(res.data);
         } catch (err) {
-            toast.error(err?.response?.data?.message || 'Failed to place bid');
+            toast.error(tr(err?.response?.data?.message || 'Failed to place bid'));
         } finally {
             setLoading(false);
         }
@@ -98,7 +99,7 @@ export default function PlaceBidButton({ crop, onBidPlaced }) {
                             </motion.button>
                         </div>
                         <p className="text-[10px] text-amber-700 font-medium text-center">
-                            Current price: ₹{crop.price}/quintal — bid higher to win
+                            <T>Current price</T>: ₹{crop.price}/quintal — <T>bid higher to win</T>
                         </p>
                     </motion.form>
                 </AnimatePresence>

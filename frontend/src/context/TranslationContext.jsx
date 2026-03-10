@@ -204,6 +204,45 @@ export const useTranslation = () => {
 };
 
 /**
+ * useT Hook — Synchronous Translation for Toast Messages & Plain Strings
+ *
+ * Returns a `tr(text)` function that translates synchronously using the
+ * internal translation cache. If the translation is not yet cached, it
+ * returns the original English text immediately and fetches it in the
+ * background (component will re-render once the translation is ready
+ * via the <T> component pattern).
+ *
+ * USAGE:
+ *   const tr = useT();
+ *   toast.error(tr('Invalid credentials.'));
+ *
+ * @returns {Function} tr — synchronous translate function
+ */
+export const useT = () => {
+    const { t, currentLanguage } = useTranslation();
+    // A simple ref-based cache per component instance
+    const cacheRef = React.useRef({});
+
+    const tr = React.useCallback((text) => {
+        if (!text) return '';
+        if (currentLanguage === 'en') return text;
+
+        const cached = cacheRef.current[`${currentLanguage}:${text}`];
+        if (cached) return cached;
+
+        // Trigger background fetch and cache it
+        t(text).then((translated) => {
+            cacheRef.current[`${currentLanguage}:${text}`] = translated;
+        });
+
+        // Return original until cache is warm
+        return text;
+    }, [currentLanguage, t]);
+
+    return tr;
+};
+
+/**
  * T Component - Declarative Translation Wrapper
  * 
  * A React component that automatically translates its children text.

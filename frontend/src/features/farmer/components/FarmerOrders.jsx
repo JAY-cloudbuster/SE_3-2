@@ -12,7 +12,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingBag, Calendar, ChevronRight, PackageOpen, Gavel, CheckCircle2, XCircle } from 'lucide-react';
-import { T } from '../../../context/TranslationContext';
+import { T, useT } from '../../../context/TranslationContext';
 import { tradeService } from '../../../services/tradeService';
 import toast from 'react-hot-toast';
 import { useContext } from 'react';
@@ -40,6 +40,7 @@ const paymentStatusLabel = {
 
 export default function FarmerOrders() {
     const { user } = useContext(AuthContext);
+    const tr = useT();
     const [orders, setOrders] = useState([]);
     const [bids, setBids] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -76,9 +77,9 @@ export default function FarmerOrders() {
         try {
             const res = await tradeService.updateBidStatus(bidId, status);
             setBids((prev) => prev.map((b) => (b._id === bidId ? res.data : b)));
-            toast.success(`Bid ${status.toLowerCase()}`);
+            toast.success(tr(`Bid ${status.toLowerCase()}`));
         } catch (err) {
-            toast.error(err.response?.data?.message || `Failed to ${status.toLowerCase()} bid`);
+            toast.error(tr(err.response?.data?.message || `Failed to ${status.toLowerCase()} bid`));
         }
     };
 

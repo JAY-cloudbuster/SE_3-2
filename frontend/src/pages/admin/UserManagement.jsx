@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { UserPlus, Users, Sprout, ShoppingCart, ToggleLeft, ToggleRight, Mail, Phone, User, Search, RefreshCw } from 'lucide-react';
-import { T } from '../../context/TranslationContext';
+import { T, useT } from '../../context/TranslationContext';
 import { adminService } from '../../services/adminService';
 import toast from 'react-hot-toast';
 
 export default function UserManagement() {
+  const tr = useT();
   const [roleFilter, setRoleFilter] = useState('FARMER');
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -19,7 +20,7 @@ export default function UserManagement() {
       const res = await adminService.getAllUsers();
       setUsers(res.data?.users || []);
     } catch {
-      toast.error('Failed to load users.');
+      toast.error(tr('Failed to load users.'));
     } finally {
       setLoading(false);
     }
@@ -39,12 +40,12 @@ export default function UserManagement() {
     setCreating(true);
     try {
       await adminService.createUser(form);
-      toast.success(`${form.role} account created! Activation email sent.`);
+      toast.success(tr(`${form.role} account created! Activation email sent.`));
       setForm({ name: '', email: '', phone: '', role: roleFilter, language: 'en' });
       setShowCreateForm(false);
       fetchUsers();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to create user.');
+      toast.error(tr(error.response?.data?.message || 'Failed to create user.'));
     } finally {
       setCreating(false);
     }
@@ -196,9 +197,9 @@ export default function UserManagement() {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {loading ? (
-              <tr><td colSpan={5} className="p-8 text-center text-slate-400 font-bold">Loading...</td></tr>
+              <tr><td colSpan={5} className="p-8 text-center text-slate-400 font-bold"><T>Loading...</T></td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={5} className="p-8 text-center text-slate-400 font-bold">No {roleFilter.toLowerCase()}s found</td></tr>
+              <tr><td colSpan={5} className="p-8 text-center text-slate-400 font-bold"><T>No users found</T></td></tr>
             ) : (
               filtered.map(u => (
                 <tr key={u._id} className="hover:bg-slate-50 transition-colors">
@@ -208,17 +209,17 @@ export default function UserManagement() {
                   <td className="p-4 text-center">
                     {u.isActive ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700">
-                        <ToggleRight size={12} /> Active
+                        <ToggleRight size={12} /><T>Active</T>
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-100 text-amber-700">
-                        <ToggleLeft size={12} /> Pending
+                        <ToggleLeft size={12} /><T>Pending</T>
                       </span>
                     )}
                   </td>
                   <td className="p-4 text-center">
                     {u.isVerified ? (
-                      <span className="text-[10px] font-black text-emerald-600">Verified</span>
+                      <span className="text-[10px] font-black text-emerald-600"><T>Verified</T></span>
                     ) : (
                       <span className="text-[10px] font-black text-slate-400">—</span>
                     )}

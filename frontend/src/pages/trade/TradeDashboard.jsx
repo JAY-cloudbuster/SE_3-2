@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Gavel, MessageSquare, Package, ArrowLeft, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { T } from '../../context/TranslationContext';
+import { T, useT } from '../../context/TranslationContext';
 import { formatQuintalRate, formatQuintalQuantity } from '../../utils/formatters';
 import { AuthContext } from '../../context/AuthContext';
 import { cropService } from '../../services/cropService';
@@ -14,6 +14,7 @@ import TradeRoom from '../../components/TradeRoom';
 export default function TradeDashboard() {
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
+    const tr = useT();
     const [activeTab, setActiveTab] = useState('auctions');
     const [listings, setListings] = useState([]);
     const [orders, setOrders] = useState([]);
@@ -32,7 +33,7 @@ export default function TradeDashboard() {
             setListings(listingRes.data || []);
             setOrders(orderRes.data || []);
         } catch {
-            toast.error('Unable to load trade dashboard data');
+            toast.error(tr('Unable to load trade dashboard data'));
         }
     };
 
@@ -69,9 +70,9 @@ export default function TradeDashboard() {
                     (o._id || o.id) === orderId ? { ...o, status: 'Cancelled' } : o
                 )
             );
-            toast.success('Order cancelled');
+            toast.success(tr('Order cancelled'));
         } catch {
-            toast.error('Failed to cancel order');
+            toast.error(tr('Failed to cancel order'));
         }
     };
 

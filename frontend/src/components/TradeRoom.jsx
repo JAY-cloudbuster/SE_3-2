@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { AuthContext } from '../context/AuthContext';
+import { T, useT } from '../context/TranslationContext';
 import ChatBubble from './ChatBubble';
 import BidInputForm from './BidInputForm';
 import AuctionLeaderboard from './AuctionLeaderboard';
@@ -35,6 +36,7 @@ const statusChipClass = {
 export default function TradeRoom({ listingId, currentUserRole }) {
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
+    const tr = useT();
     const [bids, setBids] = useState([]);
     const [messages, setMessages] = useState([]);
     const [bidStatusUpdate, setBidStatusUpdate] = useState(null);
@@ -92,8 +94,8 @@ export default function TradeRoom({ listingId, currentUserRole }) {
     // Toast on bid status change
     useEffect(() => {
         if (!bidStatusUpdate) return;
-        if (bidStatusUpdate.status === 'Accepted') toast.success('Bid accepted!');
-        if (bidStatusUpdate.status === 'Rejected') toast.error('Bid rejected');
+        if (bidStatusUpdate.status === 'Accepted') toast.success(tr('Bid accepted!'));
+        if (bidStatusUpdate.status === 'Rejected') toast.error(tr('Bid rejected'));
     }, [bidStatusUpdate]);
 
     const handleSendMessage = (e) => {
@@ -107,7 +109,7 @@ export default function TradeRoom({ listingId, currentUserRole }) {
                 : bids[0]?.buyerId?._id || bids[0]?.buyerId;
 
         if (!receiverId) {
-            toast.error('No recipient available for this conversation yet');
+            toast.error(tr('No recipient available for this conversation yet'));
             return;
         }
 
@@ -127,7 +129,7 @@ export default function TradeRoom({ listingId, currentUserRole }) {
                 setMsgText('');
             })
             .catch(() => {
-                toast.error('Failed to send message');
+                toast.error(tr('Failed to send message'));
             });
     };
 
@@ -144,9 +146,9 @@ export default function TradeRoom({ listingId, currentUserRole }) {
                 const exists = prev.some((b) => b._id === created.data._id);
                 return exists ? prev : [created.data, ...prev];
             });
-            toast.success('Bid placed successfully');
+            toast.success(tr('Bid placed successfully'));
         } catch {
-            toast.error('Failed to place bid');
+            toast.error(tr('Failed to place bid'));
         }
     };
 
@@ -156,7 +158,7 @@ export default function TradeRoom({ listingId, currentUserRole }) {
             setBidStatusUpdate(updated.data);
             setBids((prev) => prev.map((b) => (b._id === updated.data._id ? updated.data : b)));
         } catch {
-            toast.error('Failed to update bid status');
+            toast.error(tr('Failed to update bid status'));
         }
     };
 
@@ -179,10 +181,10 @@ export default function TradeRoom({ listingId, currentUserRole }) {
                         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                             <p className="text-sm font-bold text-blue-700 flex items-center gap-2">
                                 <Clock3 className="w-4 h-4" />
-                                Accepted bid ready for checkout
+                                <T>Accepted bid ready for checkout</T>
                             </p>
                             <p className="text-xs text-blue-600 mt-1">
-                                Time left: {acceptedRemaining || 'N/A'}
+                                <T>Time left</T>: {acceptedRemaining || 'N/A'}
                             </p>
                             <button
                                 onClick={() =>
@@ -196,7 +198,7 @@ export default function TradeRoom({ listingId, currentUserRole }) {
                                 disabled={acceptedRemaining === 'Expired'}
                                 className="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-bold rounded-lg"
                             >
-                                Proceed to Payment
+                                <T>Proceed to Payment</T>
                             </button>
                         </div>
                     )}
@@ -204,13 +206,13 @@ export default function TradeRoom({ listingId, currentUserRole }) {
                     <div className="bg-white rounded-xl shadow-md p-5">
                         <h3 className="text-base font-bold text-gray-800 flex items-center gap-2 mb-4">
                             <Gavel className="w-5 h-5 text-emerald-600" />
-                            Auction Leaderboard
+                            <T>Auction Leaderboard</T>
                         </h3>
                         <AuctionLeaderboard bids={bids} />
                     </div>
                     <div className="bg-white rounded-xl shadow-md p-5">
                         <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                            Place Your Bid
+                            <T>Place Your Bid</T>
                         </h3>
                         <BidInputForm
                             minAmount={highestBid}
@@ -224,10 +226,10 @@ export default function TradeRoom({ listingId, currentUserRole }) {
                     <div className="px-5 py-3 border-b border-gray-100">
                         <h3 className="text-base font-bold text-gray-800 flex items-center gap-2">
                             <MessageSquare className="w-5 h-5 text-blue-600" />
-                            Price Negotiation
+                            <T>Price Negotiation</T>
                         </h3>
                         <p className="text-xs text-gray-400">
-                            Chat to agree on the best price
+                            <T>Chat to agree on the best price</T>
                         </p>
                     </div>
                     <div className="flex-1 overflow-y-auto px-5 py-4">
@@ -274,11 +276,11 @@ export default function TradeRoom({ listingId, currentUserRole }) {
             <div className="bg-white rounded-xl shadow-md p-5 max-h-[600px] overflow-y-auto">
                 <h3 className="text-base font-bold text-gray-800 flex items-center gap-2 mb-4">
                     <Gavel className="w-5 h-5 text-emerald-600" />
-                    Incoming Bids
+                    <T>Incoming Bids</T>
                 </h3>
                 {bids.length === 0 ? (
                     <p className="text-sm text-gray-400 text-center py-8">
-                        No bids yet
+                        <T>No bids yet</T>
                     </p>
                 ) : (
                     <div className="space-y-3">
@@ -365,7 +367,7 @@ export default function TradeRoom({ listingId, currentUserRole }) {
                     <input
                         value={msgText}
                         onChange={(e) => setMsgText(e.target.value)}
-                        placeholder="Type a message..."
+                        placeholder={tr('Type a message...')}
                         className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-sm"
                     />
                     <button

@@ -25,7 +25,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';
-import { T, useTranslation } from '../../../context/TranslationContext';
+import { T, useTranslation, useT } from '../../../context/TranslationContext';
 import LanguageSelector from '../../../components/common/LanguageSelector';
 import { authService } from '../../../services/authService';
 import { getRoleHomePath } from '../../../utils/authRedirect';
@@ -70,6 +70,7 @@ export default function LoginForm() {
 
   const { login } = useContext(AuthContext);
   const { changeLanguage } = useTranslation();
+  const tr = useT();
   const navigate = useNavigate();
 
   const strength = calcStrength(newPassword);
@@ -85,10 +86,10 @@ export default function LoginForm() {
 
       login(res.data);
       if (res.data.user.language) changeLanguage(res.data.user.language);
-      toast.success('Login successful! Welcome back.');
+      toast.success(tr('Login successful! Welcome back.'));
       navigate(getRoleHomePath(res.data.user.role));
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Invalid credentials.');
+      toast.error(tr(error.response?.data?.message || 'Invalid credentials.'));
     } finally {
       setLoading(false);
     }
@@ -101,10 +102,10 @@ export default function LoginForm() {
       const res = await authService.adminLogin({ email: adminEmail, password: adminPassword });
       login(res.data);
       if (res.data.user.language) changeLanguage(res.data.user.language);
-      toast.success('Admin login successful!');
+      toast.success(tr('Admin login successful!'));
       navigate(getRoleHomePath(res.data.user.role));
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Invalid admin credentials.');
+      toast.error(tr(error.response?.data?.message || 'Invalid admin credentials.'));
     } finally {
       setLoading(false);
     }
@@ -117,9 +118,9 @@ export default function LoginForm() {
       const res = await authService.activateAccount({ email: activateEmail, password: tempPassword });
       setUserId(res.data.userId);
       setMode('set-password');
-      toast.success('Credentials verified! Set your new password.');
+      toast.success(tr('Credentials verified! Set your new password.'));
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Activation failed.');
+      toast.error(tr(error.response?.data?.message || 'Activation failed.'));
     } finally {
       setLoading(false);
     }
@@ -128,18 +129,18 @@ export default function LoginForm() {
   const handleSetPassword = async (e) => {
     e.preventDefault();
     if (!isPasswordValid(newPassword)) {
-      return toast.error('Password must be 8+ chars with uppercase & special symbol.');
+      return toast.error(tr('Password must be 8+ chars with uppercase & special symbol.'));
     }
     if (newPassword !== confirmPassword) {
-      return toast.error('Passwords do not match.');
+      return toast.error(tr('Passwords do not match.'));
     }
     setLoading(true);
     try {
       await authService.setNewPassword({ userId, newPassword });
       setMode('verify-otp');
-      toast.success('OTP sent to your email.');
+      toast.success(tr('OTP sent to your email.'));
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to set password.');
+      toast.error(tr(error.response?.data?.message || 'Failed to set password.'));
     } finally {
       setLoading(false);
     }
@@ -150,7 +151,7 @@ export default function LoginForm() {
     setLoading(true);
     try {
       await authService.verifyOTP({ userId, otp });
-      toast.success('Account activated! Login with your phone number & new password.');
+      toast.success(tr('Account activated! Login with your phone number & new password.'));
       setMode('login');
       setOtp('');
       setUserId(null);
@@ -159,7 +160,7 @@ export default function LoginForm() {
       setActivateEmail('');
       setTempPassword('');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'OTP verification failed.');
+      toast.error(tr(error.response?.data?.message || 'OTP verification failed.'));
     } finally {
       setLoading(false);
     }
@@ -168,9 +169,9 @@ export default function LoginForm() {
   const handleResendOTP = async () => {
     try {
       await authService.resendOTP({ userId });
-      toast.success('OTP resent to your email.');
+      toast.success(tr('OTP resent to your email.'));
     } catch {
-      toast.error('Failed to resend OTP.');
+      toast.error(tr('Failed to resend OTP.'));
     }
   };
 

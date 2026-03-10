@@ -1,13 +1,14 @@
 import React, { useState, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, X, CheckCircle } from 'lucide-react';
-import { T } from '../context/TranslationContext';
+import { T, useT } from '../context/TranslationContext';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 import { toast } from 'react-hot-toast';
 
 export default function RateFarmerModal({ isOpen, onClose, farmerId, farmerName }) {
     const { user } = useContext(AuthContext);
+    const tr = useT();
     const [rating, setRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,21 +18,21 @@ export default function RateFarmerModal({ isOpen, onClose, farmerId, farmerName 
 
     const handleSubmit = async () => {
         if (rating === 0) {
-            toast.error('Please select a star rating');
+            toast.error(tr('Please select a star rating'));
             return;
         }
 
         setIsSubmitting(true);
         try {
             await api.post(`/ratings/${farmerId}`, { rating });
-            toast.success('Rating submitted successfully!');
+            toast.success(tr('Rating submitted successfully!'));
             setIsSuccess(true);
             setTimeout(() => {
                 onClose();
             }, 2000);
         } catch (error) {
             console.error('Error submitting rating:', error);
-            toast.error(error.response?.data?.message || 'Failed to submit rating');
+            toast.error(tr(error.response?.data?.message || 'Failed to submit rating'));
         } finally {
             setIsSubmitting(false);
         }

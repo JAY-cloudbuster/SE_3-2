@@ -1,28 +1,30 @@
 import React, { useState } from 'react';
 import { IndianRupee } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { T, useT } from '../context/TranslationContext';
 
 export default function BidInputForm({ onPlaceBid, minAmount = 0 }) {
     const [amount, setAmount] = useState('');
+    const tr = useT();
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const numVal = Number(amount);
         if (!numVal || numVal <= 0) {
-            toast.error('Enter a valid bid amount');
+            toast.error(tr('Enter a valid bid amount'));
             return;
         }
         if (numVal > 10000) {
-            toast.error('Bid cannot exceed ₹10,000/quintal');
+            toast.error(tr('Bid cannot exceed ₹10,000/quintal'));
             return;
         }
         if (numVal <= minAmount) {
-            toast.error(`Bid must be higher than ₹${minAmount}`);
+            toast.error(tr(`Bid must be higher than ₹${minAmount}`));
             return;
         }
         onPlaceBid(numVal);
         setAmount('');
-        toast.success('Bid placed!');
+        toast.success(tr('Bid placed!'));
     };
 
     return (
@@ -39,7 +41,7 @@ export default function BidInputForm({ onPlaceBid, minAmount = 0 }) {
                         const v = Number(e.target.value);
                         if (v <= 10000) setAmount(e.target.value);
                     }}
-                    placeholder="Enter bid (₹/quintal)"
+                    placeholder={tr('Enter bid (₹/quintal)')}
                     className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-sm"
                 />
             </div>
@@ -47,7 +49,7 @@ export default function BidInputForm({ onPlaceBid, minAmount = 0 }) {
                 type="submit"
                 className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium text-sm transition-colors shadow-md"
             >
-                Place Bid
+                <T>Place Bid</T>
             </button>
         </form>
     );

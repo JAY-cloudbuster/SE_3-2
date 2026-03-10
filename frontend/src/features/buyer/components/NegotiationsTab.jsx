@@ -12,7 +12,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MessageSquare, Clock, CheckCircle, XCircle, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { T } from '../../../context/TranslationContext';
+import { T, useT } from '../../../context/TranslationContext';
 import { tradeService } from '../../../services/tradeService';
 import toast from 'react-hot-toast';
 
@@ -51,7 +51,7 @@ function NegotiationCard({ neg }) {
                             {crop.name || 'Crop'}
                         </p>
                         <p className="text-xs text-slate-500 mt-0.5">
-                            Farmer: <span className="font-bold text-slate-700">{farmer.name || '—'}</span>
+                            <T>Farmer</T>: <span className="font-bold text-slate-700">{farmer.name || '—'}</span>
                         </p>
                     </div>
                 </div>
@@ -63,17 +63,17 @@ function NegotiationCard({ neg }) {
             {/* Details */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                 <div>
-                    <span className="text-slate-400">Listed Price</span>
+                    <span className="text-slate-400"><T>Listed Price</T></span>
                     <p className="font-bold text-emerald-600">₹{crop.price}/quintal</p>
                 </div>
                 {neg.finalPrice && (
                     <div>
-                        <span className="text-slate-400">Agreed Price</span>
+                        <span className="text-slate-400"><T>Agreed Price</T></span>
                         <p className="font-bold text-emerald-700">₹{neg.finalPrice}/quintal</p>
                     </div>
                 )}
                 <div className="col-span-2">
-                    <span className="text-slate-400">Last Activity</span>
+                    <span className="text-slate-400"><T>Last Activity</T></span>
                     <p className="font-bold text-slate-700">
                         {neg.lastActivity
                             ? new Date(neg.lastActivity).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
@@ -87,7 +87,7 @@ function NegotiationCard({ neg }) {
             {/* Last message preview */}
             {lastMessage && (
                 <div className="text-xs bg-slate-50 rounded-xl p-3 border border-slate-100">
-                    <span className="text-slate-400 block mb-0.5">Last message</span>
+                    <span className="text-slate-400 block mb-0.5"><T>Last message</T></span>
                     <p className="text-slate-700 font-medium line-clamp-2">{lastMessage.content}</p>
                 </div>
             )}
@@ -96,14 +96,14 @@ function NegotiationCard({ neg }) {
             {neg.status === 'active' && (
                 <div className="pt-1">
                     <div className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2.5 rounded-xl text-center transition-colors">
-                        Continue Negotiation →
+                        <T>Continue Negotiation</T> →
                     </div>
                 </div>
             )}
             {neg.status === 'accepted' && !neg.orderCreated && (
                 <div className="pt-1">
                     <div className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold py-2.5 rounded-xl text-center transition-colors">
-                        Proceed to Payment →
+                        <T>Proceed to Payment</T> →
                     </div>
                 </div>
             )}
@@ -114,6 +114,7 @@ function NegotiationCard({ neg }) {
 export default function NegotiationsTab({ refreshTrigger = 0 }) {
     const [negotiations, setNegotiations] = useState([]);
     const [loading, setLoading] = useState(true);
+    const tr = useT();
 
     useEffect(() => {
         const load = async () => {
@@ -122,7 +123,7 @@ export default function NegotiationsTab({ refreshTrigger = 0 }) {
                 const res = await tradeService.getMyNegotiations();
                 setNegotiations(res.data || []);
             } catch {
-                toast.error('Failed to load negotiations');
+                toast.error(tr('Failed to load negotiations'));
             } finally {
                 setLoading(false);
             }

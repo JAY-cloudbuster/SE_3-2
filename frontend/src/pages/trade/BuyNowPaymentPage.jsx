@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { ArrowLeft, Package, MapPin, CreditCard, CheckCircle, Smartphone, Banknote, Truck, ShieldCheck, Clock3 } from 'lucide-react';
-import { T } from '../../context/TranslationContext';
+import { T, useT } from '../../context/TranslationContext';
 import { AuthContext } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import { formatQuintalQuantity, formatQuintalRate } from '../../utils/formatters';
@@ -23,6 +23,7 @@ export default function BuyNowPaymentPage() {
     const location = useLocation();
     const { cropId } = useParams();
     const { user } = useContext(AuthContext);
+    const tr = useT();
 
     const [crop, setCrop] = useState(null);
     const [acceptedBid, setAcceptedBid] = useState(location.state?.bid || null);
@@ -58,7 +59,7 @@ export default function BuyNowPaymentPage() {
                     if (matchedBid) setAcceptedBid(matchedBid);
                 }
             } catch {
-                toast.error('Unable to load checkout details');
+                toast.error(tr('Unable to load checkout details'));
                 navigate(dashboardRoute);
             }
         };
@@ -128,7 +129,7 @@ export default function BuyNowPaymentPage() {
         if (!deliveryAddress.pincode.trim()) newErrors.pincode = 'Pincode is required';
         else if (!/^\d{6}$/.test(deliveryAddress.pincode.trim())) newErrors.pincode = 'Enter a valid 6-digit pincode';
         setErrors(newErrors);
-        if (Object.keys(newErrors).length) toast.error('Please fill all required address fields');
+        if (Object.keys(newErrors).length) toast.error(tr('Please fill all required address fields'));
         return !Object.keys(newErrors).length;
     };
 
@@ -172,7 +173,7 @@ export default function BuyNowPaymentPage() {
         if (!validatePayment()) return;
 
         if (acceptedBid?.expiresAt && new Date(acceptedBid.expiresAt) < new Date()) {
-            toast.error('Bid payment window expired. Please place a new bid.');
+            toast.error(tr('Bid payment window expired. Please place a new bid.'));
             return;
         }
 
@@ -206,10 +207,10 @@ export default function BuyNowPaymentPage() {
             };
 
             const res = await tradeService.createOrder(payload);
-            toast.success('Order placed successfully');
+            toast.success(tr('Order placed successfully'));
             navigate('/order-confirmation', { state: { order: res.data } });
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Failed to place order');
+            toast.error(tr(err.response?.data?.message || 'Failed to place order'));
         } finally {
             setProcessing(false);
         }

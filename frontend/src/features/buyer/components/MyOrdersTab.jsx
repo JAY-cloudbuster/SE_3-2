@@ -25,7 +25,7 @@ import {
     CreditCard, AlertCircle, ShoppingBag, MessageSquare
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { T } from '../../../context/TranslationContext';
+import { T, useT } from '../../../context/TranslationContext';
 import { tradeService } from '../../../services/tradeService';
 import toast from 'react-hot-toast';
 
@@ -106,7 +106,7 @@ function BidCard({ bid, onPayNow }) {
                             {crop.name || 'Crop'}
                         </p>
                         <p className="text-xs text-slate-500 mt-0.5">
-                            Farmer: <span className="font-bold text-slate-700">{farmer.name || '—'}</span>
+                            <T>Farmer</T>: <span className="font-bold text-slate-700">{farmer.name || '—'}</span>
                         </p>
                     </div>
                 </div>
@@ -116,19 +116,19 @@ function BidCard({ bid, onPayNow }) {
             {/* Details grid */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                 <div>
-                    <span className="text-slate-400">Bid ID</span>
+                    <span className="text-slate-400"><T>Bid ID</T></span>
                     <p className="font-bold text-slate-700 truncate">{bid._id}</p>
                 </div>
                 <div>
-                    <span className="text-slate-400">Quantity</span>
-                    <p className="font-bold text-slate-700">{crop.quantity || '—'} quintals</p>
+                    <span className="text-slate-400"><T>Quantity</T></span>
+                    <p className="font-bold text-slate-700">{crop.quantity || '—'} <T>quintals</T></p>
                 </div>
                 <div>
-                    <span className="text-slate-400">Bid Amount</span>
-                    <p className="font-bold text-emerald-600">₹{bid.amount}/quintal</p>
+                    <span className="text-slate-400"><T>Bid Amount</T></span>
+                    <p className="font-bold text-emerald-600">₹{bid.amount}/<T>quintal</T></p>
                 </div>
                 <div>
-                    <span className="text-slate-400">Placed On</span>
+                    <span className="text-slate-400"><T>Placed On</T></span>
                     <p className="font-bold text-slate-700">
                         {bid.createdAt ? new Date(bid.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
                     </p>
@@ -153,7 +153,7 @@ function BidCard({ bid, onPayNow }) {
                         className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm shadow hover:shadow-lg transition-shadow"
                     >
                         <CreditCard size={16} />
-                        Pay Now
+                        <T>Pay Now</T>
                     </button>
                 </div>
             )}
@@ -205,23 +205,23 @@ function OrderCard({ order }) {
             {/* Details grid */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                 <div>
-                    <span className="text-slate-400">Order ID</span>
+                    <span className="text-slate-400"><T>Order ID</T></span>
                     <p className="font-bold text-slate-700 truncate">{order._id}</p>
                 </div>
                 <div>
-                    <span className="text-slate-400">Quantity</span>
-                    <p className="font-bold text-slate-700">{firstItem.quantity || '—'} quintals</p>
+                    <span className="text-slate-400"><T>Quantity</T></span>
+                    <p className="font-bold text-slate-700">{firstItem.quantity || '—'} <T>quintals</T></p>
                 </div>
                 <div>
-                    <span className="text-slate-400">Price / Quintal</span>
+                    <span className="text-slate-400"><T>Price / Quintal</T></span>
                     <p className="font-bold text-emerald-600">₹{firstItem.pricePerKg || '—'}</p>
                 </div>
                 <div>
-                    <span className="text-slate-400">Total Amount</span>
+                    <span className="text-slate-400"><T>Total Amount</T></span>
                     <p className="font-black text-slate-800">₹{order.totalAmount?.toLocaleString('en-IN') || '—'}</p>
                 </div>
                 <div className="col-span-2">
-                    <span className="text-slate-400">Ordered On</span>
+                    <span className="text-slate-400"><T>Ordered On</T></span>
                     <p className="font-bold text-slate-700">
                         {order.createdAt
                             ? new Date(order.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
@@ -240,6 +240,7 @@ export default function MyOrdersTab({ refreshTrigger = 0 }) {
     const [bids,   setBids]     = useState([]);
     const [filter, setFilter]   = useState('all');  // all | orders | bids
     const [loading, setLoading] = useState(true);
+    const tr = useT();
 
     useEffect(() => {
         const load = async () => {
@@ -252,7 +253,7 @@ export default function MyOrdersTab({ refreshTrigger = 0 }) {
                 setOrders(orderRes.data || []);
                 setBids(bidRes.data || []);
             } catch {
-                toast.error('Failed to load order history');
+                toast.error(tr('Failed to load order history'));
             } finally {
                 setLoading(false);
             }
@@ -280,7 +281,7 @@ export default function MyOrdersTab({ refreshTrigger = 0 }) {
                                 : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300'
                         }`}
                     >
-                        {t.label}
+                        <T>{t.label}</T>
                         <span className={`ml-2 px-1.5 py-0.5 rounded-full text-[10px] ${
                             filter === t.id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
                         }`}>{t.count}</span>
