@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide will help you deploy only the backend portion of your AgriSahayak application to Render. The backend includes Express.js API, MongoDB integration, Socket.io for real-time features, and JWT authentication.
+This guide will help you deploy only the backend portion of your AgriTech application to Render. The backend includes Express.js API, MongoDB integration, Socket.io for real-time features, and JWT authentication.
 
 ## Prerequisites
 
