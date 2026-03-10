@@ -68,15 +68,23 @@ const httpServer = createServer(app);
 
 /**
  * CORS Middleware - Enables Cross-Origin Resource Sharing
- * In production, reads allowed origins from CORS_ORIGIN env var
- * (comma-separated). Falls back to localhost for local development.
+ * Always includes the known production Vercel frontend origin.
+ * Additional origins can be appended via CORS_ORIGIN env var (comma-separated).
  */
-const allowedOrigins = process.env.CORS_ORIGIN
-    ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
-    : ['http://localhost:5173', 'http://localhost:5174'];
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://se32frontend.vercel.app',
+    ...(process.env.CORS_ORIGIN
+        ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+        : [])
+];
+
+// Deduplicate in case env var repeats a hardcoded origin
+const uniqueAllowedOrigins = [...new Set(allowedOrigins)];
 
 app.use(cors({
-    origin: allowedOrigins,
+    origin: uniqueAllowedOrigins,
     credentials: true,
 }));
 
@@ -244,7 +252,7 @@ app.use((err, req, res, next) => {
  */
 const io = new Server(httpServer, {
     cors: {
-        origin: allowedOrigins,
+        origin: uniqueAllowedOrigins,
         methods: ["GET", "POST"],
         credentials: true
     }
