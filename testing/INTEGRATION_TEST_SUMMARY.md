@@ -17,6 +17,16 @@ A newly created backend integration test suite validates the connection between 
     - `GET /api/crops` - passed
 - **Raw Test Report**: `testing/integration_test_output.txt`
 
+### Backend Integration Test Cases
+#### Setup & Connectivity
+- Validates that server initiates connecting routes smoothly to the internal system (Mongoose & App Initialization)
+
+#### General API integration
+- `GET /api/public/home`
+  - *should return a 200 indicating the API is active* (Tested across routing paths and returns without authentication)
+- `GET /api/crops`
+  - *should return available crops list* (Validates endpoint reaches the database architecture correctly returning 2xx or 401 unauth checks)
+
 ## Conclusion and Recommendations
 Backend integration tests are successfully integrated and passing. 
 To continue expanding integration testing:
