@@ -1,14 +1,16 @@
 ﻿import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_APP_URL || "http://localhost:5000";
+// In development, use an empty base URL so Vite's proxy handles /api requests
+// (avoids CORS entirely on localhost). In production, use the deployed backend URL.
+const API_BASE_URL = import.meta.env.DEV
+  ? ''
+  : (import.meta.env.VITE_APP_URL || '');
 
 /**
  * Configured Axios Instance
  *
- * Pre-configured with the backend API base URL including the /api prefix.
- * All relative paths in API calls are resolved against this base URL.
- *
- * Example: api.get('/crops') -> resolves to http://localhost:5000/api/crops
+ * In development: requests go to /api/... which Vite proxies to http://localhost:5000
+ * In production:  requests go to https://agritechse.onrender.com/api/...
  *
  * @type {import('axios').AxiosInstance}
  */
