@@ -91,7 +91,6 @@ export const SocketProvider = ({ children }) => {
       const newSocket = io(
         socketUrl,
         {
-          withCredentials: true,
           transports: ['websocket'],
         }
       ); // Backend Socket.io URL from env with localhost fallback

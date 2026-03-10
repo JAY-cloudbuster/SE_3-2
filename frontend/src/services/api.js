@@ -45,7 +45,6 @@ const apiHost = isLocalhost
  */
 const api = axios.create({
   baseURL: `${apiHost}/api`, // Localhost in dev, env URL in production, localhost as final fallback
-  withCredentials: true,
 });
 
 /**
