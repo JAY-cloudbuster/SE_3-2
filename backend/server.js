@@ -101,6 +101,7 @@ app.get('/health', async (req, res) => {
     
     const status = {
         status: dbStatus === 'connected' ? 'UP' : 'DEGRADED',
+        version: 'v2-841c86d',
         uptime: Math.floor(process.uptime()) + 's',
         timestamp: new Date().toISOString(),
         database: dbStatus,
