@@ -1,0 +1,135 @@
+
+> agrisahayak-backend@1.0.0 test
+> cross-env NODE_ENV=test jest
+
+FAIL tests/crops.test.js
+  ● Test suite failed to run
+
+    Cannot find module 'nodemailer' from 'utils/emailService.js'
+
+    Require stack:
+      utils/emailService.js
+      controllers/authController.js
+      routes/authRoutes.js
+      server.js
+      tests/crops.test.js
+
+    [0m[31m[1m>[22m[39m[90m 1 |[39m [36mconst[39m nodemailer [33m=[39m require([32m'nodemailer'[39m)[33m;[39m
+     [90m   |[39m                    [31m[1m^[22m[39m
+     [90m 2 |[39m
+     [90m 3 |[39m [36mconst[39m transporter [33m=[39m nodemailer[33m.[39mcreateTransport({
+     [90m 4 |[39m     service[33m:[39m [32m'gmail'[39m[33m,[39m[0m
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/index.js:863:11)
+      at Object.require (utils/emailService.js:1:20)
+      at Object.require (controllers/authController.js:24:26)
+      at Object.require (routes/authRoutes.js:31:5)
+      at Object.require (server.js:141:22)
+      at Object.require (tests/crops.test.js:5:13)
+
+FAIL tests/trade.test.js
+  ● Test suite failed to run
+
+    Cannot find module 'nodemailer' from 'utils/emailService.js'
+
+    Require stack:
+      utils/emailService.js
+      controllers/authController.js
+      routes/authRoutes.js
+      server.js
+      tests/trade.test.js
+
+    [0m[31m[1m>[22m[39m[90m 1 |[39m [36mconst[39m nodemailer [33m=[39m require([32m'nodemailer'[39m)[33m;[39m
+     [90m   |[39m                    [31m[1m^[22m[39m
+     [90m 2 |[39m
+     [90m 3 |[39m [36mconst[39m transporter [33m=[39m nodemailer[33m.[39mcreateTransport({
+     [90m 4 |[39m     service[33m:[39m [32m'gmail'[39m[33m,[39m[0m
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/index.js:863:11)
+      at Object.require (utils/emailService.js:1:20)
+      at Object.require (controllers/authController.js:24:26)
+      at Object.require (routes/authRoutes.js:31:5)
+      at Object.require (server.js:141:22)
+      at Object.require (tests/trade.test.js:7:13)
+
+FAIL tests/price.test.js
+  ● Test suite failed to run
+
+    Cannot find module 'nodemailer' from 'utils/emailService.js'
+
+    Require stack:
+      utils/emailService.js
+      controllers/authController.js
+      routes/authRoutes.js
+      server.js
+      tests/price.test.js
+
+    [0m[31m[1m>[22m[39m[90m 1 |[39m [36mconst[39m nodemailer [33m=[39m require([32m'nodemailer'[39m)[33m;[39m
+     [90m   |[39m                    [31m[1m^[22m[39m
+     [90m 2 |[39m
+     [90m 3 |[39m [36mconst[39m transporter [33m=[39m nodemailer[33m.[39mcreateTransport({
+     [90m 4 |[39m     service[33m:[39m [32m'gmail'[39m[33m,[39m[0m
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/index.js:863:11)
+      at Object.require (utils/emailService.js:1:20)
+      at Object.require (controllers/authController.js:24:26)
+      at Object.require (routes/authRoutes.js:31:5)
+      at Object.require (server.js:141:22)
+      at Object.require (tests/price.test.js:5:13)
+
+FAIL tests/admin.test.js
+  ● Test suite failed to run
+
+    Cannot find module 'nodemailer' from 'utils/emailService.js'
+
+    Require stack:
+      utils/emailService.js
+      controllers/authController.js
+      routes/authRoutes.js
+      server.js
+      tests/admin.test.js
+
+    [0m[31m[1m>[22m[39m[90m 1 |[39m [36mconst[39m nodemailer [33m=[39m require([32m'nodemailer'[39m)[33m;[39m
+     [90m   |[39m                    [31m[1m^[22m[39m
+     [90m 2 |[39m
+     [90m 3 |[39m [36mconst[39m transporter [33m=[39m nodemailer[33m.[39mcreateTransport({
+     [90m 4 |[39m     service[33m:[39m [32m'gmail'[39m[33m,[39m[0m
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/index.js:863:11)
+      at Object.require (utils/emailService.js:1:20)
+      at Object.require (controllers/authController.js:24:26)
+      at Object.require (routes/authRoutes.js:31:5)
+      at Object.require (server.js:141:22)
+      at Object.require (tests/admin.test.js:4:13)
+
+FAIL tests/auth.test.js
+  ● Test suite failed to run
+
+    Cannot find module 'nodemailer' from 'utils/emailService.js'
+
+    Require stack:
+      utils/emailService.js
+      controllers/authController.js
+      routes/authRoutes.js
+      server.js
+      tests/auth.test.js
+
+    [0m[31m[1m>[22m[39m[90m 1 |[39m [36mconst[39m nodemailer [33m=[39m require([32m'nodemailer'[39m)[33m;[39m
+     [90m   |[39m                    [31m[1m^[22m[39m
+     [90m 2 |[39m
+     [90m 3 |[39m [36mconst[39m transporter [33m=[39m nodemailer[33m.[39mcreateTransport({
+     [90m 4 |[39m     service[33m:[39m [32m'gmail'[39m[33m,[39m[0m
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/index.js:863:11)
+      at Object.require (utils/emailService.js:1:20)
+      at Object.require (controllers/authController.js:24:26)
+      at Object.require (routes/authRoutes.js:31:5)
+      at Object.require (server.js:141:22)
+      at Object.require (tests/auth.test.js:4:13)
+
+Test Suites: 5 failed, 5 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        2.281 s
+Ran all test suites.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?
