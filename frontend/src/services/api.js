@@ -36,7 +36,8 @@ import axios from 'axios';
  * @type {import('axios').AxiosInstance}
  */
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}/api`, // Backend Express server URL + /api prefix from env
+  baseURL: `${import.meta.env.VITE_APP_URL || 'http://localhost:5000'}/api`, // Use env URL in production, fallback to localhost for dev
+  withCredentials: true,
 });
 
 /**

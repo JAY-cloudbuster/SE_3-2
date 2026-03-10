@@ -80,7 +80,13 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       // User is authenticated - establish WebSocket connection
-      const newSocket = io(import.meta.env.VITE_SOCKET_URL); // Backend Socket.io server URL from env
+      const newSocket = io(
+        import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000',
+        {
+          withCredentials: true,
+          transports: ['websocket'],
+        }
+      ); // Backend Socket.io URL from env with localhost fallback
 
       // Re-emit join_user_room on every connect AND reconnect so the server
       // always has this socket in the correct user:<id> room.
