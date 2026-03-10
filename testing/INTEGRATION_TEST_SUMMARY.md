@@ -3,14 +3,21 @@
 This document reports on the status and execution of integration tests for the AgriSahayak application.
 
 ## Overview
-A comprehensive search across the repository did not yield any dedicated integration or end-to-end (E2E) testing suites. 
+A newly created backend integration test suite validates the connection between the API routes and the MongoDB database. 
 
-- **Backend Context**: The `backend/tests/` directory contains files such as `auth.test.js`, `crops.test.js`, and `trade.test.js`. These are currently configured and run as unit tests via Jest (using `cross-env NODE_ENV=test jest`). There is no separate `package.json` script (e.g., `test:integration`) or directory designated for testing the integration between components or against a live test database.
-- **Frontend Context**: The frontend tests, located predominantly alongside their components (e.g., `LoginForm.test.jsx`), are unit tests utilizing Vitest and React Testing Library. No Cypress, Playwright, or larger integration testing setups were located.
+- **Backend Context**: The `backend/tests/api.integration.test.js` script was written to ensure the routes and the server initialization function together. These tests are meant to validate system integrity rather than isolated logic blocks. The backend integration tests were run and captured.
+- **Frontend Context**: No explicit frontend integration/E2E tests (e.g., Cypress or Playwright) exist yet. The vitest tests are strictly unit component tests.
+
+## Test Results
+**Backend**: 
+- **Framework**: Jest with Supertest 
+- **Overall Result**: 2 Passed, 0 Failed, 2 Total
+- **Test Details**:
+    - `GET /api/public/home` - passed
+    - `GET /api/crops` - passed
+- **Raw Test Report**: `testing/integration_test_output.txt`
 
 ## Conclusion and Recommendations
-Since no tests currently qualify as full integration tests, no test outputs were generated for the `testing` folder.
-
-To implement integration testing:
-1. **Backend**: Consider adding a suite using `supertest` intertwined with a test database to validate actual API routes and request flows.
-2. **Frontend**: Implement E2E tests using Cypress or Playwright to simulate user journeys encompassing multiple components and mock API calls.
+Backend integration tests are successfully integrated and passing. 
+To continue expanding integration testing:
+1. **Frontend**: Implement E2E tests using Cypress or Playwright to simulate user journeys encompassing multiple components and mock API calls.
