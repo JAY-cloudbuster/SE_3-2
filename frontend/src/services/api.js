@@ -4,7 +4,7 @@
 // (avoids CORS entirely on localhost). In production, use the deployed backend URL.
 const API_BASE_URL = import.meta.env.DEV
   ? ''
-  : (import.meta.env.VITE_APP_URL || '');
+  : (import.meta.env.VITE_APP_URL || 'https://agritechse.onrender.com');
 
 /**
  * Configured Axios Instance
