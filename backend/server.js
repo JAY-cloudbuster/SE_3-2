@@ -68,10 +68,17 @@ const httpServer = createServer(app);
 
 /**
  * CORS Middleware - Enables Cross-Origin Resource Sharing
- * Allows the frontend (running on localhost:5173) to make
- * API requests to this backend (running on localhost:5000)
+ * In production, reads allowed origins from CORS_ORIGIN env var
+ * (comma-separated). Falls back to localhost for local development.
  */
-app.use(cors());
+const allowedOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+    : ['http://localhost:5173', 'http://localhost:5174'];
+
+app.use(cors({
+    origin: allowedOrigins,
+    credentials: true,
+}));
 
 /**
  * JSON Body Parser - Parses incoming request bodies as JSON
@@ -237,8 +244,9 @@ app.use((err, req, res, next) => {
  */
 const io = new Server(httpServer, {
     cors: {
-        origin: "http://localhost:5173",
-        methods: ["GET", "POST"]
+        origin: allowedOrigins,
+        methods: ["GET", "POST"],
+        credentials: true
     }
 });
 
