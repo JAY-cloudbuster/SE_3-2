@@ -25,7 +25,7 @@ const { sendActivationEmail } = require('../utils/emailService');
  * POST /api/admin/create-user
  */
 const createUser = asyncHandler(async (req, res) => {
-    const { name, email, phone, role } = req.body;
+    const { name, email, phone, role, language } = req.body;
 
     if (!name || !email || !phone || !role) {
         res.status(400);
@@ -57,8 +57,9 @@ const createUser = asyncHandler(async (req, res) => {
         name,
         email,
         phone,
-        password: tempPassword, // Will be hashed by pre-save middleware
+        password: tempPassword,
         role: role.toUpperCase(),
+        language: language || 'en',
         isActive: false,
         isFirstLogin: true,
     });
