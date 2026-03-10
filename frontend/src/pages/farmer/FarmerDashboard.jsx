@@ -22,7 +22,6 @@ import { T } from '../../context/TranslationContext';
 import CropForm from '../../features/farmer/components/CropForm';
 import CropList from '../../features/farmer/components/CropList';
 import FarmerOrders from '../../features/farmer/components/FarmerOrders';
-import FarmerNegotiationsPage from './FarmerNegotiationsPage';
 import TrustGauge from '../../components/shared/TrustGauge';
 import SmartPostModal from '../../components/SmartPostModal';
 import { cropService } from '../../services/cropService';
@@ -111,7 +110,6 @@ export default function FarmerDashboard() {
           <Route path="inventory" element={<CropList />} />
           <Route path="orders" element={<FarmerOrders />} />
           <Route path="analytics" element={<MarketPrices />} />
-          <Route path="negotiations" element={<FarmerNegotiationsPage />} />
           {/* Add other sub-routes here as needed */}
         </Routes>
       </AnimatePresence>

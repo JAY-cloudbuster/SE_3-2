@@ -1,49 +1,117 @@
 /**
  * @fileoverview Socket.io Context Provider for AgriSahayak Frontend
- * Uses polling→websocket upgrade order for reliable connection.
- * Falls back gracefully — the chat works via REST even if socket is unavailable.
+ * 
+ * This module provides a React Context for managing the WebSocket connection
+ * to the backend Socket.io server. It automatically establishes a connection
+ * when a user is authenticated and cleans up the connection on logout.
+ * 
+ * The socket connection enables real-time features across the platform:
+ * - Live auction bidding updates (Epic 4, Story 4.3)
+ * - Real-time negotiation chat messages (Epic 4, Story 4.4)
+ * - Order status update notifications (Epic 4, Story 4.8)
+ * 
+ * @module context/SocketContext
+ * @requires socket.io-client - Socket.io client library
+ * @requires react - React hooks (createContext, useEffect, useState, useContext)
+ * @requires context/AuthContext - To check if user is authenticated
+ * 
+ * @see Epic 4, Story 4.3 - Place Bids (real-time updates)
+ * @see Epic 4, Story 4.4 - Negotiate Price (real-time chat)
+ * @see backend/server.js - Socket.io server setup
  */
 
 import { createContext, useEffect, useState, useContext } from 'react';
 import { io } from 'socket.io-client';
 import { AuthContext } from './AuthContext';
 
-export const SocketContext = createContext(null);
+/**
+ * SocketContext - React Context for the Socket.io client instance.
+ * 
+ * The context value is the raw socket instance (or null if not connected).
+ * Components can use this to emit events and listen for server messages.
+ * 
+ * @type {React.Context}
+ */
+export const SocketContext = createContext();
 
+/**
+ * SocketProvider Component
+ * 
+ * Manages the lifecycle of the Socket.io connection:
+ * 1. When user logs in → creates a new socket connection
+ * 2. While connected → socket is available via context
+ * 3. When user logs out → closes the socket connection (cleanup)
+ * 
+ * The socket connects to the backend server at http://localhost:5000.
+ * 
+ * Usage in child components:
+ * ```jsx
+ * const socket = useContext(SocketContext);
+ * socket.emit('join_room', roomId);
+ * socket.on('receive_message', handleMessage);
+ * ```
+ * 
+ * @component
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Child components to wrap
+ * @returns {JSX.Element} SocketContext.Provider wrapping children
+ */
 export const SocketProvider = ({ children }) => {
+  // Get the current authenticated user from AuthContext
   const { user } = useContext(AuthContext);
+
+  /**
+   * The Socket.io client instance.
+   * Null when user is not authenticated or connection hasn't been established.
+   * @type {import('socket.io-client').Socket|null}
+   */
   const [socket, setSocket] = useState(null);
 
-  // Derive socket URL from VITE_API_URL so it works in dev AND production
-  const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const isLocalhost =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
+  const socketUrl = isLocalhost
+    ? 'http://localhost:5000'
+    : import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+
+  /**
+   * Effect: Manage Socket Connection Lifecycle
+   * 
+   * Creates a new Socket.io connection when a user is authenticated.
+   * The cleanup function closes the connection when:
+   * - The user logs out (user becomes null)
+   * - The component unmounts
+   * 
+   * This prevents orphaned socket connections and memory leaks.
+   */
   useEffect(() => {
-    if (!user) return;
+    if (user) {
+      // User is authenticated - establish WebSocket connection
+      const newSocket = io(
+        socketUrl,
+        {
+          transports: ['websocket'],
+        }
+      ); // Backend Socket.io URL from env with localhost fallback
 
-    const newSocket = io(socketUrl, {
-      // polling first → upgrade to websocket: the standard robust approach.
-      // websocket-only fails silently on some proxies/networks.
-      transports: ['polling', 'websocket'],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
+      // Re-emit join_user_room on every connect AND reconnect so the server
+      // always has this socket in the correct user:<id> room.
+      const joinRoom = () => {
+        newSocket.emit('join_user_room', String(user._id));
+      };
 
-    // Join the user-specific notification room on every connect/reconnect
-    const joinRoom = () => {
-      newSocket.emit('join_user_room', String(user._id));
-    };
-    newSocket.on('connect', joinRoom);
-    newSocket.on('reconnect', joinRoom);
+      newSocket.on('connect', joinRoom);
 
-    setSocket(newSocket);
+      setSocket(newSocket);
 
-    return () => {
-      newSocket.off('connect', joinRoom);
-      newSocket.off('reconnect', joinRoom);
-      newSocket.disconnect();
-    };
-  }, [user, socketUrl]);
+      // Cleanup: close the socket when user logs out or component unmounts
+      return () => {
+        newSocket.off('connect', joinRoom);
+        newSocket.close();
+      };
+    }
+  }, [user]); // Re-run when user changes (login/logout)
 
   return (
     <SocketContext.Provider value={socket}>
