@@ -18,7 +18,7 @@ const API_BASE_URL = import.meta.env.DEV
  *   api.get("/api/crops")
  */
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: `${API_BASE_URL}/api`,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json"
