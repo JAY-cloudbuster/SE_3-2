@@ -1,17 +1,14 @@
-﻿import axios from "axios";
+import axios from "axios";
 
 /**
  * Backend URL Resolution
  *
- * Development:
- *   Uses localhost backend
- *
- * Production:
- *   Uses deployed Render backend
+ * Development: Uses localhost backend
+ * Production:  Uses deployed Render backend (se32-backend.onrender.com)
  */
-
-const API_BASE_URL =
-  import.meta.env.VITE_APP_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.DEV
+  ? "http://localhost:5000"
+  : (import.meta.env.VITE_API_URL || "https://se32-backend.onrender.com");
 
 /**
  * Axios Instance
@@ -20,7 +17,6 @@ const API_BASE_URL =
  * Example:
  *   api.get("/api/crops")
  */
-
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
@@ -35,7 +31,6 @@ const api = axios.create({
  * Automatically attaches JWT token from localStorage
  * to every outgoing request.
  */
-
 api.interceptors.request.use(
   (config) => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -50,9 +45,8 @@ api.interceptors.request.use(
 );
 
 /**
- * Optional: Response interceptor for global error handling
+ * Response interceptor for global error handling
  */
-
 api.interceptors.response.use(
   (response) => response,
   (error) => {
