@@ -1,4 +1,4 @@
-﻿import axios from "axios";
+import axios from "axios";
 
 /**
  * Backend URL Resolution
@@ -8,7 +8,7 @@
  */
 const API_BASE_URL = import.meta.env.DEV
   ? "http://localhost:5000"
-  : (import.meta.env.VITE_APP_URL || "https://agritechse.onrender.com");
+  : (import.meta.env.VITE_API_URL || "https://se32-backend.onrender.com");
 
 /**
  * Axios Instance
