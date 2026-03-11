@@ -1,9 +1,8 @@
 # Environment variables
 .env
 .env.*
-# Allow .env.production to be committed (contains only public URLs, no secrets)
-!.env.production
-!frontend/.env.production
+frontend/.env
+frontend/.env.*
 
 # Logs
 logs
